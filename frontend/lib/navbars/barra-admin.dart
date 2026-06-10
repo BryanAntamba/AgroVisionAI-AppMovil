@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../styles/navbars-styles/barra-admin.dart';
 
 class BarraAdmin extends StatefulWidget {
@@ -8,13 +9,35 @@ class BarraAdmin extends StatefulWidget {
   State<BarraAdmin> createState() => _BarraAdminState();
 }
 
-class _BarraAdminState extends State<BarraAdmin> {
+class _BarraAdminState extends State<BarraAdmin>
+    with SingleTickerProviderStateMixin {
   bool _isMenuOpen = false;
+  late AnimationController _menuAnimController;
+
+  @override
+  void initState() {
+    super.initState();
+    _menuAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+  }
+
+  @override
+  void dispose() {
+    _menuAnimController.dispose();
+    super.dispose();
+  }
 
   void _toggleMenu() {
     setState(() {
       _isMenuOpen = !_isMenuOpen;
     });
+    if (_isMenuOpen) {
+      _menuAnimController.forward();
+    } else {
+      _menuAnimController.reverse();
+    }
   }
 
   @override
@@ -22,14 +45,39 @@ class _BarraAdminState extends State<BarraAdmin> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 991;
 
-    return Container(
-      constraints: const BoxConstraints(minHeight: BarraAdminStyles.navbarHeight),
-      decoration: BarraAdminStyles.navbarDecoration,
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 28 : 16,
-        vertical: BarraAdminStyles.navbarPaddingVertical,
-      ),
-      child: isDesktop ? _buildDesktopNavbar(context) : _buildMobileNavbar(context),
+    return Stack(
+      children: [
+        Container(
+          constraints: const BoxConstraints(
+            minHeight: BarraAdminStyles.navbarHeight,
+          ),
+          decoration: BarraAdminStyles.navbarDecoration,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.only(
+                  left: isDesktop ? 28 : 16,
+                  right: isDesktop ? 28 : 16,
+                  top:
+                      BarraAdminStyles.navbarPaddingVertical +
+                      BarraAdminStyles.contentPaddingTop,
+                  bottom: BarraAdminStyles.navbarPaddingVertical,
+                ),
+                child: isDesktop
+                    ? _buildDesktopNavbar(context)
+                    : _buildMobileTopBar(context),
+              ),
+              if (!isDesktop && _isMenuOpen) _buildMobileMenu(context),
+            ],
+          ),
+        ),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(decoration: BarraAdminStyles.radialOverlay),
+          ),
+        ),
+      ],
     );
   }
 
@@ -44,9 +92,17 @@ class _BarraAdminState extends State<BarraAdmin> {
           children: [
             _buildNavLink(context, 'Usuarios', '/panel-admin'),
             const SizedBox(width: 16),
-            _buildNavLink(context, 'Recomendaciones', '/panel-admin/recomendaciones'),
+            _buildNavLink(
+              context,
+              'Recomendaciones',
+              '/panel-admin/recomendaciones',
+            ),
             const SizedBox(width: 16),
-            _buildNavLink(context, 'Editar plataforma', '/panel-admin/editar-plataforma'),
+            _buildNavLink(
+              context,
+              'Editar plataforma',
+              '/panel-admin/editar-plataforma',
+            ),
             const SizedBox(width: 24),
             _buildLogoutButton(context),
           ],
@@ -55,34 +111,66 @@ class _BarraAdminState extends State<BarraAdmin> {
     );
   }
 
-  Widget _buildMobileNavbar(BuildContext context) {
+  Widget _buildMobileTopBar(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _buildBrand(context),
+        GestureDetector(
+          onTap: _toggleMenu,
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Center(
+              child: AnimatedRotation(
+                turns: _isMenuOpen ? 0.125 : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: FaIcon(
+                  _isMenuOpen ? FontAwesomeIcons.xmark : FontAwesomeIcons.bars,
+                  color: BarraAdminStyles.darkGreen,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileMenu(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _buildBrand(context),
-            IconButton(
-              icon: Icon(
-                _isMenuOpen ? Icons.close : Icons.menu,
-                color: BarraAdminStyles.darkGreen,
-                size: 28,
-              ),
-              onPressed: _toggleMenu,
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: BarraAdminStyles.borderColor, width: 1),
             ),
-          ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildMobileNavLink(context, 'Usuarios', '/panel-admin'),
+              _buildMobileNavLink(
+                context,
+                'Recomendaciones',
+                '/panel-admin/recomendaciones',
+              ),
+              _buildMobileNavLink(
+                context,
+                'Editar plataforma',
+                '/panel-admin/editar-plataforma',
+              ),
+              const SizedBox(height: 8),
+              _buildLogoutButton(context, fullWidth: true),
+            ],
+          ),
         ),
-        if (_isMenuOpen) ...[
-          const SizedBox(height: 12),
-          _buildNavLink(context, 'Usuarios', '/panel-admin'),
-          _buildNavLink(context, 'Recomendaciones', '/panel-admin/recomendaciones'),
-          _buildNavLink(context, 'Editar plataforma', '/panel-admin/editar-plataforma'),
-          const SizedBox(height: 12),
-          _buildLogoutButton(context),
-        ]
       ],
     );
   }
@@ -92,21 +180,27 @@ class _BarraAdminState extends State<BarraAdmin> {
       onTap: () {
         Navigator.pushReplacementNamed(context, '/panel-admin');
       },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            'assets/logotipos/escudo.png',
-            width: 36,
-            height: 36,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => const Icon(
-              Icons.shield, size: 36, color: BarraAdminStyles.darkGreen
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/logotipos/escudo.png',
+              width: 42,
+              height: 42,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.shield,
+                size: 38,
+                color: BarraAdminStyles.darkGreen,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          const Text('Administrador', style: BarraAdminStyles.brandText),
-        ],
+            const SizedBox(width: 10),
+            const Text('Administrador', style: BarraAdminStyles.brandText),
+          ],
+        ),
       ),
     );
   }
@@ -117,18 +211,30 @@ class _BarraAdminState extends State<BarraAdmin> {
         Navigator.pushReplacementNamed(context, route);
         if (_isMenuOpen) _toggleMenu();
       },
+      borderRadius: BorderRadius.circular(6),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-        child: Text(
-          text,
-          style: BarraAdminStyles.navLinkText,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        child: Text(text, style: BarraAdminStyles.navLinkText),
       ),
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context) {
+  Widget _buildMobileNavLink(BuildContext context, String text, String route) {
+    return InkWell(
+      onTap: () {
+        _toggleMenu();
+        Navigator.pushReplacementNamed(context, route);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        child: Text(text, style: BarraAdminStyles.navLinkText),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context, {bool fullWidth = false}) {
     return Container(
+      width: fullWidth ? double.infinity : null,
       decoration: BarraAdminStyles.logoutButtonDecoration,
       child: ElevatedButton(
         onPressed: () {
@@ -137,7 +243,7 @@ class _BarraAdminState extends State<BarraAdmin> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          minimumSize: const Size(120, 46),
+          minimumSize: Size(fullWidth ? double.infinity : 120, 46),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),

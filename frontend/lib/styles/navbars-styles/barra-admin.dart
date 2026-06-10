@@ -10,13 +10,15 @@ class BarraAdminStyles {
 
   // Tipografía
   // Dimensiones
-  static const double navbarHeight = 80.0; // Altura mínima del navbar
-  static const double navbarPaddingVertical = 20.0; // Padding vertical
+  static const double navbarHeight = 72.0; // Misma altura visual que agricultor
+  static const double navbarPaddingVertical = 6.0;
+  static const double contentPaddingTop = 18.0;
 
   static const TextStyle brandText = TextStyle(
     color: darkGreen,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: FontWeight.w800,
+    letterSpacing: -0.2,
   );
 
   static const TextStyle navLinkText = TextStyle(
@@ -26,26 +28,23 @@ class BarraAdminStyles {
   );
 
   // Decoraciones
-  static BoxDecoration navbarDecoration = const BoxDecoration(
+  static const BoxDecoration navbarDecoration = BoxDecoration(
     color: Colors.white,
-    border: Border(
-      bottom: BorderSide(color: borderColor, width: 1),
-    ),
+    border: Border(bottom: BorderSide(color: borderColor, width: 1)),
     boxShadow: [
       BoxShadow(
         color: Color.fromRGBO(7, 61, 43, 0.12),
         blurRadius: 24,
         offset: Offset(0, 10),
-      )
+      ),
     ],
-    // Simulando radial-gradient(circle at top right, rgba(85, 168, 32, 0.2), transparent 34%), #ffffff
+  );
+
+  static const BoxDecoration radialOverlay = BoxDecoration(
     gradient: RadialGradient(
-      center: Alignment.topRight,
-      radius: 1.5,
-      colors: [
-        Color.fromRGBO(85, 168, 32, 0.05), // Opacidad suave
-        Colors.white,
-      ],
+      center: Alignment(1.0, -1.0),
+      radius: 1.2,
+      colors: [Color.fromRGBO(85, 168, 32, 0.20), Colors.transparent],
       stops: [0.0, 0.34],
     ),
   );
@@ -62,7 +61,7 @@ class BarraAdminStyles {
         color: Color.fromRGBO(7, 61, 43, 0.24),
         blurRadius: 28,
         offset: Offset(0, 16),
-      )
+      ),
     ],
   );
 }

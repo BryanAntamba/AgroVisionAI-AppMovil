@@ -8,7 +8,7 @@ enum ConexionState {
   conectando,
   conectado,
   errorConexion,
-  desconectado
+  desconectado,
 }
 
 class BotonIOT extends StatefulWidget {
@@ -25,16 +25,18 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
   String _descripcion = '';
 
   static const Map<ConexionState, String> _mensajes = {
-    ConexionState.inicial: 'Apriete el botón para conectar el dispositivo AgroVision AI',
-    ConexionState.conectando: 'Conectando con el dispositivo, por favor espere...',
+    ConexionState.inicial:
+        'Apriete el botón para conectar el dispositivo AgroVision AI',
+    ConexionState.conectando:
+        'Conectando con el dispositivo, por favor espere...',
     ConexionState.conectado: 'Dispositivo conectado exitosamente',
-    ConexionState.errorConexion: 'No se pudo conectar con el dispositivo AgroVision AI. Verifique que el dispositivo esté encendido y dentro del alcance de la red.',
+    ConexionState.errorConexion:
+        'No se pudo conectar con el dispositivo AgroVision AI. Verifique que el dispositivo esté encendido y dentro del alcance de la red.',
     ConexionState.desconectado: 'Dispositivo desconectado',
   };
 
   // Constantes de simulación
   static const int tiempoConexionMs = 2000;
-  static const double probabilidadExito = 0.85;
 
   late AnimationController _pulsarController;
   late AnimationController _shakeController;
@@ -69,12 +71,9 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  bool _simularConexion() {
-    return Random().nextDouble() < probabilidadExito;
-  }
-
   void _onConectarDispositivo() {
-    if (_estado == ConexionState.conectando || _estado == ConexionState.conectado) {
+    if (_estado == ConexionState.conectando ||
+        _estado == ConexionState.conectado) {
       return;
     }
 
@@ -82,13 +81,13 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
       _estado = ConexionState.conectando;
       _descripcion = _mensajes[ConexionState.conectando]!;
     });
-    
+
     _pulsarController.repeat(reverse: true);
 
     // Navegar directamente después de un breve delay
     Timer(const Duration(milliseconds: tiempoConexionMs), () {
       if (!mounted) return;
-      
+
       _pulsarController.stop();
       _pulsarController.reset();
 
@@ -129,7 +128,7 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: BotonIotStyles.darkGreen.withOpacity(0.1),
+                    color: BotonIotStyles.darkGreen.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -141,14 +140,14 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
                 height: 200,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.shield, 
-                  size: 200, 
-                  color: BotonIotStyles.primaryGreen
+                  Icons.shield,
+                  size: 200,
+                  color: BotonIotStyles.primaryGreen,
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Título AgroVisionAI
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -161,7 +160,7 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
 
             // Botón de conexión
             _buildBotonConexion(),
-            
+
             const SizedBox(height: 24),
 
             // Descripción del estado
@@ -170,9 +169,9 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
               child: Text(
                 _descripcion,
                 textAlign: TextAlign.center,
-                style: _estado == ConexionState.errorConexion 
-                  ? BotonIotStyles.descriptionErrorText 
-                  : BotonIotStyles.descriptionText,
+                style: _estado == ConexionState.errorConexion
+                    ? BotonIotStyles.descriptionErrorText
+                    : BotonIotStyles.descriptionText,
               ),
             ),
 
@@ -196,7 +195,7 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
   Widget _buildBotonConexion() {
     BoxDecoration decoration;
     Color iconColor;
-    
+
     switch (_estado) {
       case ConexionState.conectando:
         decoration = BoxDecoration(
@@ -209,10 +208,10 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
           border: Border.all(color: BotonIotStyles.orange, width: 4),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(255, 152, 0, 0.25), 
-              blurRadius: 24, 
-              offset: Offset(0, 8)
-            )
+              color: Color.fromRGBO(255, 152, 0, 0.25),
+              blurRadius: 24,
+              offset: Offset(0, 8),
+            ),
           ],
         );
         iconColor = Colors.white;
@@ -228,10 +227,10 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
           border: Border.all(color: BotonIotStyles.primaryGreen, width: 4),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(85, 168, 32, 0.25), 
-              blurRadius: 24, 
-              offset: Offset(0, 8)
-            )
+              color: Color.fromRGBO(85, 168, 32, 0.25),
+              blurRadius: 24,
+              offset: Offset(0, 8),
+            ),
           ],
         );
         iconColor = Colors.white;
@@ -247,10 +246,10 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
           border: Border.all(color: BotonIotStyles.errorRed, width: 4),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(198, 40, 40, 0.25), 
-              blurRadius: 24, 
-              offset: Offset(0, 8)
-            )
+              color: Color.fromRGBO(198, 40, 40, 0.25),
+              blurRadius: 24,
+              offset: Offset(0, 8),
+            ),
           ],
         );
         iconColor = Colors.white;
@@ -262,10 +261,10 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
           border: Border.all(color: const Color(0xFFC8D8CE), width: 4),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(7, 61, 43, 0.05), 
-              blurRadius: 12, 
-              offset: Offset(0, 4)
-            )
+              color: Color.fromRGBO(7, 61, 43, 0.05),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
           ],
         );
         iconColor = BotonIotStyles.darkGreen;
@@ -289,25 +288,25 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
     if (_estado == ConexionState.conectando) {
       button = ScaleTransition(
         scale: Tween<double>(begin: 1.0, end: 1.05).animate(
-          CurvedAnimation(parent: _pulsarController, curve: Curves.easeInOut)
+          CurvedAnimation(parent: _pulsarController, curve: Curves.easeInOut),
         ),
         child: button,
       );
     }
-    
+
     // Animación de sacudida cuando hay error
     if (_estado == ConexionState.errorConexion) {
-       button = AnimatedBuilder(
-         animation: _shakeController,
-         builder: (context, child) {
-           final sineValue = sin(3 * pi * _shakeController.value);
-           return Transform.translate(
-             offset: Offset(sineValue * 10, 0),
-             child: child,
-           );
-         },
-         child: button,
-       );
+      button = AnimatedBuilder(
+        animation: _shakeController,
+        builder: (context, child) {
+          final sineValue = sin(3 * pi * _shakeController.value);
+          return Transform.translate(
+            offset: Offset(sineValue * 10, 0),
+            child: child,
+          );
+        },
+        child: button,
+      );
     }
 
     return button;
@@ -325,10 +324,10 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(8),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(85, 168, 32, 0.1), 
-              blurRadius: 12, 
-              offset: Offset(0, 4)
-            )
+              color: Color.fromRGBO(85, 168, 32, 0.1),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
           ],
         ),
         child: Row(
@@ -362,7 +361,10 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
         children: [
           FadeTransition(
             opacity: Tween<double>(begin: 1.0, end: 0.4).animate(
-              CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut)
+              CurvedAnimation(
+                parent: _blinkController,
+                curve: Curves.easeInOut,
+              ),
             ),
             child: Container(
               width: 10,
@@ -375,8 +377,8 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
           ),
           const SizedBox(width: 8),
           const Text(
-            'Dispositivo conectado', 
-            style: BotonIotStyles.indicatorText
+            'Dispositivo conectado',
+            style: BotonIotStyles.indicatorText,
           ),
         ],
       ),

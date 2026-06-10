@@ -25,7 +25,7 @@ class _BarraAgricultorState extends State<BarraAgricultor>
 
     _menuAnimController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 300),
     );
   }
 
@@ -38,7 +38,9 @@ class _BarraAgricultorState extends State<BarraAgricultor>
   Future<void> _cargarConfiguracion() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final historialConfig = prefs.getString('agrovision_historial_habilitado');
+      final historialConfig = prefs.getString(
+        'agrovision_historial_habilitado',
+      );
       if (historialConfig != null && mounted) {
         setState(() {
           _historialHabilitado = historialConfig.toLowerCase() == 'true';
@@ -82,7 +84,9 @@ class _BarraAgricultorState extends State<BarraAgricultor>
       children: [
         // Fondo blanco con sombra
         Container(
-          constraints: const BoxConstraints(minHeight: BarraAgricultorStyles.navbarHeight),
+          constraints: const BoxConstraints(
+            minHeight: BarraAgricultorStyles.navbarHeight,
+          ),
           decoration: BarraAgricultorStyles.navbarDecoration,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -91,12 +95,12 @@ class _BarraAgricultorState extends State<BarraAgricultor>
                 padding: EdgeInsets.only(
                   left: isDesktop ? 28 : 16,
                   right: isDesktop ? 28 : 16,
-                  top: BarraAgricultorStyles.navbarPaddingVertical + BarraAgricultorStyles.contentPaddingTop,
+                  top:
+                      BarraAgricultorStyles.navbarPaddingVertical +
+                      BarraAgricultorStyles.contentPaddingTop,
                   bottom: BarraAgricultorStyles.navbarPaddingVertical,
                 ),
-                child: isDesktop
-                    ? _buildDesktopNavbar()
-                    : _buildMobileTopBar(),
+                child: isDesktop ? _buildDesktopNavbar() : _buildMobileTopBar(),
               ),
               // Menú expandido móvil
               if (!isDesktop && _isMenuOpen) _buildMobileMenu(),
@@ -106,9 +110,7 @@ class _BarraAgricultorState extends State<BarraAgricultor>
         // Overlay radial verde top-right (decorativo, no bloquea eventos)
         Positioned.fill(
           child: IgnorePointer(
-            child: Container(
-              decoration: BarraAgricultorStyles.radialOverlay,
-            ),
+            child: Container(decoration: BarraAgricultorStyles.radialOverlay),
           ),
         ),
       ],
@@ -145,24 +147,9 @@ class _BarraAgricultorState extends State<BarraAgricultor>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildBrand(),
-        // Hamburguesa animada estilo Angular
-        GestureDetector(
+        _AnimatedHamburgerButton(
+          animation: _menuAnimController,
           onTap: _toggleMenu,
-          child: SizedBox(
-            width: 44,
-            height: 44,
-            child: Center(
-              child: AnimatedRotation(
-                turns: _isMenuOpen ? 0.125 : 0.0,
-                duration: const Duration(milliseconds: 250),
-                child: FaIcon(
-                  _isMenuOpen ? FontAwesomeIcons.xmark : FontAwesomeIcons.bars,
-                  color: BarraAgricultorStyles.darkGreen,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
         ),
       ],
     );
@@ -262,6 +249,87 @@ class _BarraAgricultorState extends State<BarraAgricultor>
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedHamburgerButton extends StatelessWidget {
+  final Animation<double> animation;
+  final VoidCallback onTap;
+
+  const _AnimatedHamburgerButton({
+    required this.animation,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Abrir navegación',
+      child: GestureDetector(
+        onTap: onTap,
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Center(
+            child: AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                final value = Curves.ease.transform(animation.value);
+
+                return SizedBox(
+                  width: 24,
+                  height: 18,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      _HamburgerLine(
+                        offsetY: -8 * (1 - value),
+                        rotation: 0.785398 * value,
+                      ),
+                      _HamburgerLine(opacity: 1 - value),
+                      _HamburgerLine(
+                        offsetY: 8 * (1 - value),
+                        rotation: -0.785398 * value,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HamburgerLine extends StatelessWidget {
+  final double offsetY;
+  final double rotation;
+  final double opacity;
+
+  const _HamburgerLine({this.offsetY = 0, this.rotation = 0, this.opacity = 1});
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.translate(
+      offset: Offset(0, offsetY),
+      child: Transform.rotate(
+        angle: rotation,
+        child: Opacity(
+          opacity: opacity,
+          child: Container(
+            width: 24,
+            height: 2,
+            decoration: BoxDecoration(
+              color: BarraAgricultorStyles.darkGreen,
+              borderRadius: BorderRadius.circular(1),
+            ),
           ),
         ),
       ),

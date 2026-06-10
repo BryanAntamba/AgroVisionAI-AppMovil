@@ -1,29 +1,47 @@
-// Modelos de configuración visual de la plataforma AgroVision AI.
-// Equivalente al servicio Angular `TemaService` / `TemaConfig`.
-
 class NavbarConfig {
   String tipoFondo;
   String colorBase;
+  bool resplandorActivo;
+  String colorResplandor;
+  String posicionResplandor;
+  int opacidadResplandor;
+  int tamanoResplandor;
+  String colorBorde;
 
   NavbarConfig({
     this.tipoFondo = 'gradiente',
-    this.colorBase = '#073D2B',
+    this.colorBase = '#ffffff',
+    this.resplandorActivo = true,
+    this.colorResplandor = '#55a820',
+    this.posicionResplandor = 'top right',
+    this.opacidadResplandor = 20,
+    this.tamanoResplandor = 34,
+    this.colorBorde = '#d7e4dc',
   });
 
-  NavbarConfig copyWith({String? tipoFondo, String? colorBase}) => NavbarConfig(
-        tipoFondo: tipoFondo ?? this.tipoFondo,
-        colorBase: colorBase ?? this.colorBase,
-      );
+  factory NavbarConfig.fromJson(Map<String, dynamic> json) {
+    return NavbarConfig(
+      tipoFondo: json['tipoFondo'] as String? ?? 'gradiente',
+      colorBase: json['colorBase'] as String? ?? '#ffffff',
+      resplandorActivo: json['resplandorActivo'] as bool? ?? true,
+      colorResplandor: json['colorResplandor'] as String? ?? '#55a820',
+      posicionResplandor: json['posicionResplandor'] as String? ?? 'top right',
+      opacidadResplandor: json['opacidadResplandor'] as int? ?? 20,
+      tamanoResplandor: json['tamanoResplandor'] as int? ?? 34,
+      colorBorde: json['colorBorde'] as String? ?? '#d7e4dc',
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-        'tipoFondo': tipoFondo,
-        'colorBase': colorBase,
-      };
-
-  factory NavbarConfig.fromJson(Map<String, dynamic> j) => NavbarConfig(
-        tipoFondo: j['tipoFondo'] as String? ?? 'gradiente',
-        colorBase: j['colorBase'] as String? ?? '#073D2B',
-      );
+    'tipoFondo': tipoFondo,
+    'colorBase': colorBase,
+    'resplandorActivo': resplandorActivo,
+    'colorResplandor': colorResplandor,
+    'posicionResplandor': posicionResplandor,
+    'opacidadResplandor': opacidadResplandor,
+    'tamanoResplandor': tamanoResplandor,
+    'colorBorde': colorBorde,
+  };
 }
 
 class ColoresConfig {
@@ -31,110 +49,121 @@ class ColoresConfig {
   String linksNormales;
   String linksActivos;
   String textosDescriptivos;
+  String iconos;
 
   ColoresConfig({
-    this.titulos = '#073D2B',
-    this.linksNormales = '#073D2B',
-    this.linksActivos = '#55A820',
-    this.textosDescriptivos = '#4B7A5A',
+    this.titulos = '#073d2b',
+    this.linksNormales = '#456657',
+    this.linksActivos = '#55a820',
+    this.textosDescriptivos = '#597268',
+    this.iconos = '#55a820',
   });
 
-  ColoresConfig copyWith({
-    String? titulos,
-    String? linksNormales,
-    String? linksActivos,
-    String? textosDescriptivos,
-  }) =>
-      ColoresConfig(
-        titulos: titulos ?? this.titulos,
-        linksNormales: linksNormales ?? this.linksNormales,
-        linksActivos: linksActivos ?? this.linksActivos,
-        textosDescriptivos: textosDescriptivos ?? this.textosDescriptivos,
-      );
+  factory ColoresConfig.fromJson(Map<String, dynamic> json) {
+    return ColoresConfig(
+      titulos: json['titulos'] as String? ?? '#073d2b',
+      linksNormales: json['linksNormales'] as String? ?? '#456657',
+      linksActivos: json['linksActivos'] as String? ?? '#55a820',
+      textosDescriptivos: json['textosDescriptivos'] as String? ?? '#597268',
+      iconos: json['iconos'] as String? ?? '#55a820',
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-        'titulos': titulos,
-        'linksNormales': linksNormales,
-        'linksActivos': linksActivos,
-        'textosDescriptivos': textosDescriptivos,
-      };
-
-  factory ColoresConfig.fromJson(Map<String, dynamic> j) => ColoresConfig(
-        titulos: j['titulos'] as String? ?? '#073D2B',
-        linksNormales: j['linksNormales'] as String? ?? '#073D2B',
-        linksActivos: j['linksActivos'] as String? ?? '#55A820',
-        textosDescriptivos: j['textosDescriptivos'] as String? ?? '#4B7A5A',
-      );
+    'titulos': titulos,
+    'linksNormales': linksNormales,
+    'linksActivos': linksActivos,
+    'textosDescriptivos': textosDescriptivos,
+    'iconos': iconos,
+  };
 }
 
 class BotonesConfig {
-  String colorFondo;
+  String tipo;
+  String colorInicial;
+  String colorFinal;
   String colorTexto;
-  String colorHover;
+  String destructivoColor;
+  String destructivoHover;
 
   BotonesConfig({
-    this.colorFondo = '#55A820',
-    this.colorTexto = '#FFFFFF',
-    this.colorHover = '#073D2B',
+    this.tipo = 'gradiente',
+    this.colorInicial = '#073d2b',
+    this.colorFinal = '#55a820',
+    this.colorTexto = '#ffffff',
+    this.destructivoColor = '#a32626',
+    this.destructivoHover = '#8b1f1f',
   });
 
-  BotonesConfig copyWith({
-    String? colorFondo,
-    String? colorTexto,
-    String? colorHover,
-  }) =>
-      BotonesConfig(
-        colorFondo: colorFondo ?? this.colorFondo,
-        colorTexto: colorTexto ?? this.colorTexto,
-        colorHover: colorHover ?? this.colorHover,
-      );
+  factory BotonesConfig.fromJson(Map<String, dynamic> json) {
+    return BotonesConfig(
+      tipo: json['tipo'] as String? ?? 'gradiente',
+      colorInicial: json['colorInicial'] as String? ?? '#073d2b',
+      colorFinal: json['colorFinal'] as String? ?? '#55a820',
+      colorTexto: json['colorTexto'] as String? ?? '#ffffff',
+      destructivoColor: json['destructivoColor'] as String? ?? '#a32626',
+      destructivoHover: json['destructivoHover'] as String? ?? '#8b1f1f',
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-        'colorFondo': colorFondo,
-        'colorTexto': colorTexto,
-        'colorHover': colorHover,
-      };
-
-  factory BotonesConfig.fromJson(Map<String, dynamic> j) => BotonesConfig(
-        colorFondo: j['colorFondo'] as String? ?? '#55A820',
-        colorTexto: j['colorTexto'] as String? ?? '#FFFFFF',
-        colorHover: j['colorHover'] as String? ?? '#073D2B',
-      );
+    'tipo': tipo,
+    'colorInicial': colorInicial,
+    'colorFinal': colorFinal,
+    'colorTexto': colorTexto,
+    'destructivoColor': destructivoColor,
+    'destructivoHover': destructivoHover,
+  };
 }
 
 class ModalesConfig {
-  String colorEncabezado;
-  String colorFondo;
+  String colorBackdrop;
+  int opacidadBackdrop;
+  String botonesFondoDestructivo;
+  String botonesHoverDestructivo;
+  String iconoExitoColor;
+  String iconoExitoFondo;
 
   ModalesConfig({
-    this.colorEncabezado = '#073D2B',
-    this.colorFondo = '#FFFFFF',
+    this.colorBackdrop = '#073d2b',
+    this.opacidadBackdrop = 45,
+    this.botonesFondoDestructivo = '#a32626',
+    this.botonesHoverDestructivo = '#8b1f1f',
+    this.iconoExitoColor = '#55a820',
+    this.iconoExitoFondo = '#eaf7e5',
   });
 
-  ModalesConfig copyWith({String? colorEncabezado, String? colorFondo}) =>
-      ModalesConfig(
-        colorEncabezado: colorEncabezado ?? this.colorEncabezado,
-        colorFondo: colorFondo ?? this.colorFondo,
-      );
+  factory ModalesConfig.fromJson(Map<String, dynamic> json) {
+    return ModalesConfig(
+      colorBackdrop: json['colorBackdrop'] as String? ?? '#073d2b',
+      opacidadBackdrop: json['opacidadBackdrop'] as int? ?? 45,
+      botonesFondoDestructivo:
+          json['botonesFondoDestructivo'] as String? ?? '#a32626',
+      botonesHoverDestructivo:
+          json['botonesHoverDestructivo'] as String? ?? '#8b1f1f',
+      iconoExitoColor: json['iconoExitoColor'] as String? ?? '#55a820',
+      iconoExitoFondo: json['iconoExitoFondo'] as String? ?? '#eaf7e5',
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-        'colorEncabezado': colorEncabezado,
-        'colorFondo': colorFondo,
-      };
-
-  factory ModalesConfig.fromJson(Map<String, dynamic> j) => ModalesConfig(
-        colorEncabezado: j['colorEncabezado'] as String? ?? '#073D2B',
-        colorFondo: j['colorFondo'] as String? ?? '#FFFFFF',
-      );
+    'colorBackdrop': colorBackdrop,
+    'opacidadBackdrop': opacidadBackdrop,
+    'botonesFondoDestructivo': botonesFondoDestructivo,
+    'botonesHoverDestructivo': botonesHoverDestructivo,
+    'iconoExitoColor': iconoExitoColor,
+    'iconoExitoFondo': iconoExitoFondo,
+  };
 }
 
-/// Configuración visual completa de la plataforma.
 class TemaConfig {
   String nombrePlataforma;
   NavbarConfig navbar;
   ColoresConfig colores;
   BotonesConfig botones;
   ModalesConfig modales;
+  String? logoUrl;
+  String? faviconUrl;
 
   TemaConfig({
     this.nombrePlataforma = 'AgroVision AI',
@@ -142,48 +171,40 @@ class TemaConfig {
     ColoresConfig? colores,
     BotonesConfig? botones,
     ModalesConfig? modales,
-  })  : navbar = navbar ?? NavbarConfig(),
-        colores = colores ?? ColoresConfig(),
-        botones = botones ?? BotonesConfig(),
-        modales = modales ?? ModalesConfig();
+    this.logoUrl,
+    this.faviconUrl,
+  }) : navbar = navbar ?? NavbarConfig(),
+       colores = colores ?? ColoresConfig(),
+       botones = botones ?? BotonesConfig(),
+       modales = modales ?? ModalesConfig();
 
-  TemaConfig copyWith({
-    String? nombrePlataforma,
-    NavbarConfig? navbar,
-    ColoresConfig? colores,
-    BotonesConfig? botones,
-    ModalesConfig? modales,
-  }) =>
-      TemaConfig(
-        nombrePlataforma: nombrePlataforma ?? this.nombrePlataforma,
-        navbar: navbar ?? this.navbar,
-        colores: colores ?? this.colores,
-        botones: botones ?? this.botones,
-        modales: modales ?? this.modales,
-      );
+  factory TemaConfig.fromJson(Map<String, dynamic> json) {
+    return TemaConfig(
+      nombrePlataforma: json['nombrePlataforma'] as String? ?? 'AgroVision AI',
+      navbar: NavbarConfig.fromJson(
+        (json['navbar'] as Map?)?.cast<String, dynamic>() ?? {},
+      ),
+      colores: ColoresConfig.fromJson(
+        (json['colores'] as Map?)?.cast<String, dynamic>() ?? {},
+      ),
+      botones: BotonesConfig.fromJson(
+        (json['botones'] as Map?)?.cast<String, dynamic>() ?? {},
+      ),
+      modales: ModalesConfig.fromJson(
+        (json['modales'] as Map?)?.cast<String, dynamic>() ?? {},
+      ),
+      logoUrl: json['logoUrl'] as String?,
+      faviconUrl: json['faviconUrl'] as String?,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-        'nombrePlataforma': nombrePlataforma,
-        'navbar': navbar.toJson(),
-        'colores': colores.toJson(),
-        'botones': botones.toJson(),
-        'modales': modales.toJson(),
-      };
-
-  factory TemaConfig.fromJson(Map<String, dynamic> j) => TemaConfig(
-        nombrePlataforma:
-            j['nombrePlataforma'] as String? ?? 'AgroVision AI',
-        navbar: j['navbar'] != null
-            ? NavbarConfig.fromJson(j['navbar'] as Map<String, dynamic>)
-            : null,
-        colores: j['colores'] != null
-            ? ColoresConfig.fromJson(j['colores'] as Map<String, dynamic>)
-            : null,
-        botones: j['botones'] != null
-            ? BotonesConfig.fromJson(j['botones'] as Map<String, dynamic>)
-            : null,
-        modales: j['modales'] != null
-            ? ModalesConfig.fromJson(j['modales'] as Map<String, dynamic>)
-            : null,
-      );
+    'nombrePlataforma': nombrePlataforma,
+    'navbar': navbar.toJson(),
+    'colores': colores.toJson(),
+    'botones': botones.toJson(),
+    'modales': modales.toJson(),
+    'logoUrl': logoUrl,
+    'faviconUrl': faviconUrl,
+  };
 }
