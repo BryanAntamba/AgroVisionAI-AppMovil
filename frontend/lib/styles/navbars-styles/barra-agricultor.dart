@@ -8,9 +8,9 @@ class BarraAgricultorStyles {
   static const Color borderColor = Color(0xFFD7E4DC);
 
   // Dimensiones
-  static const double navbarHeight = 70.0; // Altura mínima del navbar
-  static const double navbarPaddingVertical = 16.0; // Padding vertical mayor
-  static const double contentPaddingTop = 8.0; // Padding superior adicional para bajar el contenido
+  static const double navbarHeight = 72.0; // Altura mínima del navbar
+  static const double navbarPaddingVertical = 6.0; // Padding vertical inferior reducida para bajar el contenido
+  static const double contentPaddingTop = 18.0; // Padding superior adicional para bajar el contenido
 
   // Tipografía
   static const TextStyle brandText = TextStyle(
