@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../styles/admin-styles/panel-admin.dart';
+import '../../styles/admin-styles/modales-styles/eliminar-usuario.dart';
 import '../../environments/datos-simulados-admin.dart';
 
 class EliminarUsuario extends StatelessWidget {
@@ -19,15 +19,15 @@ class EliminarUsuario extends StatelessWidget {
     return GestureDetector(
       onTap: onCerrar,
       child: Container(
-        color: const Color.fromRGBO(7, 61, 43, 0.45),
+        color: EliminarUsuarioStyles.overlayColor,
         child: Center(
           child: GestureDetector(
             onTap: () {},
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 480),
-              margin: const EdgeInsets.all(24),
-              padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
-              decoration: PanelAdminStyles.cardDecoration,
+              constraints: const BoxConstraints(maxWidth: EliminarUsuarioStyles.maxWidth),
+              margin: EliminarUsuarioStyles.modalMargin,
+              padding: EliminarUsuarioStyles.modalPadding,
+              decoration: EliminarUsuarioStyles.modalDecoration,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,101 +35,73 @@ class EliminarUsuario extends StatelessWidget {
                   Row(
                     children: [
                       const Expanded(
-                        child: Text('Eliminar usuario', style: PanelAdminStyles.h1Text),
+                        child: Text('Eliminar usuario', style: EliminarUsuarioStyles.titleText),
                       ),
                       GestureDetector(
                         onTap: onCerrar,
                         child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: PanelAdminStyles.backgroundPage,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          width: EliminarUsuarioStyles.closeButtonSize,
+                          height: EliminarUsuarioStyles.closeButtonSize,
+                          decoration: EliminarUsuarioStyles.closeButtonDecoration,
                           child: const Icon(Icons.close,
-                              color: PanelAdminStyles.darkGreen, size: 18),
+                              color: EliminarUsuarioStyles.closeIconColor, 
+                              size: EliminarUsuarioStyles.closeIconSize),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: EliminarUsuarioStyles.contentSpacing),
                   RichText(
                     text: TextSpan(
-                      style: const TextStyle(color: Color(0xFF456657), fontSize: 15, height: 1.5, fontFamily: 'Arial'),
+                      style: EliminarUsuarioStyles.bodyText,
                       children: [
                         const TextSpan(text: '¿Estas seguro de que deseas eliminar al usuario '),
                         TextSpan(
                           text: usuario.nombreCompleto,
-                          style: const TextStyle(color: Color(0xFF073d2b), fontWeight: FontWeight.bold),
+                          style: EliminarUsuarioStyles.boldText,
                         ),
                         const TextSpan(text: ' con el rol de '),
                         TextSpan(
                           text: usuario.rol.label,
-                          style: const TextStyle(color: Color(0xFF073d2b), fontWeight: FontWeight.bold),
+                          style: EliminarUsuarioStyles.boldText,
                         ),
                         const TextSpan(text: '?'),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: EliminarUsuarioStyles.warningSpacing),
                   const Text(
                     'Esta accion no se puede deshacer.',
-                    style: TextStyle(
-                      color: Color(0xFFA32626),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: EliminarUsuarioStyles.warningText,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: EliminarUsuarioStyles.footerSpacing),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       GestureDetector(
                         onTap: onCerrar,
                         child: Container(
-                          constraints: const BoxConstraints(minHeight: 54),
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          decoration: BoxDecoration(
-                            color: PanelAdminStyles.backgroundInput,
-                            border: Border.all(color: PanelAdminStyles.borderGrey),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          constraints: const BoxConstraints(minHeight: EliminarUsuarioStyles.minButtonHeight),
+                          padding: EliminarUsuarioStyles.cancelButtonPadding,
+                          decoration: EliminarUsuarioStyles.cancelButtonDecoration,
                           child: const Center(
-                            child: Text('Cancelar',
-                                style: TextStyle(
-                                    color: PanelAdminStyles.darkGreen,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800)),
+                            child: Text('Cancelar', style: EliminarUsuarioStyles.cancelButtonText),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: EliminarUsuarioStyles.buttonSpacing),
                       GestureDetector(
                         onTap: onConfirmar,
                         child: Container(
-                          constraints: const BoxConstraints(minHeight: 54),
-                          padding: const EdgeInsets.symmetric(horizontal: 22),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFA32626),
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color.fromRGBO(163, 38, 38, 0.24),
-                                blurRadius: 24,
-                                offset: Offset(0, 12),
-                              ),
-                            ],
-                          ),
+                          constraints: const BoxConstraints(minHeight: EliminarUsuarioStyles.minButtonHeight),
+                          padding: EliminarUsuarioStyles.deleteButtonPadding,
+                          decoration: EliminarUsuarioStyles.deleteButtonDecoration,
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.delete, color: Colors.white, size: 16),
-                              SizedBox(width: 8),
-                              Text('Eliminar usuario',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800)),
+                              Icon(Icons.delete, color: Colors.white, size: EliminarUsuarioStyles.deleteIconSize),
+                              SizedBox(width: EliminarUsuarioStyles.iconTextSpacing),
+                              Text('Eliminar usuario', style: EliminarUsuarioStyles.deleteButtonText),
                             ],
                           ),
                         ),

@@ -10,7 +10,8 @@ class BarraAgricultorStyles {
   // Dimensiones
   static const double navbarHeight = 72.0; // Altura mínima del navbar
   static const double navbarPaddingVertical = 6.0; // Padding vertical inferior reducida para bajar el contenido
-  static const double contentPaddingTop = 18.0; // Padding superior adicional para bajar el contenido
+  static const double contentPaddingTop = 35.0; // Padding superior adicional para bajar el contenido
+  static const double elevation = 0.0; // Elevación para sombra (0 porque usamos boxShadow personalizada)
 
   // Tipografía
   static const TextStyle brandText = TextStyle(

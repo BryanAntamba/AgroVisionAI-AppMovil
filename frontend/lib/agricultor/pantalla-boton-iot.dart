@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../navbars/barra-agricultor.dart';
+import '../styles/navbars-styles/barra-agricultor.dart';
 import 'boton-iot.dart';
 
 class PantallaBotonIOT extends StatefulWidget {
@@ -33,15 +34,39 @@ class _PantallaBotonIOTState extends State<PantallaBotonIOT> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5FAF3),
-      body: Column(
+      body: Stack(
         children: [
-          const BarraAgricultor(),
-          Expanded(
-            child: Center(
-              child: SingleChildScrollView(
-                child: BotonIOT(onConectado: _onConectadoDispositivo),
-              ),
+          // Contenido con padding superior para no quedar debajo de la barra
+          Positioned.fill(
+            child: Column(
+              children: [
+                // Espacio para la barra
+                SizedBox(
+                  height: MediaQuery.of(context).size.width > 991
+                      ? BarraAgricultorStyles.navbarHeight +
+                          BarraAgricultorStyles.contentPaddingTop +
+                          (BarraAgricultorStyles.navbarPaddingVertical * 2)
+                      : BarraAgricultorStyles.navbarHeight +
+                          BarraAgricultorStyles.contentPaddingTop +
+                          (BarraAgricultorStyles.navbarPaddingVertical * 2),
+                ),
+                // Contenido scrolleable
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: BotonIOT(onConectado: _onConectadoDispositivo),
+                    ),
+                  ),
+                ),
+              ],
             ),
+          ),
+          // Barra fija en la parte superior
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: const BarraAgricultor(),
           ),
         ],
       ),

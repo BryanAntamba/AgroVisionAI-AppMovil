@@ -8,11 +8,11 @@ class BarraAdminStyles {
   static const Color linkHover = Color(0xFF55A820);
   static const Color borderColor = Color(0xFFD7E4DC);
 
-  // Tipografía
   // Dimensiones
   static const double navbarHeight = 72.0; // Misma altura visual que agricultor
   static const double navbarPaddingVertical = 6.0;
-  static const double contentPaddingTop = 18.0;
+  static const double contentPaddingTop = 35.0; // Igual que agricultor para consistencia
+  static const double elevation = 0.0;
 
   static const TextStyle brandText = TextStyle(
     color: darkGreen,

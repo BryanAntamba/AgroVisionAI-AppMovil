@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../styles/admin-styles/panel-admin.dart';
+import '../../styles/admin-styles/modales-styles/registro-usuario.dart';
 import '../../environments/datos-simulados-admin.dart';
+import '../../shared/validators/modales-validaciones.dart';
 
 class DatosUsuario {
   final String nombre;
@@ -55,6 +57,18 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
   bool _showConfirmPassword = false;
   RolUsuario? _rol;
 
+  // Errores de validación
+  String? _nombreError;
+  String? _segundoNombreError;
+  String? _apellidoError;
+  String? _segundoApellidoError;
+  String? _correoCorpError;
+  String? _correoElecError;
+  String? _telefonoError;
+  String? _passwordError;
+  String? _confirmPassError;
+  String? _rolError;
+
   @override
   void initState() {
     super.initState();
@@ -83,15 +97,152 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
     super.dispose();
   }
 
+  void _validarNombre() {
+    final valor = _nombreCtrl.text.trim();
+    setState(() {
+      // Nombre es opcional, pero si tiene valor debe ser válido
+      if (valor.isNotEmpty && !ModalesValidaciones.nombrePattern.hasMatch(valor)) {
+        _nombreError = ModalesValidaciones.mensajesError['nombrePattern'];
+      } else {
+        _nombreError = null;
+      }
+    });
+  }
+
+  void _validarSegundoNombre() {
+    final valor = _segundoNombreCtrl.text.trim();
+    setState(() {
+      // Segundo nombre es opcional, pero si tiene valor debe ser válido
+      if (valor.isNotEmpty && !ModalesValidaciones.nombrePattern.hasMatch(valor)) {
+        _segundoNombreError = ModalesValidaciones.mensajesError['nombrePattern'];
+      } else {
+        _segundoNombreError = null;
+      }
+    });
+  }
+
+  void _validarApellido() {
+    final valor = _apellidoCtrl.text.trim();
+    setState(() {
+      // Apellido es opcional, pero si tiene valor debe ser válido
+      if (valor.isNotEmpty && !ModalesValidaciones.nombrePattern.hasMatch(valor)) {
+        _apellidoError = ModalesValidaciones.mensajesError['nombrePattern'];
+      } else {
+        _apellidoError = null;
+      }
+    });
+  }
+
+  void _validarSegundoApellido() {
+    final valor = _segundoApellidoCtrl.text.trim();
+    setState(() {
+      // Segundo apellido es opcional, pero si tiene valor debe ser válido
+      if (valor.isNotEmpty && !ModalesValidaciones.nombrePattern.hasMatch(valor)) {
+        _segundoApellidoError = ModalesValidaciones.mensajesError['nombrePattern'];
+      } else {
+        _segundoApellidoError = null;
+      }
+    });
+  }
+
+  void _validarCorreoCorporativo() {
+    final valor = _correoCorpCtrl.text.trim();
+    setState(() {
+      if (valor.isEmpty) {
+        _correoCorpError = ModalesValidaciones.mensajesError['correoCorporativoRequired'];
+      } else if (!ModalesValidaciones.correoCorporativoPattern.hasMatch(valor)) {
+        _correoCorpError = ModalesValidaciones.mensajesError['correoCorporativoPattern'];
+      } else {
+        _correoCorpError = null;
+      }
+    });
+  }
+
+  void _validarCorreoElectronico() {
+    final valor = _correoElecCtrl.text.trim();
+    setState(() {
+      if (valor.isEmpty) {
+        _correoElecError = ModalesValidaciones.mensajesError['correoElectronicoRequired'];
+      } else if (!ModalesValidaciones.correoGmailPattern.hasMatch(valor)) {
+        _correoElecError = ModalesValidaciones.mensajesError['correoGmailPattern'];
+      } else {
+        _correoElecError = null;
+      }
+    });
+  }
+
+  void _validarTelefono() {
+    final valor = _telefonoCtrl.text.trim();
+    setState(() {
+      if (valor.isEmpty) {
+        _telefonoError = ModalesValidaciones.mensajesError['telefonoRequired'];
+      } else if (!ModalesValidaciones.telefonoPattern.hasMatch(valor)) {
+        _telefonoError = ModalesValidaciones.mensajesError['telefonoPattern'];
+      } else {
+        _telefonoError = null;
+      }
+    });
+  }
+
+  void _validarPassword() {
+    final valor = _passwordCtrl.text;
+    setState(() {
+      if (valor.isEmpty) {
+        _passwordError = ModalesValidaciones.mensajesError['passwordRequired'];
+      } else {
+        _passwordError = null;
+      }
+    });
+  }
+
+  void _validarConfirmPassword() {
+    final valor = _confirmPassCtrl.text;
+    setState(() {
+      if (valor.isEmpty) {
+        _confirmPassError = ModalesValidaciones.mensajesError['confirmarPasswordRequired'];
+      } else if (valor != _passwordCtrl.text) {
+        _confirmPassError = ModalesValidaciones.mensajesError['passwordMismatch'];
+      } else {
+        _confirmPassError = null;
+      }
+    });
+  }
+
   void _submit() {
-    if (_correoCorpCtrl.text.isEmpty ||
-        _correoElecCtrl.text.isEmpty ||
-        _telefonoCtrl.text.isEmpty ||
-        _passwordCtrl.text.isEmpty ||
-        _rol == null) {
-      // Idealmente, se muestra un error, pero por ahora solo se bloquea.
+    // Validar todos los campos
+    _validarNombre();
+    _validarSegundoNombre();
+    _validarApellido();
+    _validarSegundoApellido();
+    _validarCorreoCorporativo();
+    _validarCorreoElectronico();
+    _validarTelefono();
+    _validarPassword();
+    _validarConfirmPassword();
+
+    // Validar rol
+    setState(() {
+      if (_rol == null) {
+        _rolError = ModalesValidaciones.mensajesError['required'];
+      } else {
+        _rolError = null;
+      }
+    });
+
+    // Verificar si hay errores
+    if (_nombreError != null ||
+        _segundoNombreError != null ||
+        _apellidoError != null ||
+        _segundoApellidoError != null ||
+        _correoCorpError != null ||
+        _correoElecError != null ||
+        _telefonoError != null ||
+        _passwordError != null ||
+        _confirmPassError != null ||
+        _rolError != null) {
       return;
     }
+
     widget.onGuardar(DatosUsuario(
       nombre: _nombreCtrl.text.trim(),
       segundoNombre: _segundoNombreCtrl.text.trim(),
@@ -107,52 +258,39 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMobile = MediaQuery.of(context).size.width <= 700;
+    final bool isMobile = MediaQuery.of(context).size.width <= RegistroUsuarioStyles.mobileBreakpoint;
 
     return GestureDetector(
       onTap: widget.onCerrar,
       child: Container(
-        color: const Color.fromRGBO(7, 61, 43, 0.45),
+        color: RegistroUsuarioStyles.overlayColor,
         child: Center(
           child: GestureDetector(
             onTap: () {},
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 760),
-              margin: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: PanelAdminStyles.borderGrey),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromRGBO(7, 61, 43, 0.2),
-                    blurRadius: 48,
-                    offset: Offset(0, 24),
-                  ),
-                ],
-              ),
+              constraints: const BoxConstraints(maxWidth: RegistroUsuarioStyles.maxWidth),
+              margin: RegistroUsuarioStyles.modalMargin,
+              decoration: RegistroUsuarioStyles.modalDecoration,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Header
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(28, 28, 28, 0),
+                    padding: RegistroUsuarioStyles.headerPadding,
                     child: Row(
                       children: [
-                        Expanded(
-                          child: Text('Registro de usuario', style: PanelAdminStyles.h1Text),
+                        const Expanded(
+                          child: Text('Registro de usuario', style: RegistroUsuarioStyles.titleText),
                         ),
                         GestureDetector(
                           onTap: widget.onCerrar,
                           child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: PanelAdminStyles.backgroundPage,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            width: RegistroUsuarioStyles.closeButtonSize,
+                            height: RegistroUsuarioStyles.closeButtonSize,
+                            decoration: RegistroUsuarioStyles.closeButtonDecoration,
                             child: const Icon(Icons.close,
-                                color: PanelAdminStyles.darkGreen, size: 18),
+                                color: RegistroUsuarioStyles.closeIconColor, 
+                                size: RegistroUsuarioStyles.closeIconSize),
                           ),
                         ),
                       ],
@@ -162,28 +300,35 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
                   // Formulario
                   Flexible(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      padding: RegistroUsuarioStyles.formPadding,
                       child: Column(
                         children: [
                           _buildGrid(
                             isMobile: isMobile,
                             children: [
-                              _buildTextField('Nombre', Icons.person, _nombreCtrl),
-                              _buildTextField('Segundo nombre', Icons.person, _segundoNombreCtrl),
-                              _buildTextField('Apellido', Icons.person, _apellidoCtrl),
-                              _buildTextField('Segundo apellido', Icons.person, _segundoApellidoCtrl),
+                              _buildTextField('Nombre', Icons.person, _nombreCtrl, 
+                                error: _nombreError, onChanged: _validarNombre),
+                              _buildTextField('Segundo nombre', Icons.person, _segundoNombreCtrl,
+                                error: _segundoNombreError, onChanged: _validarSegundoNombre),
+                              _buildTextField('Apellido', Icons.person, _apellidoCtrl,
+                                error: _apellidoError, onChanged: _validarApellido),
+                              _buildTextField('Segundo apellido', Icons.person, _segundoApellidoCtrl,
+                                error: _segundoApellidoError, onChanged: _validarSegundoApellido),
                               _buildTextField('Correo corporativo *', Icons.email, _correoCorpCtrl,
-                                  isFull: true, placeholder: 'usuario@agrovision.com'),
+                                  isFull: true, placeholder: 'usuario@agrovision.com',
+                                  error: _correoCorpError, onChanged: _validarCorreoCorporativo),
                               _buildTextField('Correo electronico *', Icons.email, _correoElecCtrl,
-                                  isFull: true, placeholder: 'usuario@gmail.com'),
+                                  isFull: true, placeholder: 'usuario@gmail.com',
+                                  error: _correoElecError, onChanged: _validarCorreoElectronico),
                               _buildTextField('Numero de telefono *', Icons.phone, _telefonoCtrl,
-                                  isFull: true, placeholder: '10 digitos', keyboardType: TextInputType.phone),
+                                  isFull: true, placeholder: '10 digitos', keyboardType: TextInputType.phone,
+                                  error: _telefonoError, onChanged: _validarTelefono),
                               _buildPasswordField('Contraseña *', _passwordCtrl, _showPassword, () {
                                 setState(() => _showPassword = !_showPassword);
-                              }),
+                              }, error: _passwordError, onChanged: _validarPassword),
                               _buildPasswordField('Confirmar contraseña *', _confirmPassCtrl, _showConfirmPassword, () {
                                 setState(() => _showConfirmPassword = !_showConfirmPassword);
-                              }),
+                              }, error: _confirmPassError, onChanged: _validarConfirmPassword),
                               _buildRolField(),
                             ],
                           ),
@@ -193,42 +338,30 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
                   ),
                   // Footer
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(28, 16, 28, 24),
+                    padding: RegistroUsuarioStyles.footerPadding,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         GestureDetector(
                           onTap: widget.onCerrar,
                           child: Container(
-                            constraints: const BoxConstraints(minHeight: 54),
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
-                            decoration: BoxDecoration(
-                              color: PanelAdminStyles.backgroundInput,
-                              border: Border.all(color: PanelAdminStyles.borderGrey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            constraints: const BoxConstraints(minHeight: RegistroUsuarioStyles.minButtonHeight),
+                            padding: RegistroUsuarioStyles.cancelButtonPadding,
+                            decoration: RegistroUsuarioStyles.cancelButtonDecoration,
                             child: const Center(
-                              child: Text('Cancelar',
-                                  style: TextStyle(
-                                      color: PanelAdminStyles.darkGreen,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800)),
+                              child: Text('Cancelar', style: RegistroUsuarioStyles.cancelButtonText),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: RegistroUsuarioStyles.buttonSpacing),
                         GestureDetector(
                           onTap: _submit,
                           child: Container(
-                            constraints: const BoxConstraints(minHeight: 54),
-                            padding: const EdgeInsets.symmetric(horizontal: 22),
-                            decoration: PanelAdminStyles.createBtnDecoration,
+                            constraints: const BoxConstraints(minHeight: RegistroUsuarioStyles.minButtonHeight),
+                            padding: RegistroUsuarioStyles.submitButtonPadding,
+                            decoration: RegistroUsuarioStyles.submitButtonDecoration,
                             child: const Center(
-                              child: Text('Registrar usuario',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800)),
+                              child: Text('Registrar usuario', style: RegistroUsuarioStyles.submitButtonText),
                             ),
                           ),
                         ),
@@ -248,36 +381,34 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
     if (isMobile) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children.map((w) => Padding(padding: const EdgeInsets.only(bottom: 18), child: w)).toList(),
+        children: children.map((w) => Padding(padding: const EdgeInsets.only(bottom: RegistroUsuarioStyles.fieldSpacing), child: w)).toList(),
       );
     }
     List<Widget> rows = [];
     List<Widget> currentRow = [];
     for (int i = 0; i < children.length; i++) {
       final child = children[i];
-      // Determinar si es full width basado en un tag rudimentario (en Flutter no tenemos CSS grid column, simulamos con Row)
       bool isFull = child is Container && child.key == const ValueKey('full');
       if (isFull) {
         if (currentRow.isNotEmpty) {
           rows.add(Row(crossAxisAlignment: CrossAxisAlignment.start, children: currentRow));
-          rows.add(const SizedBox(height: 18));
+          rows.add(const SizedBox(height: RegistroUsuarioStyles.fieldSpacing));
           currentRow = [];
         }
         rows.add(child);
-        rows.add(const SizedBox(height: 18));
+        rows.add(const SizedBox(height: RegistroUsuarioStyles.fieldSpacing));
       } else {
         currentRow.add(Expanded(child: child));
         if (currentRow.length == 2) {
-          // Agregar espaciado entre las 2 columnas
           rows.add(Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               currentRow[0],
-              const SizedBox(width: 16),
+              const SizedBox(width: RegistroUsuarioStyles.columnSpacing),
               currentRow[1],
             ],
           ));
-          rows.add(const SizedBox(height: 18));
+          rows.add(const SizedBox(height: RegistroUsuarioStyles.fieldSpacing));
           currentRow = [];
         }
       }
@@ -287,8 +418,8 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           currentRow[0],
-          const SizedBox(width: 16),
-          Expanded(child: Container()), // Spacer vacío
+          const SizedBox(width: RegistroUsuarioStyles.columnSpacing),
+          Expanded(child: Container()),
         ],
       ));
     }
@@ -296,92 +427,94 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
   }
 
   Widget _buildTextField(String label, IconData icon, TextEditingController ctrl,
-      {bool isFull = false, String placeholder = '', TextInputType? keyboardType}) {
+      {bool isFull = false, String placeholder = '', TextInputType? keyboardType, String? error, VoidCallback? onChanged}) {
     return Container(
       key: isFull ? const ValueKey('full') : null,
-      constraints: const BoxConstraints(minHeight: 103),
+      constraints: const BoxConstraints(minHeight: RegistroUsuarioStyles.minFieldHeight),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: PanelAdminStyles.darkGreen)),
-          const SizedBox(height: 8),
+          Text(label, style: RegistroUsuarioStyles.labelText),
+          const SizedBox(height: RegistroUsuarioStyles.labelSpacing),
           Container(
-            height: 54,
-            decoration: BoxDecoration(
-              color: PanelAdminStyles.backgroundInput,
-              border: Border.all(color: PanelAdminStyles.borderGrey),
-              borderRadius: BorderRadius.circular(8),
-            ),
+            height: RegistroUsuarioStyles.inputHeight,
+            decoration: error != null 
+                ? RegistroUsuarioStyles.inputErrorDecoration 
+                : RegistroUsuarioStyles.inputDecoration,
             child: Row(
               children: [
                 SizedBox(
-                  width: 48,
-                  child: Center(child: Icon(icon, color: PanelAdminStyles.primaryGreen, size: 16)),
+                  width: RegistroUsuarioStyles.iconContainerWidth,
+                  child: Center(child: Icon(icon, color: RegistroUsuarioStyles.iconColor, size: RegistroUsuarioStyles.iconSize)),
                 ),
                 Expanded(
                   child: TextField(
                     controller: ctrl,
                     keyboardType: keyboardType,
+                    onChanged: onChanged != null ? (_) => onChanged() : null,
                     decoration: InputDecoration(
                       hintText: placeholder.isEmpty ? label : placeholder,
-                      hintStyle: const TextStyle(color: Color(0xFF6B8177), fontSize: 14),
+                      hintStyle: RegistroUsuarioStyles.hintTextStyle,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                      contentPadding: RegistroUsuarioStyles.inputContentPadding,
                     ),
-                    style: const TextStyle(color: PanelAdminStyles.darkGreen, fontSize: 14),
+                    style: RegistroUsuarioStyles.inputTextStyle,
                   ),
                 ),
               ],
             ),
           ),
+          if (error != null) ...[
+            const SizedBox(height: RegistroUsuarioStyles.errorSpacing),
+            Text(error, style: RegistroUsuarioStyles.errorText),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildPasswordField(String label, TextEditingController ctrl, bool showPass, VoidCallback onToggle) {
+  Widget _buildPasswordField(String label, TextEditingController ctrl, bool showPass, VoidCallback onToggle, {String? error, VoidCallback? onChanged}) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 103),
+      constraints: const BoxConstraints(minHeight: RegistroUsuarioStyles.minFieldHeight),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: PanelAdminStyles.darkGreen)),
-          const SizedBox(height: 8),
+          Text(label, style: RegistroUsuarioStyles.labelText),
+          const SizedBox(height: RegistroUsuarioStyles.labelSpacing),
           Container(
-            height: 54,
-            decoration: BoxDecoration(
-              color: PanelAdminStyles.backgroundInput,
-              border: Border.all(color: PanelAdminStyles.borderGrey),
-              borderRadius: BorderRadius.circular(8),
-            ),
+            height: RegistroUsuarioStyles.inputHeight,
+            decoration: error != null 
+                ? RegistroUsuarioStyles.inputErrorDecoration 
+                : RegistroUsuarioStyles.inputDecoration,
             child: Row(
               children: [
                 const SizedBox(
-                  width: 48,
-                  child: Center(child: Icon(Icons.lock, color: PanelAdminStyles.primaryGreen, size: 16)),
+                  width: RegistroUsuarioStyles.iconContainerWidth,
+                  child: Center(child: Icon(Icons.lock, color: RegistroUsuarioStyles.iconColor, size: RegistroUsuarioStyles.iconSize)),
                 ),
                 Expanded(
                   child: TextField(
                     controller: ctrl,
                     obscureText: !showPass,
-                    decoration: InputDecoration(
+                    onChanged: onChanged != null ? (_) => onChanged() : null,
+                    decoration: const InputDecoration(
                       hintText: 'Contraseña',
-                      hintStyle: const TextStyle(color: Color(0xFF6B8177), fontSize: 14),
+                      hintStyle: RegistroUsuarioStyles.hintTextStyle,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                      contentPadding: RegistroUsuarioStyles.inputContentPadding,
                     ),
-                    style: const TextStyle(color: PanelAdminStyles.darkGreen, fontSize: 14),
+                    style: RegistroUsuarioStyles.inputTextStyle,
                   ),
                 ),
                 GestureDetector(
                   onTap: onToggle,
                   child: SizedBox(
-                    width: 46,
+                    width: RegistroUsuarioStyles.passwordToggleWidth,
                     child: Center(
                       child: Icon(
                         showPass ? Icons.visibility_off : Icons.visibility,
                         color: PanelAdminStyles.darkGreen,
-                        size: 16,
+                        size: RegistroUsuarioStyles.passwordIconSize,
                       ),
                     ),
                   ),
@@ -389,6 +522,10 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
               ],
             ),
           ),
+          if (error != null) ...[
+            const SizedBox(height: RegistroUsuarioStyles.errorSpacing),
+            Text(error, style: RegistroUsuarioStyles.errorText),
+          ],
         ],
       ),
     );
@@ -397,24 +534,31 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
   Widget _buildRolField() {
     return Container(
       key: const ValueKey('full'),
-      constraints: const BoxConstraints(minHeight: 103),
+      constraints: const BoxConstraints(minHeight: RegistroUsuarioStyles.minFieldHeight),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Rol *', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: PanelAdminStyles.darkGreen)),
-          const SizedBox(height: 8),
+          const Text('Rol *', style: RegistroUsuarioStyles.rolLabelText),
+          const SizedBox(height: RegistroUsuarioStyles.labelSpacing),
           RadioGroup<RolUsuario?>(
             groupValue: _rol,
-            onChanged: (v) => setState(() => _rol = v),
+            onChanged: (v) => setState(() {
+              _rol = v;
+              _rolError = null;
+            }),
             child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
+              spacing: RegistroUsuarioStyles.rolSpacing,
+              runSpacing: RegistroUsuarioStyles.rolSpacing,
               children: [
                 _buildRadioOption(RolUsuario.admin),
                 _buildRadioOption(RolUsuario.agricultor),
               ],
             ),
           ),
+          if (_rolError != null) ...[
+            const SizedBox(height: RegistroUsuarioStyles.errorSpacing),
+            Text(_rolError!, style: RegistroUsuarioStyles.errorText),
+          ],
         ],
       ),
     );
@@ -422,24 +566,30 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
 
   Widget _buildRadioOption(RolUsuario rol) {
     return GestureDetector(
-      onTap: () => setState(() => _rol = rol),
+      onTap: () => setState(() {
+        _rol = rol;
+        _rolError = null;
+      }),
       child: Container(
-        height: 54,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: PanelAdminStyles.backgroundInput,
-          border: Border.all(color: PanelAdminStyles.borderGrey),
-          borderRadius: BorderRadius.circular(8),
-        ),
+        height: RegistroUsuarioStyles.rolOptionHeight,
+        padding: RegistroUsuarioStyles.rolOptionPadding,
+        decoration: _rolError != null 
+            ? RegistroUsuarioStyles.rolOptionErrorDecoration 
+            : RegistroUsuarioStyles.rolOptionDecoration,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Radio<RolUsuario>(
               value: rol,
-              activeColor: PanelAdminStyles.primaryGreen,
+              groupValue: _rol,
+              activeColor: RegistroUsuarioStyles.radioActiveColor,
+              onChanged: (v) => setState(() {
+                _rol = v;
+                _rolError = null;
+              }),
             ),
-            const SizedBox(width: 4),
-            Text(rol.label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: PanelAdminStyles.darkGreen)),
+            const SizedBox(width: RegistroUsuarioStyles.radioSpacing),
+            Text(rol.label, style: RegistroUsuarioStyles.rolOptionText),
           ],
         ),
       ),

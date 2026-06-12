@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../styles/admin-styles/panel-admin.dart';
 import '../navbars/barra-admin.dart';
+import '../styles/navbars-styles/barra-admin.dart';
 import '../environments/datos-simulados-admin.dart';
 import 'modalesUsuario/registro-usuario.dart';
 import 'modalesUsuario/editar-usuario.dart';
@@ -221,38 +222,62 @@ class _PanelAdminState extends State<PanelAdmin> {
 
     return Scaffold(
       backgroundColor: PanelAdminStyles.backgroundPage,
-      body: Column(
+      body: Stack(
         children: [
-          const BarraAdmin(),
-          Expanded(
-            child: Stack(
+          // Contenido con padding superior
+          Positioned.fill(
+            child: Column(
               children: [
-                SingleChildScrollView(
-                  padding: EdgeInsets.all(isMobile ? 16 : 32),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1220),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildHeader(isMobile),
-                          const SizedBox(height: 18),
-                          _buildFiltersBar(isMobile),
-                          const SizedBox(height: 18),
-                          _buildSummaryStrip(isMobile),
-                          const SizedBox(height: 18),
-                          _buildUsersGrid(isMobile),
-                          const SizedBox(height: 32),
-                        ],
+                // Espacio para la barra
+                SizedBox(
+                  height: screenWidth > 991
+                      ? BarraAdminStyles.navbarHeight +
+                          BarraAdminStyles.contentPaddingTop +
+                          (BarraAdminStyles.navbarPaddingVertical * 2)
+                      : BarraAdminStyles.navbarHeight +
+                          BarraAdminStyles.contentPaddingTop +
+                          (BarraAdminStyles.navbarPaddingVertical * 2),
+                ),
+                // Contenido scrolleable
+                Expanded(
+                  child: Stack(
+                    children: [
+                      SingleChildScrollView(
+                        padding: EdgeInsets.all(isMobile ? 16 : 32),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1220),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildHeader(isMobile),
+                                const SizedBox(height: 18),
+                                _buildFiltersBar(isMobile),
+                                const SizedBox(height: 18),
+                                _buildSummaryStrip(isMobile),
+                                const SizedBox(height: 18),
+                                _buildUsersGrid(isMobile),
+                                const SizedBox(height: 32),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      // ── Modales overlay ─────────────────────────────────────────
+                      if (_modalModo != null || _usuarioParaEliminar != null)
+                        _buildModalOverlay(),
+                    ],
                   ),
                 ),
-                // ── Modales overlay ─────────────────────────────────────────
-                if (_modalModo != null || _usuarioParaEliminar != null)
-                  _buildModalOverlay(),
               ],
             ),
+          ),
+          // Barra fija en la parte superior
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: const BarraAdmin(),
           ),
         ],
       ),
@@ -445,6 +470,8 @@ class _PanelAdminState extends State<PanelAdmin> {
                   fontSize: 14,
                   fontFamily: 'Arial',
                 ),
+                dropdownColor: PanelAdminStyles.backgroundWhite,
+                menuMaxHeight: 300,
                 items: items,
                 onChanged: onChanged,
               ),
@@ -529,6 +556,7 @@ class _PanelAdminState extends State<PanelAdmin> {
 
     if (isMobile) {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: items
             .asMap()
             .entries

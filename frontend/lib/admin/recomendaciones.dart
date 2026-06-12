@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../styles/admin-styles/recomendaciones.dart';
 import '../navbars/barra-admin.dart';
+import '../styles/navbars-styles/barra-admin.dart';
 import '../environments/modales-recomendacion.dart';
 import 'modalesRecomendacion/eliminar-recomendacion.dart';
 import 'modalesRecomendacion/visualizar-recomendacion.dart';
@@ -121,40 +122,65 @@ class _RecomendacionesState extends State<Recomendaciones> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: RecomendacionesStyles.backgroundPage,
-      body: Column(
+      body: Stack(
         children: [
-          const BarraAdmin(),
-          Expanded(
-            child: Stack(
+          // Contenido con padding superior
+          Positioned.fill(
+            child: Column(
               children: [
-                SingleChildScrollView(
-                  padding: EdgeInsets.all(isMobile ? 16 : 32),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1220),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildHeader(isMobile),
-                          const SizedBox(height: 18),
-                          _buildFiltersBar(isMobile),
-                          const SizedBox(height: 18),
-                          _buildListaRecomendaciones(isMobile),
-                          const SizedBox(height: 32),
-                        ],
+                // Espacio para la barra
+                SizedBox(
+                  height: screenWidth > 991
+                      ? BarraAdminStyles.navbarHeight +
+                          BarraAdminStyles.contentPaddingTop +
+                          (BarraAdminStyles.navbarPaddingVertical * 2)
+                      : BarraAdminStyles.navbarHeight +
+                          BarraAdminStyles.contentPaddingTop +
+                          (BarraAdminStyles.navbarPaddingVertical * 2),
+                ),
+                // Contenido scrolleable
+                Expanded(
+                  child: Stack(
+                    children: [
+                      SingleChildScrollView(
+                        padding: EdgeInsets.all(isMobile ? 16 : 32),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1220),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildHeader(isMobile),
+                                const SizedBox(height: 18),
+                                _buildFiltersBar(isMobile),
+                                const SizedBox(height: 18),
+                                _buildListaRecomendaciones(isMobile),
+                                const SizedBox(height: 32),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      // ── Modales overlay ──────────────────────────────────────────
+                      if (_mostrarRegistrar || _mostrarEditar ||
+                          _mostrarVisualizar || _mostrarEliminar)
+                        _buildModalOverlay(),
+                    ],
                   ),
                 ),
-                // ── Modales overlay ──────────────────────────────────────────
-                if (_mostrarRegistrar || _mostrarEditar ||
-                    _mostrarVisualizar || _mostrarEliminar)
-                  _buildModalOverlay(),
               ],
             ),
+          ),
+          // Barra fija en la parte superior
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: const BarraAdmin(),
           ),
         ],
       ),

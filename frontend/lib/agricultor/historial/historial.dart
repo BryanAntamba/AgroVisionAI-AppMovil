@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../navbars/barra-agricultor.dart';
+import '../../styles/navbars-styles/barra-agricultor.dart';
 import '../../styles/agricultor-styles/historial-styles/historial.dart';
 import '../../environments/historial.dart';
 import 'modal/modal-reporte.dart';
@@ -270,30 +271,54 @@ class _HistorialState extends State<Historial> {
       backgroundColor: HistorialStyles.backgroundLight,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: HistorialStyles.primaryGreen))
-          : Column(
+          : Stack(
               children: [
-                const BarraAgricultor(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(screenWidth > 700 ? 32.0 : 16.0),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1220),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildHeader(),
-                            const SizedBox(height: 18),
-                            _buildFilters(screenWidth),
-                            const SizedBox(height: 18),
-                            _buildSummaryStrip(screenWidth),
-                            const SizedBox(height: 18),
-                            _buildRecordsGrid(screenWidth),
-                          ],
+                // Contenido con padding superior para no quedar debajo de la barra
+                Positioned.fill(
+                  child: Column(
+                    children: [
+                      // Espacio para la barra
+                      SizedBox(
+                        height: screenWidth > 991
+                            ? BarraAgricultorStyles.navbarHeight +
+                                BarraAgricultorStyles.contentPaddingTop +
+                                (BarraAgricultorStyles.navbarPaddingVertical * 2)
+                            : BarraAgricultorStyles.navbarHeight +
+                                BarraAgricultorStyles.contentPaddingTop +
+                                (BarraAgricultorStyles.navbarPaddingVertical * 2),
+                      ),
+                      // Contenido scrolleable
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.all(screenWidth > 700 ? 32.0 : 16.0),
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1220),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildHeader(),
+                                  const SizedBox(height: 18),
+                                  _buildFilters(screenWidth),
+                                  const SizedBox(height: 18),
+                                  _buildSummaryStrip(screenWidth),
+                                  const SizedBox(height: 18),
+                                  _buildRecordsGrid(screenWidth),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
+                ),
+                // Barra fija en la parte superior
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: const BarraAgricultor(),
                 ),
               ],
             ),

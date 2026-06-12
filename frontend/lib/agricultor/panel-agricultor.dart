@@ -5,11 +5,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../navbars/barra-agricultor.dart';
+import '../styles/navbars-styles/barra-agricultor.dart';
 import 'boton-iot.dart';
 import 'modales/desconectar-dispositivo.dart';
 import 'modales/guardar-reporte.dart';
 import '../environments/datos-iot-simulados.dart';
 import '../styles/agricultor-styles/panel-agricultor.dart';
+import '../shared/utils/traductor-enfermedades/clases-enfermedad.dart';
 
 // Simulated recommendations store since the TS code had RecomendacionesStore
 const List<Map<String, dynamic>> recomendacionesSimuladas = [
@@ -94,13 +96,17 @@ class _PanelAgricultorState extends State<PanelAgricultor>
   void _guardarReporte() async {
     try {
       final ahora = DateTime.now();
+      // Traducir el diagnóstico antes de guardar
+      final diagnosticoOriginal = _datos.diagnosticoFinal.diagnosticoFinal;
+      final diagnosticoEspanol = traducirDiagnostico(diagnosticoOriginal);
+      
       final reporte = {
         'id': ahora.millisecondsSinceEpoch,
         'fecha': ahora.toIso8601String().substring(0, 10),
         'hora':
             '${ahora.hour.toString().padLeft(2, '0')}:${ahora.minute.toString().padLeft(2, '0')}',
         'planta': _etiquetaPlanta,
-        'diagnostico': _datos.diagnosticoFinal.diagnosticoFinal,
+        'diagnostico': diagnosticoEspanol, // Guardado en español
         'confianza': _datos.diagnosticoFinal.confianzaFinal,
         'salud': _datos.indiceSalud.valor,
       };
@@ -266,28 +272,52 @@ class _PanelAgricultorState extends State<PanelAgricultor>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: PanelAgricultorStyles.backgroundLight,
-      body: Column(
+      body: Stack(
         children: [
-          const BarraAgricultor(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(32.0),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1220),
-                  child: _dispositivoConectado
-                      ? _buildDashboard()
-                      : SizedBox(
-                          height: MediaQuery.of(context).size.height - 180,
-                          child: Center(
-                            child: BotonIOT(
-                              onConectado: _onConectadoDispositivo,
-                            ),
-                          ),
-                        ),
+          // Contenido con padding superior para no quedar debajo de la barra
+          Positioned.fill(
+            child: Column(
+              children: [
+                // Espacio para la barra (altura dinámica basada en si está expandida)
+                SizedBox(
+                  height: MediaQuery.of(context).size.width > 991
+                      ? BarraAgricultorStyles.navbarHeight +
+                          BarraAgricultorStyles.contentPaddingTop +
+                          (BarraAgricultorStyles.navbarPaddingVertical * 2)
+                      : BarraAgricultorStyles.navbarHeight +
+                          BarraAgricultorStyles.contentPaddingTop +
+                          (BarraAgricultorStyles.navbarPaddingVertical * 2),
                 ),
-              ),
+                // Contenido scrolleable
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1220),
+                        child: _dispositivoConectado
+                            ? _buildDashboard()
+                            : SizedBox(
+                                height: MediaQuery.of(context).size.height - 180,
+                                child: Center(
+                                  child: BotonIOT(
+                                    onConectado: _onConectadoDispositivo,
+                                  ),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
+          ),
+          // Barra fija en la parte superior
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: const BarraAgricultor(),
           ),
         ],
       ),
@@ -1117,12 +1147,40 @@ class _PanelAgricultorState extends State<PanelAgricultor>
 
   Widget _buildDiagnostico() {
     final diag = _datos.diagnosticoFinal;
+    // Traducir el diagnóstico principal
+    final diagnosticoEspanol = traducirDiagnostico(diag.diagnosticoFinal);
+    final diagnosticoEsSano = esClaseSana(diag.diagnosticoFinal);
+    
+    // Convertir PrediccionesIOT a Map para poder trabajar con él
+    final prediccionesMap = {
+      'healthy': diag.predicciones.healthy,
+      'early_blight': diag.predicciones.earlyBlight,
+      'late_blight': diag.predicciones.lateBlight,
+      'leaf_mold': diag.predicciones.leafMold,
+      'septoria': diag.predicciones.septoria,
+    };
+    
+    // Obtener predicciones y ordenarlas por porcentaje descendente
+    final prediccionesList = prediccionesMap.entries.map((entry) {
+      return MapEntry(
+        traducirDiagnostico(entry.key),
+        entry.value,
+      );
+    }).toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    
+    // Tomar las 5 principales
+    final top5 = prediccionesList.take(5).toList();
+    // Contar cuántas quedan
+    final restantes = prediccionesList.length - 5;
+    
     return _buildSeccion(
       'Diagnóstico de la IA',
       FontAwesomeIcons.brain,
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Resultado principal
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1130,13 +1188,19 @@ class _PanelAgricultorState extends State<PanelAgricultor>
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: PanelAgricultorStyles.sanoBg,
+                  color: diagnosticoEsSano 
+                      ? PanelAgricultorStyles.sanoBg 
+                      : PanelAgricultorStyles.warnBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Center(
+                child: Center(
                   child: FaIcon(
-                    FontAwesomeIcons.shieldHeart,
-                    color: PanelAgricultorStyles.sanoText,
+                    diagnosticoEsSano 
+                        ? FontAwesomeIcons.shieldHeart 
+                        : FontAwesomeIcons.triangleExclamation,
+                    color: diagnosticoEsSano 
+                        ? PanelAgricultorStyles.sanoText 
+                        : PanelAgricultorStyles.warnText,
                     size: 22,
                   ),
                 ),
@@ -1147,7 +1211,7 @@ class _PanelAgricultorState extends State<PanelAgricultor>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      diag.diagnosticoFinal,
+                      diagnosticoEspanol,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -1198,9 +1262,105 @@ class _PanelAgricultorState extends State<PanelAgricultor>
               ),
             ],
           ),
+          const SizedBox(height: 14),
+          // Subtítulo de probabilidades
+          const Text(
+            'Probabilidades por condición',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: PanelAgricultorStyles.textGreen,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Lista de las 5 principales probabilidades
+          ...top5.map((pred) {
+            final porcentaje = pred.value;
+            final color = _getColorParaProbabilidad(porcentaje);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 170,
+                    child: Text(
+                      pred.key,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: PanelAgricultorStyles.textGreen,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEDF1EE),
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                      child: FractionallySizedBox(
+                        widthFactor: porcentaje / 100,
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 40,
+                    child: Text(
+                      '${porcentaje.toStringAsFixed(1)} %',
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: PanelAgricultorStyles.darkGreen,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          // Mensaje de condiciones restantes (siempre mostrar)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              children: [
+                const FaIcon(
+                  FontAwesomeIcons.ellipsis,
+                  size: 10,
+                  color: Color(0xFF8FA69C),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  diag.otrasCondiciones,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF8FA69C),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  // Función auxiliar para obtener color según porcentaje
+  Color _getColorParaProbabilidad(double porcentaje) {
+    if (porcentaje >= 50) return const Color(0xFF55A820); // Verde
+    if (porcentaje >= 20) return const Color(0xFF7F77DD); // Púrpura
+    if (porcentaje >= 10) return const Color(0xFFB56C07); // Naranja
+    if (porcentaje >= 5) return const Color(0xFF597268);  // Gris verdoso
+    return const Color(0xFFC62828); // Rojo
   }
 
   Widget _buildMetricas() {

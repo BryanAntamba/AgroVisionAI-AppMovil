@@ -80,40 +80,48 @@ class _BarraAgricultorState extends State<BarraAgricultor>
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 991;
 
-    return Stack(
-      children: [
-        // Fondo blanco con sombra
-        Container(
-          constraints: const BoxConstraints(
-            minHeight: BarraAgricultorStyles.navbarHeight,
-          ),
-          decoration: BarraAgricultorStyles.navbarDecoration,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: EdgeInsets.only(
-                  left: isDesktop ? 28 : 16,
-                  right: isDesktop ? 28 : 16,
-                  top:
-                      BarraAgricultorStyles.navbarPaddingVertical +
-                      BarraAgricultorStyles.contentPaddingTop,
-                  bottom: BarraAgricultorStyles.navbarPaddingVertical,
-                ),
-                child: isDesktop ? _buildDesktopNavbar() : _buildMobileTopBar(),
+    return Material(
+      elevation: 0,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+        ),
+        child: Stack(
+          children: [
+            // Fondo blanco con sombra
+            Container(
+              constraints: const BoxConstraints(
+                minHeight: BarraAgricultorStyles.navbarHeight,
               ),
-              // Menú expandido móvil
-              if (!isDesktop && _isMenuOpen) _buildMobileMenu(),
-            ],
-          ),
+              decoration: BarraAgricultorStyles.navbarDecoration,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(
+                      left: isDesktop ? 28 : 16,
+                      right: isDesktop ? 28 : 16,
+                      top:
+                          BarraAgricultorStyles.navbarPaddingVertical +
+                          BarraAgricultorStyles.contentPaddingTop,
+                      bottom: BarraAgricultorStyles.navbarPaddingVertical,
+                    ),
+                    child: isDesktop ? _buildDesktopNavbar() : _buildMobileTopBar(),
+                  ),
+                  // Menú expandido móvil con animación
+                  if (!isDesktop) _buildAnimatedMobileMenu(),
+                ],
+              ),
+            ),
+            // Overlay radial verde top-right (decorativo, no bloquea eventos)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(decoration: BarraAgricultorStyles.radialOverlay),
+              ),
+            ),
+          ],
         ),
-        // Overlay radial verde top-right (decorativo, no bloquea eventos)
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Container(decoration: BarraAgricultorStyles.radialOverlay),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -174,6 +182,19 @@ class _BarraAgricultorState extends State<BarraAgricultor>
           const SizedBox(height: 8),
           _buildLogoutButton(fullWidth: true),
         ],
+      ),
+    );
+  }
+
+  // ─── MOBILE ANIMATED MENU (con animación suave) ─────────────────────
+  Widget _buildAnimatedMobileMenu() {
+    return ClipRect(
+      child: AnimatedAlign(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        heightFactor: _isMenuOpen ? 1.0 : 0.0,
+        alignment: Alignment.topCenter,
+        child: _buildMobileMenu(),
       ),
     );
   }

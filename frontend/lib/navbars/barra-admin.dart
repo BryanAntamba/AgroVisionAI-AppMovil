@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../styles/navbars-styles/barra-admin.dart';
 
 class BarraAdmin extends StatefulWidget {
@@ -19,7 +18,7 @@ class _BarraAdminState extends State<BarraAdmin>
     super.initState();
     _menuAnimController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 300),
     );
   }
 
@@ -45,39 +44,47 @@ class _BarraAdminState extends State<BarraAdmin>
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 991;
 
-    return Stack(
-      children: [
-        Container(
-          constraints: const BoxConstraints(
-            minHeight: BarraAdminStyles.navbarHeight,
-          ),
-          decoration: BarraAdminStyles.navbarDecoration,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: EdgeInsets.only(
-                  left: isDesktop ? 28 : 16,
-                  right: isDesktop ? 28 : 16,
-                  top:
-                      BarraAdminStyles.navbarPaddingVertical +
-                      BarraAdminStyles.contentPaddingTop,
-                  bottom: BarraAdminStyles.navbarPaddingVertical,
-                ),
-                child: isDesktop
-                    ? _buildDesktopNavbar(context)
-                    : _buildMobileTopBar(context),
+    return Material(
+      elevation: 0,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+        ),
+        child: Stack(
+          children: [
+            Container(
+              constraints: const BoxConstraints(
+                minHeight: BarraAdminStyles.navbarHeight,
               ),
-              if (!isDesktop && _isMenuOpen) _buildMobileMenu(context),
-            ],
-          ),
+              decoration: BarraAdminStyles.navbarDecoration,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(
+                      left: isDesktop ? 28 : 16,
+                      right: isDesktop ? 28 : 16,
+                      top:
+                          BarraAdminStyles.navbarPaddingVertical +
+                          BarraAdminStyles.contentPaddingTop,
+                      bottom: BarraAdminStyles.navbarPaddingVertical,
+                    ),
+                    child: isDesktop
+                        ? _buildDesktopNavbar(context)
+                        : _buildMobileTopBar(context),
+                  ),
+                  if (!isDesktop) _buildAnimatedMobileMenu(context),
+                ],
+              ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(decoration: BarraAdminStyles.radialOverlay),
+              ),
+            ),
+          ],
         ),
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Container(decoration: BarraAdminStyles.radialOverlay),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -117,61 +124,53 @@ class _BarraAdminState extends State<BarraAdmin>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildBrand(context),
-        GestureDetector(
+        _AnimatedHamburgerButton(
+          animation: _menuAnimController,
           onTap: _toggleMenu,
-          child: SizedBox(
-            width: 44,
-            height: 44,
-            child: Center(
-              child: AnimatedRotation(
-                turns: _isMenuOpen ? 0.125 : 0.0,
-                duration: const Duration(milliseconds: 250),
-                child: FaIcon(
-                  _isMenuOpen ? FontAwesomeIcons.xmark : FontAwesomeIcons.bars,
-                  color: BarraAdminStyles.darkGreen,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
         ),
       ],
     );
   }
 
   Widget _buildMobileMenu(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
-          decoration: const BoxDecoration(
-            border: Border(
-              top: BorderSide(color: BarraAdminStyles.borderColor, width: 1),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildMobileNavLink(context, 'Usuarios', '/panel-admin'),
-              _buildMobileNavLink(
-                context,
-                'Recomendaciones',
-                '/panel-admin/recomendaciones',
-              ),
-              _buildMobileNavLink(
-                context,
-                'Editar plataforma',
-                '/panel-admin/editar-plataforma',
-              ),
-              const SizedBox(height: 8),
-              _buildLogoutButton(context, fullWidth: true),
-            ],
-          ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+      decoration: const BoxDecoration(
+        border: Border(
+          top: BorderSide(color: BarraAdminStyles.borderColor, width: 1),
         ),
-      ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildMobileNavLink(context, 'Usuarios', '/panel-admin'),
+          _buildMobileNavLink(
+            context,
+            'Recomendaciones',
+            '/panel-admin/recomendaciones',
+          ),
+          _buildMobileNavLink(
+            context,
+            'Editar plataforma',
+            '/panel-admin/editar-plataforma',
+          ),
+          const SizedBox(height: 8),
+          _buildLogoutButton(context, fullWidth: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnimatedMobileMenu(BuildContext context) {
+    return ClipRect(
+      child: AnimatedAlign(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        heightFactor: _isMenuOpen ? 1.0 : 0.0,
+        alignment: Alignment.topCenter,
+        child: _buildMobileMenu(context),
+      ),
     );
   }
 
@@ -206,16 +205,12 @@ class _BarraAdminState extends State<BarraAdmin>
   }
 
   Widget _buildNavLink(BuildContext context, String text, String route) {
-    return InkWell(
+    return _HoverNavLink(
+      text: text,
       onTap: () {
         Navigator.pushReplacementNamed(context, route);
         if (_isMenuOpen) _toggleMenu();
       },
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-        child: Text(text, style: BarraAdminStyles.navLinkText),
-      ),
     );
   }
 
@@ -253,6 +248,129 @@ class _BarraAdminState extends State<BarraAdmin>
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+// ─── ANIMATED HAMBURGER BUTTON ─────────────────────────────────────────
+class _AnimatedHamburgerButton extends StatelessWidget {
+  final Animation<double> animation;
+  final VoidCallback onTap;
+
+  const _AnimatedHamburgerButton({
+    required this.animation,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Abrir navegación',
+      child: GestureDetector(
+        onTap: onTap,
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Center(
+            child: AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                final value = Curves.ease.transform(animation.value);
+
+                return SizedBox(
+                  width: 24,
+                  height: 18,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      _HamburgerLine(
+                        offsetY: -8 * (1 - value),
+                        rotation: 0.785398 * value,
+                      ),
+                      _HamburgerLine(opacity: 1 - value),
+                      _HamburgerLine(
+                        offsetY: 8 * (1 - value),
+                        rotation: -0.785398 * value,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HamburgerLine extends StatelessWidget {
+  final double offsetY;
+  final double rotation;
+  final double opacity;
+
+  const _HamburgerLine({this.offsetY = 0, this.rotation = 0, this.opacity = 1});
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.translate(
+      offset: Offset(0, offsetY),
+      child: Transform.rotate(
+        angle: rotation,
+        child: Opacity(
+          opacity: opacity,
+          child: Container(
+            width: 24,
+            height: 2,
+            decoration: BoxDecoration(
+              color: BarraAdminStyles.darkGreen,
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── HOVER NAV LINK (desktop) ──────────────────────────────────────────────
+class _HoverNavLink extends StatefulWidget {
+  final String text;
+  final VoidCallback onTap;
+
+  const _HoverNavLink({required this.text, required this.onTap});
+
+  @override
+  State<_HoverNavLink> createState() => _HoverNavLinkState();
+}
+
+class _HoverNavLinkState extends State<_HoverNavLink> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Text(
+            widget.text,
+            style: TextStyle(
+              color: _hovered
+                  ? BarraAdminStyles.linkHover
+                  : BarraAdminStyles.linkNormal,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),

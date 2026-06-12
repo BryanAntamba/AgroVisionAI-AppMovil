@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../navbars/barra-admin.dart';
+import '../styles/navbars-styles/barra-admin.dart';
 import '../styles/admin-styles/plataforma-editable.dart';
 import '../environments/tema-config.dart';
 import '../shared/services/tema.service.dart';
@@ -443,44 +444,67 @@ class _PlataformaEditableState extends State<PlataformaEditable> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
     return Scaffold(
       backgroundColor: PlataformaEditableStyles.bgPage,
       body: Stack(
         children: [
-          Column(
-            children: [
-              const BarraAdmin(),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(32),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1220),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Configuración', style: PlataformaEditableStyles.eyebrow),
-                          const SizedBox(height: 8),
-                          const Text('Editar Plataforma', style: PlataformaEditableStyles.h1),
-                          const SizedBox(height: 10),
-                          const Text('Personaliza la identidad visual y los colores de toda la plataforma', style: PlataformaEditableStyles.pageDesc),
-                          const SizedBox(height: 24),
-                          _buildIdentidadVisual(),
-                          const SizedBox(height: 24),
-                          _buildNavbar(),
-                          const SizedBox(height: 24),
-                          _buildColores(),
-                          const SizedBox(height: 24),
-                          _buildActionButtons(),
-                        ],
+          // Contenido con padding superior
+          Positioned.fill(
+            child: Column(
+              children: [
+                // Espacio para la barra
+                SizedBox(
+                  height: screenWidth > 991
+                      ? BarraAdminStyles.navbarHeight +
+                          BarraAdminStyles.contentPaddingTop +
+                          (BarraAdminStyles.navbarPaddingVertical * 2)
+                      : BarraAdminStyles.navbarHeight +
+                          BarraAdminStyles.contentPaddingTop +
+                          (BarraAdminStyles.navbarPaddingVertical * 2),
+                ),
+                // Contenido scrolleable
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(32),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1220),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Configuración', style: PlataformaEditableStyles.eyebrow),
+                            const SizedBox(height: 8),
+                            const Text('Editar Plataforma', style: PlataformaEditableStyles.h1),
+                            const SizedBox(height: 10),
+                            const Text('Personaliza la identidad visual y los colores de toda la plataforma', style: PlataformaEditableStyles.pageDesc),
+                            const SizedBox(height: 24),
+                            _buildIdentidadVisual(),
+                            const SizedBox(height: 24),
+                            _buildNavbar(),
+                            const SizedBox(height: 24),
+                            _buildColores(),
+                            const SizedBox(height: 24),
+                            _buildActionButtons(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+          // Overlay
           _buildOverlay(),
+          // Barra fija en la parte superior
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: const BarraAdmin(),
+          ),
         ],
       ),
     );
