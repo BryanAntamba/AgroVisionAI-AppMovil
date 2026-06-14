@@ -7,7 +7,7 @@ import '../../navbars/barra-agricultor.dart';
 import '../../styles/navbars-styles/barra-agricultor.dart';
 import '../../styles/agricultor-styles/historial-styles/historial.dart';
 import '../../environments/historial.dart';
-import 'modal/modal-reporte.dart';
+import '../modales/modal-reporte.dart';
 
 class Historial extends StatefulWidget {
   const Historial({super.key});

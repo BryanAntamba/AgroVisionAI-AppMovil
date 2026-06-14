@@ -260,17 +260,19 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width <= RegistroUsuarioStyles.mobileBreakpoint;
 
-    return GestureDetector(
-      onTap: widget.onCerrar,
-      child: Container(
-        color: RegistroUsuarioStyles.overlayColor,
-        child: Center(
-          child: GestureDetector(
-            onTap: () {},
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: RegistroUsuarioStyles.maxWidth),
-              margin: RegistroUsuarioStyles.modalMargin,
-              decoration: RegistroUsuarioStyles.modalDecoration,
+    return Material(
+      type: MaterialType.transparency,
+      child: GestureDetector(
+        onTap: widget.onCerrar,
+        child: Container(
+          color: RegistroUsuarioStyles.overlayColor,
+          child: Center(
+            child: GestureDetector(
+              onTap: () {},
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: RegistroUsuarioStyles.maxWidth),
+                margin: RegistroUsuarioStyles.modalMargin,
+                decoration: RegistroUsuarioStyles.modalDecoration,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -374,6 +376,7 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
           ),
         ),
       ),
+    ),
     );
   }
 

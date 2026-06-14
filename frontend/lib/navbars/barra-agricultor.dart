@@ -385,11 +385,9 @@ class _HoverNavLinkState extends State<_HoverNavLink> {
           child: Text(
             widget.text,
             style: TextStyle(
-              color: _hovered
-                  ? BarraAgricultorStyles.primaryGreen
-                  : BarraAgricultorStyles.linkNormal,
+              color: BarraAgricultorStyles.linkNormal,
               fontSize: 15,
-              fontWeight: FontWeight.w700,
+              fontWeight: _hovered ? FontWeight.w800 : FontWeight.w700,
             ),
           ),
         ),

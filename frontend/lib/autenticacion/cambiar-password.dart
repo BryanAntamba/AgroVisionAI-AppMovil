@@ -4,10 +4,12 @@ import '../styles/autenticacion-styles/cambiar-password.dart';
 
 class CambiarPassword extends StatefulWidget {
   final VoidCallback onPasswordCambiado;
+  final VoidCallback? onVolverLogin;
 
   const CambiarPassword({
     super.key,
     required this.onPasswordCambiado,
+    this.onVolverLogin,
   });
 
   @override
@@ -32,7 +34,6 @@ class _CambiarPasswordState extends State<CambiarPassword> with TickerProviderSt
   late AnimationController _animationController;
   late List<Animation<double>> _fadeAnimations;
   late List<Animation<Offset>> _slideAnimations;
-  final List<int> _animationDelays = [90, 190, 290, 390, 490, 590];
 
   @override
   void initState() {
@@ -41,13 +42,14 @@ class _CambiarPasswordState extends State<CambiarPassword> with TickerProviderSt
   }
 
   void _initializeAnimations() {
+    // Duración total: 590ms (último delay) + 720ms (duración animación) = 1310ms
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1310), // 590ms + 720ms
+      duration: const Duration(milliseconds: 1310),
       vsync: this,
     );
 
     _fadeAnimations = List.generate(6, (index) {
-      final delayMs = _animationDelays[index];
+      final delayMs = CambiarPasswordStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
       final endFraction = (delayMs + 720) / 1310.0;
 
@@ -64,7 +66,7 @@ class _CambiarPasswordState extends State<CambiarPassword> with TickerProviderSt
     });
 
     _slideAnimations = List.generate(6, (index) {
-      final delayMs = _animationDelays[index];
+      final delayMs = CambiarPasswordStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
       final endFraction = (delayMs + 720) / 1310.0;
 
@@ -200,7 +202,7 @@ class _CambiarPasswordState extends State<CambiarPassword> with TickerProviderSt
                       child: Focus(
                         onFocusChange: (focus) => setState(() => _passwordFocus = focus),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: CambiarPasswordStyles.transitionDuration,
                           constraints: const BoxConstraints(minHeight: 54),
                           decoration: CambiarPasswordStyles.inputDecoration(_passwordFocus),
                           child: Row(
@@ -273,7 +275,7 @@ class _CambiarPasswordState extends State<CambiarPassword> with TickerProviderSt
                       child: Focus(
                         onFocusChange: (focus) => setState(() => _confirmPasswordFocus = focus),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: CambiarPasswordStyles.transitionDuration,
                           constraints: const BoxConstraints(minHeight: 54),
                           decoration: CambiarPasswordStyles.inputDecoration(_confirmPasswordFocus),
                           child: Row(
@@ -336,27 +338,46 @@ class _CambiarPasswordState extends State<CambiarPassword> with TickerProviderSt
               // Botón confirmar - Delay 6 (590ms)
               _buildAnimatedWidget(
                 index: 5,
-                child: Container(
-                  decoration: CambiarPasswordStyles.buttonDecoration,
-                  child: ElevatedButton(
-                    onPressed: _confirmarPassword,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      minimumSize: const Size(double.infinity, 54),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      decoration: CambiarPasswordStyles.buttonDecoration,
+                      child: ElevatedButton(
+                        onPressed: _confirmarPassword,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          minimumSize: const Size(double.infinity, 54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)
+                          ),
+                        ),
+                        child: const Text(
+                          'Confirmar contrasena',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      'Confirmar contrasena',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                    // Enlace "Regresar a iniciar sesión" con animación después del botón
+                    if (widget.onVolverLogin != null) ...[
+                      const SizedBox(height: 20),
+                      TextButton(
+                        onPressed: widget.onVolverLogin,
+                        style: TextButton.styleFrom(
+                          foregroundColor: CambiarPasswordStyles.linkGreen,
+                        ),
+                        child: const Text(
+                          'Regresar a iniciar sesión',
+                          style: CambiarPasswordStyles.changeLink,
+                        ),
                       ),
-                    ),
-                  ),
+                    ],
+                  ],
                 ),
               ),
             ],

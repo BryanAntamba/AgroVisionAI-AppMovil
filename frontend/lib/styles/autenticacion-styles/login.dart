@@ -156,4 +156,11 @@ class LoginStyles {
   static const Duration transitionDuration = Duration(milliseconds: 200);
   
   static const List<int> animationDelays = [90, 190, 290, 390, 490, 590];
+
+  // ============ BREAKPOINTS RESPONSIVE ============
+  static const double mobileBreakpoint = 600;
+  static const double tabletPortraitBreakpoint = 900;
+  static const double tabletLandscapeBreakpoint = 1200;
+  static const double desktopBreakpoint = 1200;
+  static const double largeDesktopBreakpoint = 1440;
 }

@@ -89,6 +89,7 @@ class _BarraAdminState extends State<BarraAdmin>
   }
 
   Widget _buildDesktopNavbar(BuildContext context) {
+    final currentRoute = ModalRoute.of(context)?.settings.name ?? '';
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -97,18 +98,20 @@ class _BarraAdminState extends State<BarraAdmin>
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildNavLink(context, 'Usuarios', '/panel-admin'),
+            _buildNavLink(context, 'Usuarios', '/panel-admin', currentRoute),
             const SizedBox(width: 16),
             _buildNavLink(
               context,
               'Recomendaciones',
               '/panel-admin/recomendaciones',
+              currentRoute,
             ),
             const SizedBox(width: 16),
             _buildNavLink(
               context,
               'Editar plataforma',
               '/panel-admin/editar-plataforma',
+              currentRoute,
             ),
             const SizedBox(width: 24),
             _buildLogoutButton(context),
@@ -133,6 +136,7 @@ class _BarraAdminState extends State<BarraAdmin>
   }
 
   Widget _buildMobileMenu(BuildContext context) {
+    final currentRoute = ModalRoute.of(context)?.settings.name ?? '';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
@@ -144,16 +148,18 @@ class _BarraAdminState extends State<BarraAdmin>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildMobileNavLink(context, 'Usuarios', '/panel-admin'),
+          _buildMobileNavLink(context, 'Usuarios', '/panel-admin', currentRoute),
           _buildMobileNavLink(
             context,
             'Recomendaciones',
             '/panel-admin/recomendaciones',
+            currentRoute,
           ),
           _buildMobileNavLink(
             context,
             'Editar plataforma',
             '/panel-admin/editar-plataforma',
+            currentRoute,
           ),
           const SizedBox(height: 8),
           _buildLogoutButton(context, fullWidth: true),
@@ -204,25 +210,39 @@ class _BarraAdminState extends State<BarraAdmin>
     );
   }
 
-  Widget _buildNavLink(BuildContext context, String text, String route) {
+  Widget _buildNavLink(BuildContext context, String text, String route, String currentRoute) {
+    final isActive = currentRoute == route;
     return _HoverNavLink(
       text: text,
+      isActive: isActive,
       onTap: () {
-        Navigator.pushReplacementNamed(context, route);
+        if (currentRoute != route) {
+          Navigator.pushReplacementNamed(context, route);
+        }
         if (_isMenuOpen) _toggleMenu();
       },
     );
   }
 
-  Widget _buildMobileNavLink(BuildContext context, String text, String route) {
+  Widget _buildMobileNavLink(BuildContext context, String text, String route, String currentRoute) {
+    final isActive = currentRoute == route;
     return InkWell(
       onTap: () {
         _toggleMenu();
-        Navigator.pushReplacementNamed(context, route);
+        if (currentRoute != route) {
+          Navigator.pushReplacementNamed(context, route);
+        }
       },
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        child: Text(text, style: BarraAdminStyles.navLinkText),
+        decoration: null,
+        child: Text(
+          text,
+          style: BarraAdminStyles.navLinkText.copyWith(
+            color: BarraAdminStyles.linkNormal,
+            fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
+          ),
+        ),
       ),
     );
   }
@@ -342,8 +362,9 @@ class _HamburgerLine extends StatelessWidget {
 class _HoverNavLink extends StatefulWidget {
   final String text;
   final VoidCallback onTap;
+  final bool isActive;
 
-  const _HoverNavLink({required this.text, required this.onTap});
+  const _HoverNavLink({required this.text, required this.onTap, this.isActive = false});
 
   @override
   State<_HoverNavLink> createState() => _HoverNavLinkState();
@@ -362,14 +383,13 @@ class _HoverNavLinkState extends State<_HoverNavLink> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: null,
           child: Text(
             widget.text,
             style: TextStyle(
-              color: _hovered
-                  ? BarraAdminStyles.linkHover
-                  : BarraAdminStyles.linkNormal,
+              color: BarraAdminStyles.linkNormal,
               fontSize: 15,
-              fontWeight: FontWeight.w700,
+              fontWeight: widget.isActive || _hovered ? FontWeight.w800 : FontWeight.w700,
             ),
           ),
         ),

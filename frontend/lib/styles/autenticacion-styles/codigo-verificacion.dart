@@ -78,6 +78,12 @@ class CodigoVerificacionStyles {
     height: 1.6,
   );
 
+  static const TextStyle changeEmailLink = TextStyle(
+    color: linkGreen,
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+  );
+
   // Decoraciones
   static BoxDecoration inputDecoration(bool isFocused) {
     return BoxDecoration(
@@ -113,4 +119,9 @@ class CodigoVerificacionStyles {
       )
     ],
   );
+
+  // ============ ANIMACIONES ============
+  static const Duration fadeUpDuration = Duration(milliseconds: 720);
+  static const Duration transitionDuration = Duration(milliseconds: 200);
+  static const List<int> animationDelays = [90, 190, 290, 390, 490, 590];
 }

@@ -1,163 +1,180 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../styles/agricultor-styles/modales-styles/desconectar-dispositivo.dart';
 
-class DesconectarDispositivo extends StatelessWidget {
+class DesconectarDispositivo extends StatefulWidget {
   const DesconectarDispositivo({super.key});
+
+  @override
+  State<DesconectarDispositivo> createState() => _DesconectarDispositivoState();
+}
+
+class _DesconectarDispositivoState extends State<DesconectarDispositivo> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.66, curve: Curves.easeOut),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 20),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    ));
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Material(
       type: MaterialType.transparency,
-      child: GestureDetector(
-        onTap: () => Navigator.pop(context, false),
-        child: Container(
-          color: const Color.fromRGBO(7, 61, 43, 0.45),
-          child: Center(
-            child: GestureDetector(
-              onTap: () {}, // Evita que se cierre al tocar la tarjeta
-              child: Container(
-              width: MediaQuery.of(context).size.width > 500 
-                  ? 480 
-                  : MediaQuery.of(context).size.width * 0.9,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFD7E4DC)),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromRGBO(7, 61, 43, 0.2),
-                    blurRadius: 48,
-                    offset: Offset(0, 24),
-                  ),
-                ],
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return GestureDetector(
+            onTap: () => Navigator.pop(context, false),
+            child: Container(
+              color: DesconectarDispositivoStyles.overlayColor.withValues(
+                alpha: DesconectarDispositivoStyles.overlayColor.a * _fadeAnimation.value,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Botón cerrar (X)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      InkWell(
-                        onTap: () => Navigator.pop(context, false),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5FAF3),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Color(0xFF073D2B),
-                            size: 18,
-                          ),
+              child: Center(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Transform.translate(
+                    offset: _slideAnimation.value,
+                    child: Opacity(
+                      opacity: _controller.value,
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: DesconectarDispositivoStyles.maxWidth,
+                          maxHeight: MediaQuery.of(context).size.height * 0.9,
                         ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  // Título
-                  const Text(
-                    '¿Desconectar el dispositivo?',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF073D2B),
-                      height: 1.15,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Mensaje
-                  const Text(
-                    'El monitoreo en tiempo real se detendrá. Podrá conectar el dispositivo nuevamente cuando lo necesite.',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Color(0xFF456657),
-                      height: 1.5,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Botones de acción
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // Botón Cancelar
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        style: TextButton.styleFrom(
-                          minimumSize: const Size(100, 54),
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          backgroundColor: const Color(0xFFFBFDF9),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: const BorderSide(color: Color(0xFFD7E4DC)),
-                          ),
-                        ),
-                        child: const Text(
-                          'Cancelar',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF073D2B),
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(width: 10),
-                      
-                      // Botón Desconectar
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(150, 54),
-                          padding: const EdgeInsets.symmetric(horizontal: 22),
-                          backgroundColor: const Color(0xFFA32626),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            FaIcon(
-                              FontAwesomeIcons.plug,
-                              size: 16,
-                              color: Colors.white,
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                        padding: const EdgeInsets.only(left: 28, right: 28, top: 28, bottom: 24),
+                        decoration: DesconectarDispositivoStyles.modalDecoration,
+                        child: Stack(
+                          children: [
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  '¿Desconectar el dispositivo?',
+                                  style: DesconectarDispositivoStyles.titleStyle,
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'El monitoreo en tiempo real se detendrá. Podrá conectar el dispositivo nuevamente cuando lo necesite.',
+                                  style: DesconectarDispositivoStyles.messageStyle,
+                                ),
+                                const SizedBox(height: 22),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () => Navigator.pop(context, false),
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Container(
+                                            height: 54,
+                                            decoration: DesconectarDispositivoStyles.cancelBtnDecoration,
+                                            child: const Center(
+                                              child: Text(
+                                                'Cancelar',
+                                                style: DesconectarDispositivoStyles.cancelBtnStyle,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () => Navigator.pop(context, true),
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Container(
+                                            height: 54,
+                                            decoration: DesconectarDispositivoStyles.disconnectBtnDecoration,
+                                            child: Center(
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  const FaIcon(
+                                                    FontAwesomeIcons.plug,
+                                                    color: Colors.white,
+                                                    size: 16,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  const Text(
+                                                    'Desconectar',
+                                                    style: DesconectarDispositivoStyles.disconnectBtnStyle,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Desconectar',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: () => Navigator.pop(context, false),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: DesconectarDispositivoStyles.closeBtnDecoration,
+                                  child: const Center(
+                                    child: FaIcon(
+                                      FontAwesomeIcons.xmark,
+                                      color: DesconectarDispositivoStyles.closeBtnColor,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
-    ));
+    );
   }
 }

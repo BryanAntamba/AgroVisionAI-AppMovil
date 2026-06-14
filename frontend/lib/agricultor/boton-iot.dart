@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../styles/agricultor-styles/boton-iot.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../navbars/barra-agricultor.dart';
+import '../styles/navbars-styles/barra-agricultor.dart';
 
 enum ConexionState {
   inicial,
@@ -12,9 +15,14 @@ enum ConexionState {
 }
 
 class BotonIOT extends StatefulWidget {
-  final ValueChanged<bool> onConectado;
+  final ValueChanged<bool>? onConectado;
+  final bool isFullScreen;
 
-  const BotonIOT({super.key, required this.onConectado});
+  const BotonIOT({
+    super.key,
+    this.onConectado,
+    this.isFullScreen = false,
+  });
 
   @override
   State<BotonIOT> createState() => _BotonIOTState();
@@ -85,14 +93,29 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
     _pulsarController.repeat(reverse: true);
 
     // Navegar directamente después de un breve delay
-    Timer(const Duration(milliseconds: tiempoConexionMs), () {
+    Timer(const Duration(milliseconds: tiempoConexionMs), () async {
       if (!mounted) return;
 
       _pulsarController.stop();
       _pulsarController.reset();
 
-      // Siempre conectar exitosamente y navegar
-      widget.onConectado(true);
+      if (widget.onConectado != null) {
+        widget.onConectado!(true);
+      } else if (widget.isFullScreen) {
+        // Guardar estado de conexión
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('dispositivoConectado', 'true');
+          await prefs.setString('dispositivoDesconectado', 'false');
+        } catch (e) {
+          debugPrint('Error guardando en SharedPreferences: $e');
+        }
+
+        // Navegar inmediatamente al panel del agricultor
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/panel-agricultor');
+        }
+      }
     });
   }
 
@@ -109,12 +132,14 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
       _estado = ConexionState.inicial;
       _descripcion = _mensajes[ConexionState.inicial]!;
     });
-    widget.onConectado(false);
+    if (widget.onConectado != null) {
+      widget.onConectado!(false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    Widget buttonContent = Center(
       child: Container(
         width: double.infinity,
         constraints: const BoxConstraints(maxWidth: 600),
@@ -190,6 +215,44 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
         ),
       ),
     );
+
+    if (widget.isFullScreen) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF5FAF3),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.width > 991
+                        ? BarraAgricultorStyles.navbarHeight +
+                            BarraAgricultorStyles.contentPaddingTop +
+                            (BarraAgricultorStyles.navbarPaddingVertical * 2)
+                        : BarraAgricultorStyles.navbarHeight +
+                            BarraAgricultorStyles.contentPaddingTop +
+                            (BarraAgricultorStyles.navbarPaddingVertical * 2),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: buttonContent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: const BarraAgricultor(),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return buttonContent;
   }
 
   Widget _buildBotonConexion() {

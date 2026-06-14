@@ -3,7 +3,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../styles/autenticacion-styles/password-confirmacion.dart';
 
 class PasswordConfirmacion extends StatefulWidget {
-  const PasswordConfirmacion({super.key});
+  final VoidCallback? onVolverLogin;
+  
+  const PasswordConfirmacion({
+    super.key,
+    this.onVolverLogin,
+  });
 
   @override
   State<PasswordConfirmacion> createState() => _PasswordConfirmacionState();
@@ -13,7 +18,6 @@ class _PasswordConfirmacionState extends State<PasswordConfirmacion> with Ticker
   late AnimationController _animationController;
   late List<Animation<double>> _fadeAnimations;
   late List<Animation<Offset>> _slideAnimations;
-  final List<int> _animationDelays = [90, 190, 290, 390];
 
   @override
   void initState() {
@@ -22,13 +26,14 @@ class _PasswordConfirmacionState extends State<PasswordConfirmacion> with Ticker
   }
 
   void _initializeAnimations() {
+    // Duración total: 390ms (último delay) + 720ms (duración animación) = 1110ms
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1110), // 390ms + 720ms
+      duration: const Duration(milliseconds: 1110),
       vsync: this,
     );
 
     _fadeAnimations = List.generate(4, (index) {
-      final delayMs = _animationDelays[index];
+      final delayMs = PasswordConfirmacionStyles.animationDelays[index];
       final startFraction = delayMs / 1110.0;
       final endFraction = (delayMs + 720) / 1110.0;
 
@@ -45,7 +50,7 @@ class _PasswordConfirmacionState extends State<PasswordConfirmacion> with Ticker
     });
 
     _slideAnimations = List.generate(4, (index) {
-      final delayMs = _animationDelays[index];
+      final delayMs = PasswordConfirmacionStyles.animationDelays[index];
       final startFraction = delayMs / 1110.0;
       final endFraction = (delayMs + 720) / 1110.0;
 
@@ -131,6 +136,25 @@ class _PasswordConfirmacionState extends State<PasswordConfirmacion> with Ticker
             ),
           ),
         ),
+        
+        // Enlace "Regresar a iniciar sesión" - Delay 4 (390ms)
+        if (widget.onVolverLogin != null)
+          _buildAnimatedWidget(
+            index: 3,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 26),
+              child: TextButton(
+                onPressed: widget.onVolverLogin,
+                style: TextButton.styleFrom(
+                  foregroundColor: PasswordConfirmacionStyles.linkGreen,
+                ),
+                child: const Text(
+                  'Regresar a iniciar sesión',
+                  style: PasswordConfirmacionStyles.confirmationLink,
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

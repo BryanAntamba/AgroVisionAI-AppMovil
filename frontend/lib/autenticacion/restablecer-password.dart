@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../styles/autenticacion-styles/restablecer-password.dart';
-import '../styles/autenticacion-styles/codigo-verificacion.dart';
-import '../styles/autenticacion-styles/cambiar-password.dart';
-import '../styles/autenticacion-styles/password-confirmacion.dart';
 import 'password-confirmacion.dart';
 import 'codigo-verificacion.dart';
 import 'cambiar-password.dart';
@@ -38,7 +35,6 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
   late AnimationController _animationController;
   late List<Animation<double>> _fadeAnimations;
   late List<Animation<Offset>> _slideAnimations;
-  final List<int> _animationDelays = [90, 190, 290, 390, 490, 590];
 
   @override
   void initState() {
@@ -47,13 +43,14 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
   }
 
   void _initializeAnimations() {
+    // Duración total: 590ms (último delay) + 720ms (duración animación) = 1310ms
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1310), // 590ms + 720ms
+      duration: const Duration(milliseconds: 1310),
       vsync: this,
     );
 
     _fadeAnimations = List.generate(6, (index) {
-      final delayMs = _animationDelays[index];
+      final delayMs = RestablecerPasswordStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
       final endFraction = (delayMs + 720) / 1310.0;
 
@@ -70,7 +67,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     });
 
     _slideAnimations = List.generate(6, (index) {
-      final delayMs = _animationDelays[index];
+      final delayMs = RestablecerPasswordStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
       final endFraction = (delayMs + 720) / 1310.0;
 
@@ -181,27 +178,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 250),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      transitionBuilder: (child, animation) {
-        // Fade simple y rápido para no interferir con las animaciones internas
-        return FadeTransition(
-          opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-            ),
-          ),
-          child: child,
-        );
-      },
-      child: _buildStepContent(),
-    );
-  }
-
-  Widget _buildStepContent() {
+    // ngSwitch simple, cada paso maneja sus propias animaciones internas
     switch (paso) {
       case 'correo':
         return _buildCorreoPaso();
@@ -277,7 +254,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
                       child: Focus(
                         onFocusChange: (focus) => setState(() => _emailFocus = focus),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: RestablecerPasswordStyles.transitionDuration,
                           constraints: const BoxConstraints(minHeight: 54),
                           decoration: RestablecerPasswordStyles.inputDecoration(_emailFocus),
                           child: Row(
@@ -384,132 +361,28 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
   }
 
   Widget _buildCodigoPaso() {
-    return Column(
-      children: [
-        CodigoVerificacion(
-          key: ValueKey('codigo_$_correoVerificado'),
-          correo: _correoVerificado,
-          onCodigoVerificado: mostrarCambioPassword,
-          onReenviarCodigo: reenviarCodigoVerificacion,
-        ),
-        // Enlace animado "Regresar a iniciar sesión"
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 400),
-                tween: Tween<double>(begin: 0.0, end: 1.0),
-                curve: Curves.easeOut,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: TextButton(
-                  onPressed: widget.volverLogin,
-                  child: Text(
-                    'Regresar a iniciar sesión',
-                    style: CodigoVerificacionStyles.resendLink.copyWith(
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return CodigoVerificacion(
+      key: ValueKey('codigo_$_correoVerificado'),
+      correo: _correoVerificado,
+      onCodigoVerificado: mostrarCambioPassword,
+      onReenviarCodigo: reenviarCodigoVerificacion,
+      onCambiarCorreo: volverACorreo,
+      onVolverLogin: widget.volverLogin,
     );
   }
 
   Widget _buildCambiarPasswordPaso() {
-    return Column(
-      children: [
-        CambiarPassword(
-          key: const ValueKey('password_change'),
-          onPasswordCambiado: finalizarCambio,
-        ),
-        // Enlace animado "Regresar a iniciar sesión"
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 400),
-                tween: Tween<double>(begin: 0.0, end: 1.0),
-                curve: Curves.easeOut,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: TextButton(
-                  onPressed: widget.volverLogin,
-                  child: Text(
-                    'Regresar a iniciar sesión',
-                    style: CambiarPasswordStyles.changeLink,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return CambiarPassword(
+      key: const ValueKey('password_change'),
+      onPasswordCambiado: finalizarCambio,
+      onVolverLogin: widget.volverLogin,
     );
   }
 
   Widget _buildFinalizadoPaso() {
-    return Column(
-      children: [
-        PasswordConfirmacion(
-          key: const ValueKey('confirmacion_final'),
-        ),
-        // Enlace animado "Regresar a iniciar sesión"
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 400),
-                tween: Tween<double>(begin: 0.0, end: 1.0),
-                curve: Curves.easeOut,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: TextButton(
-                  onPressed: widget.volverLogin,
-                  child: Text(
-                    'Regresar a iniciar sesión',
-                    style: PasswordConfirmacionStyles.confirmationLink,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return PasswordConfirmacion(
+      key: const ValueKey('confirmacion_final'),
+      onVolverLogin: widget.volverLogin,
     );
   }
 }

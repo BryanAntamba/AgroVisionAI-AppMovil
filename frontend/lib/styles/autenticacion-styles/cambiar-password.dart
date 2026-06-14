@@ -78,4 +78,9 @@ class CambiarPasswordStyles {
       )
     ],
   );
+
+  // ============ ANIMACIONES ============
+  static const Duration fadeUpDuration = Duration(milliseconds: 720);
+  static const Duration transitionDuration = Duration(milliseconds: 200);
+  static const List<int> animationDelays = [90, 190, 290, 390, 490, 590];
 }

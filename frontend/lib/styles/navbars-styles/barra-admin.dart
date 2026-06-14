@@ -5,15 +5,15 @@ class BarraAdminStyles {
   static const Color darkGreen = Color(0xFF073D2B);
   static const Color primaryGreen = Color(0xFF55A820);
   static const Color linkNormal = Color(0xFF456657);
-  static const Color linkHover = Color(0xFF55A820);
   static const Color borderColor = Color(0xFFD7E4DC);
 
   // Dimensiones
-  static const double navbarHeight = 72.0; // Misma altura visual que agricultor
-  static const double navbarPaddingVertical = 6.0;
-  static const double contentPaddingTop = 35.0; // Igual que agricultor para consistencia
-  static const double elevation = 0.0;
+  static const double navbarHeight = 72.0; // Altura mínima del navbar
+  static const double navbarPaddingVertical = 6.0; // Padding vertical inferior reducida para bajar el contenido
+  static const double contentPaddingTop = 35.0; // Padding superior adicional para bajar el contenido
+  static const double elevation = 0.0; // Elevación para sombra (0 porque usamos boxShadow personalizada)
 
+  // Tipografía
   static const TextStyle brandText = TextStyle(
     color: darkGreen,
     fontSize: 22,
@@ -27,28 +27,35 @@ class BarraAdminStyles {
     fontWeight: FontWeight.w700,
   );
 
-  // Decoraciones
+  // Navbar container (fondo blanco + sombra)
   static const BoxDecoration navbarDecoration = BoxDecoration(
     color: Colors.white,
-    border: Border(bottom: BorderSide(color: borderColor, width: 1)),
+    border: Border(
+      bottom: BorderSide(color: borderColor, width: 1),
+    ),
     boxShadow: [
       BoxShadow(
         color: Color.fromRGBO(7, 61, 43, 0.12),
         blurRadius: 24,
         offset: Offset(0, 10),
-      ),
+      )
     ],
   );
 
+  // Gradiente radial overlay top-right (verde suave 20%)
   static const BoxDecoration radialOverlay = BoxDecoration(
     gradient: RadialGradient(
       center: Alignment(1.0, -1.0),
       radius: 1.2,
-      colors: [Color.fromRGBO(85, 168, 32, 0.20), Colors.transparent],
+      colors: [
+        Color.fromRGBO(85, 168, 32, 0.20),
+        Colors.transparent,
+      ],
       stops: [0.0, 0.34],
     ),
   );
 
+  // Botón cerrar sesión
   static BoxDecoration logoutButtonDecoration = BoxDecoration(
     gradient: const LinearGradient(
       colors: [darkGreen, primaryGreen],
@@ -61,7 +68,7 @@ class BarraAdminStyles {
         color: Color.fromRGBO(7, 61, 43, 0.24),
         blurRadius: 28,
         offset: Offset(0, 16),
-      ),
+      )
     ],
   );
 }

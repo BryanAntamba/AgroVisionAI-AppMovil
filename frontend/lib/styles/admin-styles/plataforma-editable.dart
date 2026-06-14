@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PlataformaEditableStyles {
-  // Colores Base
+  // Colores Base (Por defecto o referencias constantes para partes estáticas)
   static const Color primaryGreen = Color(0xFF55A820);
   static const Color darkGreen = Color(0xFF073D2B);
   static const Color bgPage = Color(0xFFF5FAF3);
@@ -82,7 +82,7 @@ class PlataformaEditableStyles {
   static final BoxDecoration fileUploadArea = BoxDecoration(
     color: bgInput,
     borderRadius: BorderRadius.circular(8),
-    border: Border.all(color: borderInput, width: 2), // dashed idealmente
+    border: Border.all(color: borderInput, width: 2), // en CSS era dashed pero se simula
   );
 
   static final BoxDecoration helpBox = BoxDecoration(
@@ -91,7 +91,7 @@ class PlataformaEditableStyles {
     border: const Border(left: BorderSide(color: primaryGreen, width: 3)),
   );
 
-  // Botones
+  // Botones estáticos (algunos dinámicos los haremos in-line)
   static final BoxDecoration primaryBtn = BoxDecoration(
     gradient: const LinearGradient(
       colors: [darkGreen, primaryGreen],

@@ -10,24 +10,18 @@ import 'boton-iot.dart';
 import 'modales/desconectar-dispositivo.dart';
 import 'modales/guardar-reporte.dart';
 import '../environments/datos-iot-simulados.dart';
+import '../environments/datos-alertas-simuladas.dart';
 import '../styles/agricultor-styles/panel-agricultor.dart';
 import '../shared/utils/traductor-enfermedades/clases-enfermedad.dart';
 
-// Simulated recommendations store since the TS code had RecomendacionesStore
-const List<Map<String, dynamic>> recomendacionesSimuladas = [
-  {
-    'tipo': 'ok',
-    'titulo': 'Continuar riego actual',
-    'mensaje': 'La humedad del suelo es óptima.',
-    'accion': 'Mantener plan de riego regular.',
-  },
-  {
-    'tipo': 'warn',
-    'titulo': 'Revisar intensidad de luz',
-    'mensaje': 'La luz está un poco alta para la etapa actual.',
-    'accion': 'Ajustar malla polisombra si es posible.',
-  },
-];
+import '../environments/modales-recomendacion.dart';
+
+// Importar componentes de alertas
+import 'alertas/alerta-dht22.dart';
+import 'alertas/alerta-cam.dart';
+import 'alertas/alerta-capacite-v2.dart';
+import 'alertas/alerta-antena-wifi.dart';
+import 'alertas/alerta-sensor-idr.dart';
 
 class PanelAgricultor extends StatefulWidget {
   const PanelAgricultor({super.key});
@@ -51,6 +45,9 @@ class _PanelAgricultorState extends State<PanelAgricultor>
   Timer? _intervaloCaptura;
   late AnimationController _blinkController;
 
+  // Variables para el sistema de alertas
+  List<TipoAlertaSensor> _alertasVisibles = [];
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +58,9 @@ class _PanelAgricultorState extends State<PanelAgricultor>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
+
+    // Cargar alertas activas inicialmente
+    _alertasVisibles = List.from(alertasActivasAlInicio);
   }
 
   Future<void> _cargarEstadoLocal() async {
@@ -91,6 +91,18 @@ class _PanelAgricultorState extends State<PanelAgricultor>
   String get _etiquetaPlanta {
     final n = _datos.captura.numeroPlanta;
     return 'Planta #${n.toString().padLeft(2, '0')}';
+  }
+
+  // Método para obtener los datos de una alerta específica
+  AlertaSensorData _getAlerta(TipoAlertaSensor id) {
+    return catalogoAlertasSensores[id]!;
+  }
+
+  // Método para cerrar una alerta
+  void _cerrarAlerta(TipoAlertaSensor id) {
+    setState(() {
+      _alertasVisibles.remove(id);
+    });
   }
 
   void _guardarReporte() async {
@@ -330,6 +342,11 @@ class _PanelAgricultorState extends State<PanelAgricultor>
       children: [
         _buildEncabezado(),
         const SizedBox(height: 14),
+        // Panel de alertas (si hay alertas visibles)
+        if (_alertasVisibles.isNotEmpty) ...[
+          _buildAlertasPanel(),
+          const SizedBox(height: 14),
+        ],
         _buildCaptura(),
         _buildSalud(),
         _buildSensores(),
@@ -458,6 +475,53 @@ class _PanelAgricultorState extends State<PanelAgricultor>
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildAlertasPanel() {
+    return Column(
+      children: [
+        if (_alertasVisibles.contains(TipoAlertaSensor.dht22))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AlertaDht22(
+              alerta: _getAlerta(TipoAlertaSensor.dht22),
+              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.dht22),
+            ),
+          ),
+        if (_alertasVisibles.contains(TipoAlertaSensor.cam))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AlertaCam(
+              alerta: _getAlerta(TipoAlertaSensor.cam),
+              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.cam),
+            ),
+          ),
+        if (_alertasVisibles.contains(TipoAlertaSensor.capaciteV2))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AlertaCapaciteV2(
+              alerta: _getAlerta(TipoAlertaSensor.capaciteV2),
+              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.capaciteV2),
+            ),
+          ),
+        if (_alertasVisibles.contains(TipoAlertaSensor.antenaWifi))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AlertaAntenaWifi(
+              alerta: _getAlerta(TipoAlertaSensor.antenaWifi),
+              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.antenaWifi),
+            ),
+          ),
+        if (_alertasVisibles.contains(TipoAlertaSensor.sensorLdr))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AlertaSensorLdr(
+              alerta: _getAlerta(TipoAlertaSensor.sensorLdr),
+              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.sensorLdr),
+            ),
+          ),
       ],
     );
   }
@@ -1631,23 +1695,32 @@ class _PanelAgricultorState extends State<PanelAgricultor>
     );
   }
 
+  FaIconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'fa-circle-check': return FontAwesomeIcons.circleCheck;
+      case 'fa-triangle-exclamation': return FontAwesomeIcons.triangleExclamation;
+      case 'fa-circle-exclamation': return FontAwesomeIcons.circleExclamation;
+      default: return FontAwesomeIcons.circleInfo;
+    }
+  }
+
   Widget _buildRecomendaciones() {
     return _buildSeccion(
       'Recomendaciones de acción',
       FontAwesomeIcons.clipboardList,
       Column(
-        children: recomendacionesSimuladas.map((r) {
+        children: RecomendacionesStore.paraDashboard().map((r) {
           return Container(
             margin: const EdgeInsets.only(bottom: 7),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: r['tipo'] == 'warn'
+              color: r.tipo == 'warn'
                   ? PanelAgricultorStyles.warnBg
-                  : PanelAgricultorStyles.critBg,
+                  : r.tipo == 'ok' ? PanelAgricultorStyles.sanoBg : PanelAgricultorStyles.critBg,
               border: Border.all(
-                color: r['tipo'] == 'warn'
+                color: r.tipo == 'warn'
                     ? const Color(0xFFFAC775)
-                    : const Color(0xFFF7C1C1),
+                    : r.tipo == 'ok' ? const Color(0xFFC0DD97) : const Color(0xFFF7C1C1),
               ),
               borderRadius: BorderRadius.circular(8),
             ),
@@ -1655,12 +1728,10 @@ class _PanelAgricultorState extends State<PanelAgricultor>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 FaIcon(
-                  r['tipo'] == 'warn'
-                      ? FontAwesomeIcons.droplet
-                      : FontAwesomeIcons.pumpMedical,
-                  color: r['tipo'] == 'warn'
+                  _getIconData(r.icono),
+                  color: r.tipo == 'warn'
                       ? PanelAgricultorStyles.warnText
-                      : PanelAgricultorStyles.critText,
+                      : r.tipo == 'ok' ? PanelAgricultorStyles.sanoText : PanelAgricultorStyles.critText,
                   size: 16,
                 ),
                 const SizedBox(width: 10),
@@ -1669,7 +1740,7 @@ class _PanelAgricultorState extends State<PanelAgricultor>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        r['titulo'],
+                        r.titulo,
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
@@ -1677,13 +1748,13 @@ class _PanelAgricultorState extends State<PanelAgricultor>
                         ),
                       ),
                       Text(
-                        r['mensaje'],
+                        r.mensaje,
                         style: TextStyle(
                           fontSize: 12,
                           height: 1.5,
-                          color: r['tipo'] == 'warn'
+                          color: r.tipo == 'warn'
                               ? const Color(0xFF633806)
-                              : const Color(0xFF791F1F),
+                              : r.tipo == 'ok' ? const Color(0xFF23730F) : const Color(0xFF791F1F),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -1694,19 +1765,19 @@ class _PanelAgricultorState extends State<PanelAgricultor>
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: r['tipo'] == 'warn'
+                          color: r.tipo == 'warn'
                               ? const Color(0xFF854F0B)
-                              : const Color(0xFFA32626),
+                              : r.tipo == 'ok' ? const Color(0xFF23730F) : const Color(0xFFA32626),
                         ),
                       ),
                       Text(
-                        r['accion'],
+                        r.accion,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: r['tipo'] == 'warn'
+                          color: r.tipo == 'warn'
                               ? const Color(0xFF633806)
-                              : const Color(0xFF791F1F),
+                              : r.tipo == 'ok' ? const Color(0xFF23730F) : const Color(0xFF791F1F),
                         ),
                       ),
                     ],

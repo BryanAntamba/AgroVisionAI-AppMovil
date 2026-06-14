@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../styles/agricultor-styles/modales-styles/alerta-sensor.dart';
+import '../../styles/agricultor-styles/alertas-styles/alerta-sensor.dart';
 import '../../environments/datos-alertas-simuladas.dart';
 
 /// Widget genérico que renderiza el banner de alerta de sensor.

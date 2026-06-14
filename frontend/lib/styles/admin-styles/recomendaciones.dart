@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../environments/modales-recomendacion.dart';
 
 class RecomendacionesStyles {
@@ -182,12 +183,12 @@ class RecomendacionesStyles {
     }
   }
 
-  static IconData prioridadIcon(ColorRecomendacion c) {
+  static FaIconData prioridadIcon(ColorRecomendacion c) {
     switch (c) {
-      case ColorRecomendacion.verde:    return Icons.check_circle_outline;
-      case ColorRecomendacion.amarillo: return Icons.water_drop_outlined;
-      case ColorRecomendacion.naranja:  return Icons.warning_amber_outlined;
-      case ColorRecomendacion.rojo:     return Icons.dangerous_outlined;
+      case ColorRecomendacion.verde:    return FontAwesomeIcons.circleCheck;
+      case ColorRecomendacion.amarillo: return FontAwesomeIcons.circleExclamation;
+      case ColorRecomendacion.naranja:  return FontAwesomeIcons.triangleExclamation;
+      case ColorRecomendacion.rojo:     return FontAwesomeIcons.circleXmark;
     }
   }
 }

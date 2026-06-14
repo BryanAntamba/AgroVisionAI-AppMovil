@@ -8,12 +8,16 @@ class CodigoVerificacion extends StatefulWidget {
   final String correo;
   final VoidCallback onCodigoVerificado;
   final VoidCallback onReenviarCodigo;
+  final VoidCallback? onCambiarCorreo;
+  final VoidCallback? onVolverLogin;
 
   const CodigoVerificacion({
     super.key,
     required this.correo,
     required this.onCodigoVerificado,
     required this.onReenviarCodigo,
+    this.onCambiarCorreo,
+    this.onVolverLogin,
   });
 
   @override
@@ -37,7 +41,6 @@ class _CodigoVerificacionState extends State<CodigoVerificacion> with TickerProv
   late AnimationController _animationController;
   late List<Animation<double>> _fadeAnimations;
   late List<Animation<Offset>> _slideAnimations;
-  final List<int> _animationDelays = [90, 190, 290, 390, 490, 590];
 
   @override
   void initState() {
@@ -46,13 +49,14 @@ class _CodigoVerificacionState extends State<CodigoVerificacion> with TickerProv
   }
 
   void _initializeAnimations() {
+    // Duración total: 590ms (último delay) + 720ms (duración animación) = 1310ms
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1310), // 590ms + 720ms
+      duration: const Duration(milliseconds: 1310),
       vsync: this,
     );
 
     _fadeAnimations = List.generate(6, (index) {
-      final delayMs = _animationDelays[index];
+      final delayMs = CodigoVerificacionStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
       final endFraction = (delayMs + 720) / 1310.0;
 
@@ -69,7 +73,7 @@ class _CodigoVerificacionState extends State<CodigoVerificacion> with TickerProv
     });
 
     _slideAnimations = List.generate(6, (index) {
-      final delayMs = _animationDelays[index];
+      final delayMs = CodigoVerificacionStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
       final endFraction = (delayMs + 720) / 1310.0;
 
@@ -254,7 +258,7 @@ class _CodigoVerificacionState extends State<CodigoVerificacion> with TickerProv
                       child: Focus(
                         onFocusChange: (focus) => setState(() => _isFocused = focus),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: CodigoVerificacionStyles.transitionDuration,
                           constraints: const BoxConstraints(minHeight: 54),
                           decoration: CodigoVerificacionStyles.inputDecoration(_isFocused),
                           child: Row(
@@ -377,6 +381,20 @@ class _CodigoVerificacionState extends State<CodigoVerificacion> with TickerProv
                             ],
                           ),
                         ),
+                    ],
+                    // Enlace "Cambiar correo electrónico" con animación después de "Reenviar código"
+                    if (widget.onCambiarCorreo != null) ...[
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: widget.onCambiarCorreo,
+                        style: TextButton.styleFrom(
+                          foregroundColor: CodigoVerificacionStyles.linkGreen,
+                        ),
+                        child: const Text(
+                          'Cambiar correo electrónico',
+                          style: CodigoVerificacionStyles.changeEmailLink,
+                        ),
+                      ),
                     ],
                   ],
                 ),

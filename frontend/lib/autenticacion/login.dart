@@ -25,7 +25,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   String? _passwordError;
   
   final GlobalKey<RestablecerPasswordState> _resetPasswordKey = GlobalKey();
-  String _resetPaso = 'correo';
   
   bool _emailFocus = false;
   bool _passwordFocus = false;
@@ -181,7 +180,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   void _backToLogin() {
     setState(() {
       _showResetPassword = false;
-      _resetPaso = 'correo';
       _loginError = '';
       _emailController.clear();
       _passwordController.clear();
@@ -196,14 +194,55 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final bool isDesktop = size.width > 900;
+    final screenWidth = size.width;
+    
+    // Breakpoints adaptativos
+    final bool isMobile = screenWidth < 600;
+    final bool isTabletPortrait = screenWidth >= 600 && screenWidth < 900;
+    final bool isTabletLandscape = screenWidth >= 900 && screenWidth < 1200;
+    final bool isDesktop = screenWidth >= 1200;
+    
+    // Mostrar carrusel en tablets landscape y desktop
+    final bool showCarousel = isTabletLandscape || isDesktop;
+    
+    // Calcular ancho del panel de login según el tamaño de pantalla
+    double loginPanelWidth;
+    if (isMobile) {
+      loginPanelWidth = screenWidth;
+    } else if (isTabletPortrait) {
+      loginPanelWidth = screenWidth;
+    } else if (isTabletLandscape) {
+      // Tablet landscape: panel más estrecho para mostrar el carrusel
+      loginPanelWidth = screenWidth * 0.45; // 45% del ancho
+    } else {
+      // Desktop: anchos fijos según el tamaño total
+      loginPanelWidth = screenWidth > 1440 ? 540 : 440;
+    }
+    
+    // Padding adaptativo
+    double horizontalPadding;
+    double verticalPadding;
+    
+    if (isMobile) {
+      horizontalPadding = 24;
+      verticalPadding = 32;
+    } else if (isTabletPortrait) {
+      horizontalPadding = 48;
+      verticalPadding = 48;
+    } else if (isTabletLandscape) {
+      horizontalPadding = 40;
+      verticalPadding = 48;
+    } else {
+      horizontalPadding = 64;
+      verticalPadding = 64;
+    }
 
     return Scaffold(
       backgroundColor: LoginStyles.backgroundLight,
       body: Row(
         children: [
-          // Panel del Carrusel (Solo visible en Desktop)
-          if (isDesktop)
+          // Panel del Carrusel (Visible en tablets landscape y desktop)
+          if (showCarousel)
             Expanded(
               child: Stack(
                 fit: StackFit.expand,
@@ -227,14 +266,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       ),
                     ),
                   ),
-                  // Botones de control del carrusel (Opcional)
+                  // Botones de control del carrusel
+                  // Ajustar tamaño de botones según dispositivo
                   Positioned(
-                    left: 20,
+                    left: isTabletLandscape ? 12 : 20,
                     top: 0,
                     bottom: 0,
                     child: Center(
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
+                        iconSize: isTabletLandscape ? 20 : 24,
+                        icon: Icon(
+                          Icons.arrow_back_ios, 
+                          color: Colors.white70,
+                          size: isTabletLandscape ? 20 : 24,
+                        ),
                         onPressed: () {
                           setState(() {
                             _currentCarouselIndex = (_currentCarouselIndex - 1 + _carouselImages.length) % _carouselImages.length;
@@ -244,12 +289,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     ),
                   ),
                   Positioned(
-                    right: 20,
+                    right: isTabletLandscape ? 12 : 20,
                     top: 0,
                     bottom: 0,
                     child: Center(
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios, color: Colors.white70),
+                        iconSize: isTabletLandscape ? 20 : 24,
+                        icon: Icon(
+                          Icons.arrow_forward_ios, 
+                          color: Colors.white70,
+                          size: isTabletLandscape ? 20 : 24,
+                        ),
                         onPressed: () {
                           setState(() {
                             _currentCarouselIndex = (_currentCarouselIndex + 1) % _carouselImages.length;
@@ -258,22 +308,48 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       ),
                     ),
                   ),
+                  // Indicadores de carrusel para tablets
+                  if (isTabletLandscape)
+                    Positioned(
+                      bottom: 20,
+                      left: 0,
+                      right: 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          _carouselImages.length,
+                          (index) => Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _currentCarouselIndex == index
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.4),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
             
           // Panel de Login
           Container(
-            width: isDesktop ? (size.width > 1440 ? 540 : 440) : size.width,
+            width: loginPanelWidth,
             decoration: LoginStyles.loginPanelDecoration,
             padding: EdgeInsets.symmetric(
-              horizontal: isDesktop ? 64 : 32,
-              vertical: isDesktop ? 64 : 32,
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
             ),
             child: Center(
               child: SingleChildScrollView(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 430),
+                  constraints: BoxConstraints(
+                    maxWidth: isTabletLandscape ? 380 : 430,
+                  ),
                   child: _showResetPassword ? _buildResetPasswordView() : _buildLoginForm(),
                 ),
               ),
@@ -514,47 +590,74 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           key: _resetPasswordKey,
           volverLogin: _backToLogin,
           onPasoChanged: (paso) {
-            setState(() {
-              _resetPaso = paso;
-            });
+            // El paso se maneja internamente en RestablecerPassword
           },
         ),
-        // Animación para el enlace "Cambiar correo electrónico"
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: _resetPaso == 'codigo'
-              ? Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    TweenAnimationBuilder<double>(
-                      duration: const Duration(milliseconds: 400),
-                      tween: Tween<double>(begin: 0.0, end: 1.0),
-                      curve: Curves.easeOut,
-                      builder: (context, value, child) {
-                        return Opacity(
-                          opacity: value,
-                          child: Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: TextButton(
-                        onPressed: () {
-                          _resetPasswordKey.currentState?.volverACorreo();
-                        },
-                        child: const Text(
-                          'Cambiar correo electrónico',
-                          style: LoginStyles.forgotLink,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              : const SizedBox.shrink(),
-        ),
       ],
+    );
+  }
+}
+
+// Widget helper para animaciones con delay (fade-up)
+class _DelayedFadeUp extends StatefulWidget {
+  final Widget child;
+  final Duration delay;
+  
+  const _DelayedFadeUp({
+    required this.child,
+    required this.delay,
+  });
+
+  @override
+  State<_DelayedFadeUp> createState() => _DelayedFadeUpState();
+}
+
+class _DelayedFadeUpState extends State<_DelayedFadeUp> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 720),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.34),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    // Espera el delay antes de iniciar la animación
+    Future.delayed(widget.delay, () {
+      if (mounted) {
+        _controller.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
+      ),
     );
   }
 }

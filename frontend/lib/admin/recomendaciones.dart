@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../styles/admin-styles/recomendaciones.dart';
 import '../navbars/barra-admin.dart';
 import '../styles/navbars-styles/barra-admin.dart';
@@ -213,7 +214,7 @@ class _RecomendacionesState extends State<Recomendaciones> {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.add, color: Colors.white, size: 18),
+            FaIcon(FontAwesomeIcons.plus, color: Colors.white, size: 18),
             SizedBox(width: 8),
             Text(
               'Registrar recomendación',
@@ -290,7 +291,7 @@ class _RecomendacionesState extends State<Recomendaciones> {
           child: DropdownButton<FiltroPrioridad>(
             value: _filtroPrioridad,
             isExpanded: true,
-            icon: const Icon(Icons.keyboard_arrow_down,
+            icon: const FaIcon(FontAwesomeIcons.chevronDown,
                 color: RecomendacionesStyles.primaryGreen),
             style: const TextStyle(
                 color: RecomendacionesStyles.darkGreen,
@@ -365,7 +366,7 @@ class _RecomendacionesState extends State<Recomendaciones> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icono, size: 11, color: priTxt),
+              FaIcon(icono, size: 11, color: priTxt),
               const SizedBox(width: 4),
               Text(
                 rec.prioridad.label.toUpperCase(),
@@ -403,30 +404,30 @@ class _RecomendacionesState extends State<Recomendaciones> {
     final acciones = isMobile
         ? Row(
             children: [
-              _buildIconBtn(Icons.edit, onTap: () => setState(() {
+              _buildIconBtn(FontAwesomeIcons.pen, onTap: () => setState(() {
                 _seleccionada = rec; _mostrarEditar = true;
               })),
               const SizedBox(width: 8),
-              _buildIconBtn(Icons.visibility, onTap: () => setState(() {
+              _buildIconBtn(FontAwesomeIcons.eye, onTap: () => setState(() {
                 _seleccionada = rec; _mostrarVisualizar = true;
               })),
               const SizedBox(width: 8),
-              _buildIconBtn(Icons.delete, danger: true, onTap: () => setState(() {
+              _buildIconBtn(FontAwesomeIcons.trash, danger: true, onTap: () => setState(() {
                 _seleccionada = rec; _mostrarEliminar = true;
               })),
             ],
           )
         : Column(
             children: [
-              _buildIconBtn(Icons.edit, onTap: () => setState(() {
+              _buildIconBtn(FontAwesomeIcons.pen, onTap: () => setState(() {
                 _seleccionada = rec; _mostrarEditar = true;
               })),
               const SizedBox(height: 8),
-              _buildIconBtn(Icons.visibility, onTap: () => setState(() {
+              _buildIconBtn(FontAwesomeIcons.eye, onTap: () => setState(() {
                 _seleccionada = rec; _mostrarVisualizar = true;
               })),
               const SizedBox(height: 8),
-              _buildIconBtn(Icons.delete, danger: true, onTap: () => setState(() {
+              _buildIconBtn(FontAwesomeIcons.trash, danger: true, onTap: () => setState(() {
                 _seleccionada = rec; _mostrarEliminar = true;
               })),
             ],
@@ -465,7 +466,7 @@ class _RecomendacionesState extends State<Recomendaciones> {
     );
   }
 
-  Widget _buildIconBtn(IconData icon,
+  Widget _buildIconBtn(FaIconData icon,
       {bool danger = false, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -473,12 +474,14 @@ class _RecomendacionesState extends State<Recomendaciones> {
         width: 36,
         height: 36,
         decoration: RecomendacionesStyles.iconBtnDecoration(danger: danger),
-        child: Icon(
-          icon,
-          size: 16,
-          color: danger
-              ? RecomendacionesStyles.dangerText
-              : RecomendacionesStyles.darkGreen,
+        child: Center(
+          child: FaIcon(
+            icon,
+            size: 16,
+            color: danger
+                ? RecomendacionesStyles.dangerText
+                : RecomendacionesStyles.darkGreen,
+          ),
         ),
       ),
     );
@@ -580,7 +583,7 @@ class _SearchBoxState extends State<_SearchBox> {
       child: Row(
         children: [
           const SizedBox(width: 14),
-          const Icon(Icons.search,
+          const FaIcon(FontAwesomeIcons.magnifyingGlass,
               color: RecomendacionesStyles.primaryGreen, size: 20),
           const SizedBox(width: 10),
           Expanded(
@@ -609,7 +612,7 @@ class _SearchBoxState extends State<_SearchBox> {
               },
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Icon(Icons.close,
+                child: FaIcon(FontAwesomeIcons.xmark,
                     color: Color(0xFF6B8177), size: 18),
               ),
             ),

@@ -241,17 +241,19 @@ class _EditarUsuarioState extends State<EditarUsuario> {
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width <= EditarUsuarioStyles.mobileBreakpoint;
 
-    return GestureDetector(
-      onTap: widget.onCerrar,
-      child: Container(
-        color: EditarUsuarioStyles.overlayColor,
-        child: Center(
-          child: GestureDetector(
-            onTap: () {},
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: EditarUsuarioStyles.maxWidth),
-              margin: EditarUsuarioStyles.modalMargin,
-              decoration: EditarUsuarioStyles.modalDecoration,
+    return Material(
+      type: MaterialType.transparency,
+      child: GestureDetector(
+        onTap: widget.onCerrar,
+        child: Container(
+          color: EditarUsuarioStyles.overlayColor,
+          child: Center(
+            child: GestureDetector(
+              onTap: () {},
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: EditarUsuarioStyles.maxWidth),
+                margin: EditarUsuarioStyles.modalMargin,
+                decoration: EditarUsuarioStyles.modalDecoration,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -353,6 +355,7 @@ class _EditarUsuarioState extends State<EditarUsuario> {
           ),
         ),
       ),
+    ),
     );
   }
 

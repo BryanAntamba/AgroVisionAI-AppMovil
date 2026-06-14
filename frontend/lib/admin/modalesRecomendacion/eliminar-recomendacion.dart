@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../environments/modales-recomendacion.dart';
-import '../../styles/admin-styles/recomendaciones.dart';
+import '../../styles/admin-styles/modalesRecomendacion-styles/eliminar-recomendacion.dart';
 
 class EliminarRecomendacion extends StatelessWidget {
   final RecomendacionRegistrada recomendacion;
@@ -19,116 +20,143 @@ class EliminarRecomendacion extends StatelessWidget {
     return GestureDetector(
       onTap: onCerrar,
       child: Container(
-        color: const Color.fromRGBO(7, 61, 43, 0.45),
+        color: EliminarRecomendacionStyles.backdropColor,
         child: Center(
           child: GestureDetector(
-            onTap: () {}, // Evitar que el tap se propague al fondo
+            onTap: () {},
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 560),
-              margin: const EdgeInsets.all(24),
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: RecomendacionesStyles.borderGrey),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromRGBO(7, 61, 43, 0.2),
-                    blurRadius: 48,
-                    offset: Offset(0, 24),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              constraints: const BoxConstraints(maxWidth: 480),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              decoration: EliminarRecomendacionStyles.cardDecoration,
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text('¿Eliminar recomendación?',
-                            style: RecomendacionesStyles.h1Text.copyWith(fontSize: 22)),
-                      ),
-                      GestureDetector(
-                        onTap: onCerrar,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: RecomendacionesStyles.backgroundPage,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.close,
-                              color: RecomendacionesStyles.darkGreen, size: 18),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    '¿Está seguro de que desea eliminar la recomendación "${recomendacion.titulo}"?',
-                    style: RecomendacionesStyles.headerDesc,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Esta acción no se puede deshacer.',
-                    style: TextStyle(
-                      color: RecomendacionesStyles.dangerText,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 28,
+                      right: 28,
+                      top: 28,
+                      bottom: 24,
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: onCerrar,
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 50),
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          decoration: BoxDecoration(
-                            color: RecomendacionesStyles.backgroundInput,
-                            border: Border.all(color: RecomendacionesStyles.borderGrey),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Center(
-                            child: Text('Cancelar', style: RecomendacionesStyles.labelText),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 44, bottom: 16),
+                          child: Text(
+                            'Eliminar recomendación',
+                            style: EliminarRecomendacionStyles.titleStyle,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: onConfirmar,
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 50),
-                          padding: const EdgeInsets.symmetric(horizontal: 22),
-                          decoration: BoxDecoration(
-                            color: RecomendacionesStyles.dangerText,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color.fromRGBO(198, 40, 40, 0.24),
-                                blurRadius: 24,
-                                offset: Offset(0, 12),
+                        RichText(
+                          text: TextSpan(
+                            style: EliminarRecomendacionStyles.confirmMessage,
+                            children: [
+                              const TextSpan(
+                                text:
+                                    '¿Está seguro de que desea eliminar la recomendación ',
+                              ),
+                              TextSpan(
+                                text: '${recomendacion.titulo}?',
+                                style: EliminarRecomendacionStyles
+                                    .confirmMessageBold,
                               ),
                             ],
                           ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.delete, color: Colors.white, size: 16),
-                              SizedBox(width: 8),
-                              Text('Eliminar recomendación',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800)),
-                            ],
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Esta acción no se puede deshacer.',
+                          style: EliminarRecomendacionStyles.confirmWarning,
+                        ),
+                        const SizedBox(height: 22),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: onCerrar,
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minHeight: 54,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                  ),
+                                  decoration: EliminarRecomendacionStyles
+                                      .cancelBtnDecoration,
+                                  child: const Center(
+                                    child: Text(
+                                      'Cancelar',
+                                      style: EliminarRecomendacionStyles
+                                          .cancelBtnStyle,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: onConfirmar,
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minHeight: 54,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 10,
+                                  ),
+                                  decoration: EliminarRecomendacionStyles
+                                      .deleteBtnDecoration,
+                                  child: const Wrap(
+                                    alignment: WrapAlignment.center,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    children: [
+                                      FaIcon(
+                                        FontAwesomeIcons.trash,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                      Text(
+                                        'Eliminar',
+                                        style: EliminarRecomendacionStyles
+                                            .deleteBtnStyle,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: 18,
+                    right: 18,
+                    child: GestureDetector(
+                      onTap: onCerrar,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: EliminarRecomendacionStyles.backgroundPage,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: FaIcon(
+                            FontAwesomeIcons.xmark,
+                            color: EliminarRecomendacionStyles.darkGreen,
+                            size: 18,
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),

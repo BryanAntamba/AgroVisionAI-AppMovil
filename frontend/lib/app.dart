@@ -4,7 +4,7 @@ import 'admin/panel-admin.dart';
 import 'admin/recomendaciones.dart';
 import 'admin/plataforma-editable.dart';
 import 'agricultor/panel-agricultor.dart';
-import 'agricultor/pantalla-boton-iot.dart';
+import 'agricultor/boton-iot.dart';
 import 'agricultor/historial/historial.dart';
 
 class AppRoutes {
@@ -21,7 +21,7 @@ class AppRoutes {
         panelAdmin: (context) => const PanelAdmin(),
         panelAdminRecomendaciones: (context) => const Recomendaciones(),
         panelAdminEditarPlataforma: (context) => const PlataformaEditable(),
-        botonIOT: (context) => const PantallaBotonIOT(),
+        botonIOT: (context) => const BotonIOT(isFullScreen: true),
         panelAgricultor: (context) => const PanelAgricultor(),
         historial: (context) => const Historial(),
       };

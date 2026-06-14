@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../environments/modales-recomendacion.dart';
-import '../../styles/admin-styles/recomendaciones.dart';
+import '../../styles/admin-styles/modalesRecomendacion-styles/visualizar-recomendacion.dart';
 
 class VisualizarRecomendacion extends StatelessWidget {
   final RecomendacionRegistrada recomendacion;
@@ -12,133 +13,102 @@ class VisualizarRecomendacion extends StatelessWidget {
     required this.onCerrar,
   });
 
+  String formatearFecha(String iso) {
+    try {
+      final d = DateTime.parse(iso);
+      final meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      final dia = d.day.toString().padLeft(2, '0');
+      final mes = meses[d.month - 1];
+      final ano = d.year;
+      final hora = d.hour.toString().padLeft(2, '0');
+      final min = d.minute.toString().padLeft(2, '0');
+      return '$dia $mes $ano, $hora:$min';
+    } catch (e) {
+      return iso;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bg     = RecomendacionesStyles.cardBg(recomendacion.color);
-    final border = RecomendacionesStyles.cardBorder(recomendacion.color);
-    final priBg  = RecomendacionesStyles.prioridadBg(recomendacion.prioridad);
-    final priTxt = RecomendacionesStyles.prioridadText(recomendacion.prioridad);
-    final icono  = RecomendacionesStyles.prioridadIcon(recomendacion.color);
-
     return GestureDetector(
       onTap: onCerrar,
       child: Container(
-        color: const Color.fromRGBO(7, 61, 43, 0.45),
+        color: VisualizarRecomendacionStyles.backdropColor,
         child: Center(
           child: GestureDetector(
-            onTap: () {},
+            onTap: () {}, // Evitar que el tap se propague al fondo
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 560),
-              margin: const EdgeInsets.all(24),
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: RecomendacionesStyles.borderGrey),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromRGBO(7, 61, 43, 0.2),
-                    blurRadius: 48,
-                    offset: Offset(0, 24),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              constraints: const BoxConstraints(maxWidth: 760, maxHeight: 920),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              decoration: VisualizarRecomendacionStyles.cardDecoration,
+              child: Stack(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text('Visualizar recomendación',
-                            style: RecomendacionesStyles.h1Text.copyWith(fontSize: 22)),
-                      ),
-                      GestureDetector(
-                        onTap: onCerrar,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: RecomendacionesStyles.backgroundPage,
-                            borderRadius: BorderRadius.circular(8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 28, right: 28, top: 28, bottom: 24),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 44, bottom: 22),
+                            child: Text(
+                              'Detalle de recomendación',
+                              style: VisualizarRecomendacionStyles.titleStyle,
+                            ),
                           ),
-                          child: const Icon(Icons.close,
-                              color: RecomendacionesStyles.darkGreen, size: 18),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: bg,
-                      border: Border.all(color: border),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                              color: priBg,
-                              borderRadius: BorderRadius.circular(99)),
-                          child: Row(mainAxisSize: MainAxisSize.min, children: [
-                            Icon(icono, size: 11, color: priTxt),
-                            const SizedBox(width: 4),
-                            Text(
-                              recomendacion.prioridad.label.toUpperCase(),
-                              style: RecomendacionesStyles.badgeText
-                                  .copyWith(color: priTxt),
-                            ),
-                          ]),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(recomendacion.titulo, style: RecomendacionesStyles.cardTitle),
-                        const SizedBox(height: 6),
-                        Text(recomendacion.descripcion, style: RecomendacionesStyles.cardDesc),
-                        if (recomendacion.accion.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.only(top: 10),
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                  top: BorderSide(
-                                      color: Color.fromRGBO(7, 61, 43, 0.1))),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('ACCIÓN RECOMENDADA:',
-                                    style: RecomendacionesStyles.accionLabel),
-                                const SizedBox(height: 4),
-                                Text(recomendacion.accion,
-                                    style: RecomendacionesStyles.accionText),
-                              ],
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildField('Título:', recomendacion.titulo),
+                              const SizedBox(height: 18),
+                              _buildField('Descripción:', recomendacion.descripcion),
+                              const SizedBox(height: 18),
+                              _buildField('Acción recomendada:', recomendacion.accion),
+                              const SizedBox(height: 18),
+                              _buildField('Prioridad:', recomendacion.prioridad.label),
+                              const SizedBox(height: 18),
+                              _buildField('Color:', recomendacion.color.label),
+                              const SizedBox(height: 18),
+                              _buildField('Registrada:', formatearFecha(recomendacion.fechaRegistro)),
+                            ],
+                          ),
+                          const SizedBox(height: 22),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              GestureDetector(
+                                onTap: onCerrar,
+                                child: Container(
+                                  constraints: const BoxConstraints(minHeight: 54),
+                                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                                  decoration: VisualizarRecomendacionStyles.submitBtnDecoration,
+                                  child: const Center(
+                                    child: Text('Cerrar', style: VisualizarRecomendacionStyles.submitBtnStyle),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Align(
-                    alignment: Alignment.centerRight,
+                  Positioned(
+                    top: 18,
+                    right: 18,
                     child: GestureDetector(
                       onTap: onCerrar,
                       child: Container(
-                        constraints: const BoxConstraints(minHeight: 50),
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        decoration: BoxDecoration(
-                          color: RecomendacionesStyles.backgroundInput,
-                          border: Border.all(color: RecomendacionesStyles.borderGrey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        width: 40,
+                        height: 40,
+                        decoration: VisualizarRecomendacionStyles.closeBtnDecoration,
                         child: const Center(
-                          widthFactor: 1.0,
-                          child: Text('Cerrar', style: RecomendacionesStyles.labelText),
+                          child: FaIcon(
+                            FontAwesomeIcons.xmark,
+                            color: VisualizarRecomendacionStyles.darkGreen,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),
@@ -148,6 +118,17 @@ class VisualizarRecomendacion extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildField(String label, String value) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(text: '$label ', style: VisualizarRecomendacionStyles.formTextBoldStyle),
+          TextSpan(text: value, style: VisualizarRecomendacionStyles.formTextStyle),
+        ],
       ),
     );
   }

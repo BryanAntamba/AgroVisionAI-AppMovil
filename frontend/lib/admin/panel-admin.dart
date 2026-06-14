@@ -3,10 +3,10 @@ import '../styles/admin-styles/panel-admin.dart';
 import '../navbars/barra-admin.dart';
 import '../styles/navbars-styles/barra-admin.dart';
 import '../environments/datos-simulados-admin.dart';
-import 'modalesUsuario/registro-usuario.dart';
-import 'modalesUsuario/editar-usuario.dart';
-import 'modalesUsuario/eliminar-usuario.dart';
-import 'modalesUsuario/perfil-usuario.dart';
+import 'modales/registro-usuario.dart';
+import 'modales/editar-usuario.dart';
+import 'modales/eliminar-usuario.dart';
+import 'modales/perfil-usuario.dart';
 
 enum FiltroRol { todos, admin, agricultor }
 enum FiltroEstado { todos, activo, inactivo, enLinea, sinSesion }
