@@ -248,15 +248,11 @@ class _ModalReporteState extends State<ModalReporte> with SingleTickerProviderSt
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              Row(
+                              Column(
                                 children: [
-                                  Expanded(
-                                    child: _buildMetricaCard('Salud', '${widget.registro.salud}%'),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: _buildMetricaCard('Resultado\nInteligente', '${widget.registro.confianza}%'),
-                                  ),
+                                  _buildMetricaCard('Salud', '${widget.registro.salud}%'),
+                                  const SizedBox(height: 14),
+                                  _buildMetricaCard('Resultado Inteligente', '${widget.registro.confianza}%'),
                                 ],
                               ),
                               const SizedBox(height: 24),
@@ -381,6 +377,7 @@ class _ModalReporteState extends State<ModalReporte> with SingleTickerProviderSt
 
   Widget _buildMetricaCard(String label, String value) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: ModalReporteStyles.metricaDecoration,
       child: Column(

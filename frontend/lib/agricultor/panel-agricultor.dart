@@ -343,10 +343,10 @@ class _PanelAgricultorState extends State<PanelAgricultor>
         _buildEncabezado(),
         const SizedBox(height: 14),
         // Panel de alertas (si hay alertas visibles)
-        if (_alertasVisibles.isNotEmpty) ...[
+        if (_alertasVisibles.isNotEmpty) 
           _buildAlertasPanel(),
+        if (_alertasVisibles.isNotEmpty)
           const SizedBox(height: 14),
-        ],
         _buildCaptura(),
         _buildSalud(),
         _buildSensores(),
@@ -480,49 +480,72 @@ class _PanelAgricultorState extends State<PanelAgricultor>
   }
 
   Widget _buildAlertasPanel() {
+    final List<Widget> widgets = [];
+    
+    if (_alertasVisibles.contains(TipoAlertaSensor.dht22)) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: AlertaDht22(
+            alerta: _getAlerta(TipoAlertaSensor.dht22),
+            onCerrar: () => _cerrarAlerta(TipoAlertaSensor.dht22),
+          ),
+        ),
+      );
+    }
+    
+    if (_alertasVisibles.contains(TipoAlertaSensor.cam)) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: AlertaCam(
+            alerta: _getAlerta(TipoAlertaSensor.cam),
+            onCerrar: () => _cerrarAlerta(TipoAlertaSensor.cam),
+          ),
+        ),
+      );
+    }
+    
+    if (_alertasVisibles.contains(TipoAlertaSensor.capaciteV2)) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: AlertaCapaciteV2(
+            alerta: _getAlerta(TipoAlertaSensor.capaciteV2),
+            onCerrar: () => _cerrarAlerta(TipoAlertaSensor.capaciteV2),
+          ),
+        ),
+      );
+    }
+    
+    if (_alertasVisibles.contains(TipoAlertaSensor.antenaWifi)) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: AlertaAntenaWifi(
+            alerta: _getAlerta(TipoAlertaSensor.antenaWifi),
+            onCerrar: () => _cerrarAlerta(TipoAlertaSensor.antenaWifi),
+          ),
+        ),
+      );
+    }
+    
+    if (_alertasVisibles.contains(TipoAlertaSensor.sensorLdr)) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: AlertaSensorLdr(
+            alerta: _getAlerta(TipoAlertaSensor.sensorLdr),
+            onCerrar: () => _cerrarAlerta(TipoAlertaSensor.sensorLdr),
+          ),
+        ),
+      );
+    }
+    
     return Column(
-      children: [
-        if (_alertasVisibles.contains(TipoAlertaSensor.dht22))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AlertaDht22(
-              alerta: _getAlerta(TipoAlertaSensor.dht22),
-              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.dht22),
-            ),
-          ),
-        if (_alertasVisibles.contains(TipoAlertaSensor.cam))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AlertaCam(
-              alerta: _getAlerta(TipoAlertaSensor.cam),
-              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.cam),
-            ),
-          ),
-        if (_alertasVisibles.contains(TipoAlertaSensor.capaciteV2))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AlertaCapaciteV2(
-              alerta: _getAlerta(TipoAlertaSensor.capaciteV2),
-              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.capaciteV2),
-            ),
-          ),
-        if (_alertasVisibles.contains(TipoAlertaSensor.antenaWifi))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AlertaAntenaWifi(
-              alerta: _getAlerta(TipoAlertaSensor.antenaWifi),
-              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.antenaWifi),
-            ),
-          ),
-        if (_alertasVisibles.contains(TipoAlertaSensor.sensorLdr))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AlertaSensorLdr(
-              alerta: _getAlerta(TipoAlertaSensor.sensorLdr),
-              onCerrar: () => _cerrarAlerta(TipoAlertaSensor.sensorLdr),
-            ),
-          ),
-      ],
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: widgets,
     );
   }
 
@@ -1235,8 +1258,6 @@ class _PanelAgricultorState extends State<PanelAgricultor>
     
     // Tomar las 5 principales
     final top5 = prediccionesList.take(5).toList();
-    // Contar cuántas quedan
-    final restantes = prediccionesList.length - 5;
     
     return _buildSeccion(
       'Diagnóstico de la IA',
