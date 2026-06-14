@@ -1,14 +1,27 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPORTACIONES
+// ═══════════════════════════════════════════════════════════════════════════
+import 'dart:convert'; // Para codificar/decodificar JSON
+import 'package:flutter/material.dart'; // Framework de Flutter
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Iconos de FontAwesome
+import 'package:shared_preferences/shared_preferences.dart'; // Almacenamiento local persistente
 
-import '../../navbars/barra-agricultor.dart';
-import '../../styles/navbars-styles/barra-agricultor.dart';
-import '../../styles/agricultor-styles/historial-styles/historial.dart';
-import '../../environments/historial.dart';
-import '../modales/modal-reporte.dart';
+import '../../navbars/barra-agricultor.dart'; // Barra de navegación del agricultor
+import '../../styles/navbars-styles/barra-agricultor.dart'; // Estilos de la barra
+import '../../styles/agricultor-styles/historial-styles/historial.dart'; // Estilos del historial
+import '../../environments/historial.dart'; // Modelos y datos simulados del historial
+import '../modales/modal-reporte.dart'; // Modal para visualizar reporte completo
 
+// ═══════════════════════════════════════════════════════════════════════════
+// WIDGET: Historial - Pantalla de historial de monitoreo de cultivos
+// ═══════════════════════════════════════════════════════════════════════════
+/// Pantalla que muestra el historial completo de análisis de plantas realizados.
+/// Incluye filtros por:
+/// - Búsqueda de texto (diagnóstico)
+/// - Estado de salud (Todos, Sano, Alerta, Crítico)
+/// - Rango de fechas (inicio y fin)
+/// 
+/// Muestra estadísticas resumidas y permite abrir reportes individuales
 class Historial extends StatefulWidget {
   const Historial({super.key});
 
@@ -16,26 +29,36 @@ class Historial extends StatefulWidget {
   State<Historial> createState() => _HistorialState();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADO: _HistorialState - Gestiona el historial de análisis de plantas
+// ═══════════════════════════════════════════════════════════════════════════
 class _HistorialState extends State<Historial> {
-  final TextEditingController _searchController = TextEditingController();
-  String _busqueda = '';
-  String _filtroEstado = 'Todos';
-  DateTime? _fechaInicio;
-  DateTime? _fechaFin;
+  // ─── CONTROLADORES Y FILTROS ───
+  final TextEditingController _searchController = TextEditingController(); // Controlador del campo de búsqueda
+  String _busqueda = ''; // Término de búsqueda actual
+  String _filtroEstado = 'Todos'; // Filtro de estado: Todos, Sano, Alerta, Crítico
+  DateTime? _fechaInicio; // Fecha de inicio del rango (null = sin filtro)
+  DateTime? _fechaFin; // Fecha de fin del rango (null = sin filtro)
 
-  List<RegistroHistorial> _registros = [];
-  bool _isLoading = true;
+  // ─── DATOS ───
+  List<RegistroHistorial> _registros = []; // Lista de todos los registros del historial
+  bool _isLoading = true; // true = cargando datos, false = datos listos
 
-  final FocusNode _searchFocusNode = FocusNode();
-  final FocusNode _statusFocusNode = FocusNode();
-  bool _searchFocused = false;
-  bool _statusFocused = false;
+  // ─── CONTROL DE FOCUS (para estilos de campos enfocados) ───
+  final FocusNode _searchFocusNode = FocusNode(); // Focus del campo de búsqueda
+  final FocusNode _statusFocusNode = FocusNode(); // Focus del dropdown de estado
+  bool _searchFocused = false; // true = campo de búsqueda tiene focus
+  bool _statusFocused = false; // true = dropdown de estado tiene focus
+
+  // ─── CONTROL DE MODAL ───
+  RegistroHistorial? _registroSeleccionado; // Registro actual para mostrar en modal (null = modal cerrado)
 
   @override
   void initState() {
     super.initState();
-    _cargarRegistros();
+    _cargarRegistros(); // Carga registros desde SharedPreferences o datos simulados
 
+    // Listeners para cambiar estilos cuando los campos obtienen/pierden focus
     _searchFocusNode.addListener(() {
       setState(() {
         _searchFocused = _searchFocusNode.hasFocus;
@@ -50,17 +73,26 @@ class _HistorialState extends State<Historial> {
 
   @override
   void dispose() {
+    // Libera recursos de controladores y focus nodes
     _searchController.dispose();
     _searchFocusNode.dispose();
     _statusFocusNode.dispose();
     super.dispose();
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CARGAR REGISTROS DESDE ALMACENAMIENTO LOCAL O DATOS SIMULADOS
+  // ═══════════════════════════════════════════════════════════════════════════
+  /// Intenta cargar el historial guardado en SharedPreferences.
+  /// Si no existe historial guardado, usa datos simulados por defecto.
+  /// Maneja errores y asegura que siempre haya datos disponibles.
   Future<void> _cargarRegistros() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final historialGuardado = prefs.getString('agrovision_historial');
+      final prefs = await SharedPreferences.getInstance(); // Obtiene instancia de SharedPreferences
+      final historialGuardado = prefs.getString('agrovision_historial'); // Intenta obtener historial guardado
+      
       if (historialGuardado != null) {
+        // Si hay historial guardado, decodifica el JSON y convierte a lista de RegistroHistorial
         final List<dynamic> list = json.decode(historialGuardado);
         setState(() {
           _registros = list.map((item) {
@@ -78,15 +110,17 @@ class _HistorialState extends State<Historial> {
               luz: (item['luz'] as num?)?.toInt() ?? 50000,
             );
           }).toList();
-          _isLoading = false;
+          _isLoading = false; // Termina carga
         });
       } else {
+        // Si no hay historial guardado, usa datos simulados
         setState(() {
-          _registros = [...historialSimulado];
+          _registros = [...historialSimulado]; // Clona lista de datos simulados
           _isLoading = false;
         });
       }
     } catch (e) {
+      // Si hay error al cargar, usa datos simulados como respaldo
       debugPrint('Error cargando historial: $e');
       setState(() {
         _registros = [...historialSimulado];
@@ -95,8 +129,15 @@ class _HistorialState extends State<Historial> {
     }
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MÉTODOS UTILITARIOS PARA FILTRADO Y CLASIFICACIÓN
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Normaliza un string para búsqueda (minúsculas, sin acentos, sin espacios extra)
+  /// Ejemplo: "Tizón Temprano" -> "tizon temprano"
   String _normalizar(String valor) {
     var str = valor.toLowerCase().trim();
+    // Reemplaza vocales con acentos por vocales sin acentos
     str = str.replaceAll(RegExp(r'[áàäâ]'), 'a');
     str = str.replaceAll(RegExp(r'[éèëê]'), 'e');
     str = str.replaceAll(RegExp(r'[íìïî]'), 'i');
@@ -105,24 +146,30 @@ class _HistorialState extends State<Historial> {
     return str;
   }
 
+  /// Determina el estado de una planta según su nivel de salud (0-100)
+  /// - 80-100: Sano
+  /// - 50-79: Alerta  
+  /// - 0-49: Crítico
   String _obtenerEstado(int salud) {
     if (salud >= 80) return 'Sano';
     if (salud >= 50) return 'Alerta';
     return 'Crítico';
   }
 
+  /// Retorna el color del texto según el estado de salud
   Color _obtenerColorTextoEstado(int salud) {
     final estado = _obtenerEstado(salud);
-    if (estado == 'Sano') return HistorialStyles.sanoText;
-    if (estado == 'Alerta') return HistorialStyles.alertaText;
-    return HistorialStyles.criticoText;
+    if (estado == 'Sano') return HistorialStyles.sanoText; // Verde
+    if (estado == 'Alerta') return HistorialStyles.alertaText; // Amarillo
+    return HistorialStyles.criticoText; // Rojo
   }
 
+  /// Retorna el color de fondo según el estado de salud
   Color _obtenerColorBgEstado(int salud) {
     final estado = _obtenerEstado(salud);
-    if (estado == 'Sano') return HistorialStyles.sanoBg;
-    if (estado == 'Alerta') return HistorialStyles.alertaBg;
-    return HistorialStyles.criticoBg;
+    if (estado == 'Sano') return HistorialStyles.sanoBg; // Verde claro
+    if (estado == 'Alerta') return HistorialStyles.alertaBg; // Amarillo claro
+    return HistorialStyles.criticoBg; // Rojo claro
   }
 
   bool _coincideFecha(String fechaRegistroStr) {
@@ -254,13 +301,7 @@ class _HistorialState extends State<Historial> {
   }
 
   void _abrirReporte(RegistroHistorial registro) {
-    showDialog(
-      context: context,
-      barrierColor: const Color.fromRGBO(7, 61, 43, 0.45),
-      builder: (context) {
-        return ModalReporte(registro: registro);
-      },
-    );
+    setState(() => _registroSeleccionado = registro);
   }
 
   @override
@@ -320,6 +361,12 @@ class _HistorialState extends State<Historial> {
                   right: 0,
                   child: const BarraAgricultor(),
                 ),
+                // ── Modal overlay (al nivel del Stack principal para cubrir todo) ──
+                if (_registroSeleccionado != null)
+                  ModalReporte(
+                    registro: _registroSeleccionado!,
+                    onCerrar: () => setState(() => _registroSeleccionado = null),
+                  ),
               ],
             ),
     );

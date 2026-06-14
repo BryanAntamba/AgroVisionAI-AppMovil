@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+/// Animaciones para formularios de autenticación
+/// Separado de validacion-errores.dart para mantener responsabilidades únicas
+/// 
+/// Incluye:
+/// - fadeUp: animación de entrada con fade y slide
+/// - fadeView: transición entre vistas
+/// - feedback: animación de mensajes de feedback (éxito/error)
+/// - authLinkMotion: efecto hover en enlaces
 class AnimacionesAutenticacion {
   // Equivalente Flutter de .fade-up, .fade-view y feedback CSS.
   static const Duration fadeUpDuration = Duration(milliseconds: 720);

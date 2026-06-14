@@ -1,28 +1,47 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPORTACIONES
+// ═══════════════════════════════════════════════════════════════════════════
+import 'dart:async'; // Para Timer y operaciones asíncronas
+import 'dart:convert'; // Para JSON encode/decode
+import 'package:flutter/material.dart'; // Framework de Flutter
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Iconos de FontAwesome
+import 'package:shared_preferences/shared_preferences.dart'; // Almacenamiento local persistente
 
-import '../navbars/barra-agricultor.dart';
-import '../styles/navbars-styles/barra-agricultor.dart';
-import 'boton-iot.dart';
-import 'modales/desconectar-dispositivo.dart';
-import 'modales/guardar-reporte.dart';
-import '../environments/datos-iot-simulados.dart';
-import '../environments/datos-alertas-simuladas.dart';
-import '../styles/agricultor-styles/panel-agricultor.dart';
-import '../shared/utils/traductor-enfermedades/clases-enfermedad.dart';
+import '../navbars/barra-agricultor.dart'; // Barra de navegación del agricultor
+import '../styles/navbars-styles/barra-agricultor.dart'; // Estilos de la barra
+import 'boton-iot.dart'; // Botón de conexión IoT
+import 'modales/desconectar-dispositivo.dart'; // Modal para confirmar desconexión
+import 'modales/guardar-reporte.dart'; // Modal de confirmación de guardado
+import '../environments/datos-iot-simulados.dart'; // Datos simulados de sensores IoT
+import '../environments/datos-alertas-simuladas.dart'; // Sistema de alertas de sensores
+import '../styles/agricultor-styles/panel-agricultor.dart'; // Estilos del panel
+import '../shared/utils/traductor-enfermedades/clases-enfermedad.dart'; // Traductor de diagnósticos
 
-import '../environments/modales-recomendacion.dart';
+import '../environments/modales-recomendacion.dart'; // Recomendaciones de acción
 
-// Importar componentes de alertas
-import 'alertas/alerta-dht22.dart';
-import 'alertas/alerta-cam.dart';
-import 'alertas/alerta-capacite-v2.dart';
-import 'alertas/alerta-antena-wifi.dart';
-import 'alertas/alerta-sensor-idr.dart';
+// Importar componentes de alertas de sensores
+import 'alertas/alerta-dht22.dart'; // Alerta sensor temperatura/humedad
+import 'alertas/alerta-cam.dart'; // Alerta cámara
+import 'alertas/alerta-capacite-v2.dart'; // Alerta sensor humedad suelo
+import 'alertas/alerta-antena-wifi.dart'; // Alerta WiFi
+import 'alertas/alerta-sensor-idr.dart'; // Alerta sensor de luz LDR
 
+// ═══════════════════════════════════════════════════════════════════════════
+// WIDGET: PanelAgricultor - Dashboard principal del agricultor
+// ═══════════════════════════════════════════════════════════════════════════
+/// Pantalla principal que muestra el monitoreo en tiempo real de cultivos.
+/// 
+/// Funcionalidades principales:
+/// - Conexión/desconexión de dispositivo IoT
+/// - Visualización de datos de sensores en tiempo real
+/// - Sistema de alertas de sensores (DHT22, cámara, humedad, WiFi, luz)
+/// - Captura automática de imágenes de plantas
+/// - Índice de salud de la planta (con componentes visuales)
+/// - Diagnóstico por IA con probabilidades
+/// - Métricas de lesión y análisis de colores
+/// - Recomendaciones de acción dinámicas
+/// - Guardar reportes en historial
+/// - Estado de conectividad del dispositivo
 class PanelAgricultor extends StatefulWidget {
   const PanelAgricultor({super.key});
 
@@ -30,39 +49,56 @@ class PanelAgricultor extends StatefulWidget {
   State<PanelAgricultor> createState() => _PanelAgricultorState();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADO: _PanelAgricultorState - Gestiona dashboard y datos en tiempo real
+// ═══════════════════════════════════════════════════════════════════════════
 class _PanelAgricultorState extends State<PanelAgricultor>
     with TickerProviderStateMixin {
-  bool _dispositivoConectado = false;
-  bool _dispositivoDesconectado = false;
-  final DatosIOTSimulados _datos = datosIOTSimulados;
+  // ─── ESTADO DE CONEXIÓN DEL DISPOSITIVO ───
+  bool _dispositivoConectado = false; // true = dispositivo conectado
+  bool _dispositivoDesconectado = false; // true = dispositivo fue desconectado intencionalmente
+  final DatosIOTSimulados _datos = datosIOTSimulados; // Datos simulados de sensores IoT
 
-  bool _isDisconnecting = false;
-  bool _isReconnecting = false;
-  String _errorReconexion = '';
-  int _intentosReconexion = 0;
-  String _fechaUltimaCaptura = '';
+  // ─── ESTADO DE RECONEXIÓN ───
+  bool _isDisconnecting = false; // true = proceso de desconexión en curso
+  bool _isReconnecting = false; // true = intentando reconectar
+  String _errorReconexion = ''; // Mensaje de error de reconexión
+  int _intentosReconexion = 0; // Contador de intentos de reconexión
+  String _fechaUltimaCaptura = ''; // Fecha/hora formateada de última captura
 
-  Timer? _intervaloCaptura;
-  late AnimationController _blinkController;
+  // ─── CONTROL DE MODALES ───
+  bool _mostrarModalDesconectar = false; // true = muestra modal de confirmación de desconexión
+  bool _mostrarModalGuardarReporte = false; // true = muestra modal de éxito al guardar
 
-  // Variables para el sistema de alertas
-  List<TipoAlertaSensor> _alertasVisibles = [];
+  // ─── SIMULACIÓN DE CAPTURAS ───
+  Timer? _intervaloCaptura; // Timer que simula capturas periódicas de imágenes
+  late AnimationController _blinkController; // Animación de parpadeo del indicador de conexión
+
+  // ─── SISTEMA DE ALERTAS DE SENSORES ───
+  List<TipoAlertaSensor> _alertasVisibles = []; // Lista de alertas actualmente mostradas
 
   @override
   void initState() {
     super.initState();
-    _fechaUltimaCaptura = _datos.meta.fechaCaptura;
-    _cargarEstadoLocal();
+    _fechaUltimaCaptura = _datos.meta.fechaCaptura; // Inicializa con fecha simulada
+    _cargarEstadoLocal(); // Carga estado de conexión desde SharedPreferences
 
+    // Configura animación de parpadeo del indicador (1.2s por ciclo)
     _blinkController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
+    )..repeat(reverse: true); // Loop infinito con reverse
 
-    // Cargar alertas activas inicialmente
+    // Carga alertas activas inicialmente (desde datos simulados)
     _alertasVisibles = List.from(alertasActivasAlInicio);
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MÉTODOS DE GESTIÓN DE ESTADO Y ALMACENAMIENTO
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Carga el estado de conexión desde SharedPreferences
+  /// Si el dispositivo está conectado y no desconectado, inicia simulación de capturas
   Future<void> _cargarEstadoLocal() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -73,6 +109,7 @@ class _PanelAgricultorState extends State<PanelAgricultor>
             prefs.getString('dispositivoDesconectado') == 'true';
       });
 
+      // Si está conectado y no fue desconectado, inicia captura automática
       if (_dispositivoConectado && !_dispositivoDesconectado) {
         _iniciarSimulacionCapturas();
       }
@@ -83,58 +120,82 @@ class _PanelAgricultorState extends State<PanelAgricultor>
 
   @override
   void dispose() {
-    _detenerSimulacionCapturas();
-    _blinkController.dispose();
+    _detenerSimulacionCapturas(); // Detiene timer de capturas
+    _blinkController.dispose(); // Libera recursos de animación
     super.dispose();
   }
 
+  /// Genera etiqueta de planta con formato (ej: "Planta #01", "Planta #15")
   String get _etiquetaPlanta {
     final n = _datos.captura.numeroPlanta;
-    return 'Planta #${n.toString().padLeft(2, '0')}';
+    return 'Planta #${n.toString().padLeft(2, '0')}'; // Rellena con 0 a la izquierda
   }
 
-  // Método para obtener los datos de una alerta específica
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MÉTODOS DE GESTIÓN DE ALERTAS
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Obtiene los datos de una alerta específica desde el catálogo
+  /// @param id: Tipo de alerta del sensor
+  /// @return AlertaSensorData: Datos completos de la alerta (título, descripción, fecha)
   AlertaSensorData _getAlerta(TipoAlertaSensor id) {
     return catalogoAlertasSensores[id]!;
   }
 
-  // Método para cerrar una alerta
+  /// Cierra/oculta una alerta específica
+  /// @param id: Tipo de alerta a cerrar
   void _cerrarAlerta(TipoAlertaSensor id) {
     setState(() {
-      _alertasVisibles.remove(id);
+      _alertasVisibles.remove(id); // Remueve de la lista de alertas visibles
     });
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MÉTODO DE GUARDADO DE REPORTE
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Guarda el reporte actual en el historial (SharedPreferences)
+  /// Proceso:
+  /// 1. Obtiene fecha/hora actual
+  /// 2. Traduce diagnóstico al español
+  /// 3. Crea objeto de reporte con todos los datos
+  /// 4. Lee historial existente
+  /// 5. Inserta nuevo reporte al inicio
+  /// 6. Guarda en SharedPreferences
+  /// 7. Muestra modal de éxito
   void _guardarReporte() async {
     try {
       final ahora = DateTime.now();
-      // Traducir el diagnóstico antes de guardar
+      // Traducir el diagnóstico de inglés a español antes de guardar
       final diagnosticoOriginal = _datos.diagnosticoFinal.diagnosticoFinal;
       final diagnosticoEspanol = traducirDiagnostico(diagnosticoOriginal);
       
+      // Crea objeto de reporte con todos los datos actuales
       final reporte = {
-        'id': ahora.millisecondsSinceEpoch,
-        'fecha': ahora.toIso8601String().substring(0, 10),
+        'id': ahora.millisecondsSinceEpoch, // ID único basado en timestamp
+        'fecha': ahora.toIso8601String().substring(0, 10), // Formato: YYYY-MM-DD
         'hora':
-            '${ahora.hour.toString().padLeft(2, '0')}:${ahora.minute.toString().padLeft(2, '0')}',
-        'planta': _etiquetaPlanta,
-        'diagnostico': diagnosticoEspanol, // Guardado en español
-        'confianza': _datos.diagnosticoFinal.confianzaFinal,
-        'salud': _datos.indiceSalud.valor,
+            '${ahora.hour.toString().padLeft(2, '0')}:${ahora.minute.toString().padLeft(2, '0')}', // Formato: HH:MM
+        'planta': _etiquetaPlanta, // Ej: "Planta #01"
+        'diagnostico': diagnosticoEspanol, // Diagnóstico traducido al español
+        'confianza': _datos.diagnosticoFinal.confianzaFinal, // % de confianza de IA
+        'salud': _datos.indiceSalud.valor, // % de salud de la planta
       };
 
+      // Lee historial existente desde SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final strList = prefs.getString('agrovision_historial');
       List<dynamic> prev = strList != null ? json.decode(strList) : [];
+      
+      // Inserta nuevo reporte al inicio (más reciente primero)
       prev.insert(0, reporte);
+      
+      // Guarda historial actualizado
       await prefs.setString('agrovision_historial', json.encode(prev));
 
+      // Muestra modal de confirmación
       if (mounted) {
-        showDialog(
-          context: context,
-          barrierColor: Colors.transparent,
-          builder: (context) => const GuardarReporte(),
-        );
+        setState(() => _mostrarModalGuardarReporte = true);
       }
     } catch (e) {
       debugPrint('Error guardando reporte: $e');
@@ -165,16 +226,17 @@ class _PanelAgricultorState extends State<PanelAgricultor>
     }
   }
 
-  Future<void> _abrirModalDesconectar() async {
-    final resultado = await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => const DesconectarDispositivo(),
-    );
+  void _abrirModalDesconectar() {
+    setState(() => _mostrarModalDesconectar = true);
+  }
 
-    if (resultado == true && mounted) {
-      _desconectarDispositivo();
-    }
+  void _cerrarModalDesconectar() {
+    setState(() => _mostrarModalDesconectar = false);
+  }
+
+  void _confirmarDesconectar() {
+    _cerrarModalDesconectar();
+    _desconectarDispositivo();
   }
 
   void _desconectarDispositivo() {
@@ -331,6 +393,16 @@ class _PanelAgricultorState extends State<PanelAgricultor>
             right: 0,
             child: const BarraAgricultor(),
           ),
+          // ── Modales overlay (al nivel del Stack principal para cubrir todo) ──
+          if (_mostrarModalDesconectar)
+            DesconectarDispositivo(
+              onCerrar: _cerrarModalDesconectar,
+              onConfirmar: _confirmarDesconectar,
+            ),
+          if (_mostrarModalGuardarReporte)
+            GuardarReporte(
+              onCerrar: () => setState(() => _mostrarModalGuardarReporte = false),
+            ),
         ],
       ),
     );

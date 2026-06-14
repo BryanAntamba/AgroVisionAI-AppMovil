@@ -1,3 +1,23 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// RESTABLECER CONTRASEÑA - FLUJO COMPLETO DE RECUPERACIÓN
+// ═══════════════════════════════════════════════════════════════════════════
+// Componente maestro que orquesta el flujo completo de restablecimiento de
+// contraseña mediante un wizard de 4 pasos secuenciales.
+//
+// Pasos del flujo:
+// 1. 'correo': Ingreso del correo electrónico
+// 2. 'codigo': Verificación del código de 6 dígitos
+// 3. 'password': Creación de nueva contraseña
+// 4. 'finalizado': Confirmación de cambio exitoso
+//
+// Características principales:
+// - Navegación secuencial entre pasos
+// - Validación de correo simulado (usuario@gmail.com)
+// - Integración con componentes especializados
+// - Animaciones independientes por paso
+// - Callbacks para comunicación con componentes padre
+// ═══════════════════════════════════════════════════════════════════════════
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../styles/autenticacion-styles/restablecer-password.dart';
@@ -5,6 +25,13 @@ import 'password-confirmacion.dart';
 import 'codigo-verificacion.dart';
 import 'cambiar-password.dart';
 
+/// Widget Stateful que maneja el flujo completo de restablecimiento
+/// 
+/// Parámetros requeridos:
+/// - [volverLogin]: Callback para regresar a la pantalla de login
+/// 
+/// Parámetros opcionales:
+/// - [onPasoChanged]: Callback ejecutado cuando cambia el paso actual
 class RestablecerPassword extends StatefulWidget {
   final VoidCallback volverLogin;
   final Function(String)? onPasoChanged;
@@ -20,28 +47,77 @@ class RestablecerPassword extends StatefulWidget {
 }
 
 class RestablecerPasswordState extends State<RestablecerPassword> with TickerProviderStateMixin {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONTROLADORES Y ESTADO DEL FORMULARIO (PASO 1: CORREO)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Clave global para validación del formulario de correo
   final _formKey = GlobalKey<FormState>();
+  
+  /// Controlador para el campo de correo electrónico
   final TextEditingController _emailController = TextEditingController();
   
+  /// Mensaje de error general del proceso de restablecimiento
   String _resetError = '';
+  
+  /// Mensaje de error específico del campo de correo
   String? _emailErrorMsg;
+  
+  /// Almacena el correo verificado para usarlo en pasos posteriores
   String _correoVerificado = '';
-  String paso = 'correo'; // 'correo', 'codigo', 'password', 'finalizado'
+  
+  /// Paso actual del wizard: 'correo', 'codigo', 'password', 'finalizado'
+  String paso = 'correo';
+  
+  /// Indica si el campo de correo tiene foco
   bool _emailFocus = false;
   
+  // ═══════════════════════════════════════════════════════════════════════════
+  // VALIDACIÓN SIMULADA
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Correo simulado para pruebas (debe coincidir para avanzar)
   final String _correoSimulado = 'usuario@gmail.com';
   
-  // Animaciones
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONTROLADORES Y ANIMACIONES (SOLO PARA PASO 1: CORREO)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Los otros pasos (codigo, password, finalizado) manejan sus propias animaciones
+  // Sistema de animaciones fade-up con delays escalonados para 6 elementos:
+  // 1. Logo (90ms)
+  // 2. Título (190ms)
+  // 3. Descripción (290ms)
+  // 4. Campo correo (390ms)
+  // 5. Botón enviar (490ms)
+  // 6. Enlace regresar (590ms)
+  
+  /// Controlador principal de animaciones (duración total: 1310ms)
   late AnimationController _animationController;
+  
+  /// Lista de animaciones de opacidad (fade-in) para cada elemento
   late List<Animation<double>> _fadeAnimations;
+  
+  /// Lista de animaciones de desplazamiento (slide-up) para cada elemento
   late List<Animation<Offset>> _slideAnimations;
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CICLO DE VIDA DEL WIDGET
+  // ═══════════════════════════════════════════════════════════════════════════
+  
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
   }
 
+  /// Inicializa el sistema de animaciones fade-up escalonadas para el paso de correo
+  /// 
+  /// Proceso:
+  /// 1. Crea el AnimationController con duración total de 1310ms
+  /// 2. Genera 6 animaciones de fade (opacidad 0 → 1)
+  /// 3. Genera 6 animaciones de slide (offset 0.34 → 0)
+  /// 4. Cada animación tiene su propio delay y usa Interval para timing
+  /// 5. Inicia todas las animaciones automáticamente
   void _initializeAnimations() {
     // Duración total: 590ms (último delay) + 720ms (duración animación) = 1310ms
     _animationController = AnimationController(
@@ -49,6 +125,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
       vsync: this,
     );
 
+    // Genera animaciones de fade-in para cada uno de los 6 elementos
     _fadeAnimations = List.generate(6, (index) {
       final delayMs = RestablecerPasswordStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
@@ -66,6 +143,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
       );
     });
 
+    // Genera animaciones de slide-up para cada uno de los 6 elementos
     _slideAnimations = List.generate(6, (index) {
       final delayMs = RestablecerPasswordStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
@@ -83,16 +161,27 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
       );
     });
 
+    // Inicia las animaciones automáticamente
     _animationController.forward();
   }
 
   @override
   void dispose() {
+    // Libera recursos de animación y controladores
     _animationController.dispose();
     _emailController.dispose();
     super.dispose();
   }
   
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BUILDER DE ANIMACIONES
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Construye un widget con animaciones de fade y slide aplicadas
+  /// 
+  /// Parámetros:
+  /// - [index]: Índice del elemento (0-5) que determina qué animación usar
+  /// - [child]: Widget hijo que se animará
   Widget _buildAnimatedWidget({
     required int index,
     required Widget child,
@@ -106,9 +195,21 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // VALIDACIÓN DEL FORMULARIO
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Valida el campo de correo electrónico
+  /// 
+  /// Validaciones:
+  /// 1. Verifica que no esté vacío
+  /// 2. Verifica que contenga "@gmail.com"
+  /// 
+  /// Retorna [true] si es válido, [false] en caso contrario
   bool _validateFields() {
     bool isValid = true;
     final email = _emailController.text.trim();
+    
     if (email.isEmpty) {
       _emailErrorMsg = 'El correo es requerido';
       isValid = false;
@@ -118,10 +219,22 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     } else {
       _emailErrorMsg = null;
     }
+    
     setState(() {});
     return isValid;
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NAVEGACIÓN ENTRE PASOS
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// PASO 1 → PASO 2: Envía código de verificación y avanza
+  /// 
+  /// Flujo:
+  /// 1. Limpia errores previos
+  /// 2. Valida el formato del correo
+  /// 3. Verifica que coincida con el correo simulado
+  /// 4. Si todo es correcto, avanza al paso 'codigo'
   void _enviarCodigo() {
     setState(() {
       _resetError = '';
@@ -131,6 +244,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
       return;
     }
 
+    // Validación contra el correo simulado
     if (_emailController.text.trim() != _correoSimulado) {
       setState(() {
         _resetError = 'El correo no coincide con el usuario simulado.';
@@ -138,6 +252,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
       return;
     }
 
+    // Avanza al paso de verificación de código
     setState(() {
       _correoVerificado = _emailController.text.trim();
       paso = 'codigo';
@@ -145,6 +260,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     widget.onPasoChanged?.call(paso);
   }
 
+  /// PASO 2 → PASO 3: Código verificado, muestra formulario de nueva contraseña
   void mostrarCambioPassword() {
     setState(() {
       paso = 'password';
@@ -152,6 +268,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     widget.onPasoChanged?.call(paso);
   }
 
+  /// PASO 3 → PASO 4: Contraseña cambiada, muestra confirmación final
   void finalizarCambio() {
     setState(() {
       paso = 'finalizado';
@@ -159,6 +276,14 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     widget.onPasoChanged?.call(paso);
   }
 
+  /// PASO 2 → PASO 1: Regresa al paso de correo para cambiar el email
+  /// 
+  /// Resetea:
+  /// - El paso actual a 'correo'
+  /// - El correo verificado
+  /// - Errores
+  /// - El campo de texto
+  /// - Reinicia las animaciones
   void volverACorreo() {
     setState(() {
       paso = 'correo';
@@ -167,18 +292,25 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
       _emailController.clear();
     });
     widget.onPasoChanged?.call(paso);
-    // Reinicia la animación al volver al paso de correo
+    
+    // Reinicia las animaciones para el paso de correo
     _animationController.reset();
     _animationController.forward();
   }
 
+  /// Callback para reenviar el código de verificación (usado en paso 2)
   void reenviarCodigoVerificacion() {
     debugPrint('Reenviando código de verificación a: $_correoVerificado');
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONSTRUCCIÓN DE LA INTERFAZ (ROUTER DE PASOS)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
   @override
   Widget build(BuildContext context) {
-    // ngSwitch simple, cada paso maneja sus propias animaciones internas
+    // Switch simple: cada paso renderiza su propio componente
+    // Cada componente maneja sus propias animaciones internas
     switch (paso) {
       case 'correo':
         return _buildCorreoPaso();
@@ -193,12 +325,26 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     }
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PASO 1: INGRESO DE CORREO ELECTRÓNICO
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Construye la interfaz del primer paso (ingreso de correo)
+  /// 
+  /// Elementos:
+  /// - Logo
+  /// - Título y descripción
+  /// - Campo de correo con validación
+  /// - Botón de enviar código
+  /// - Enlace para regresar a login
   Widget _buildCorreoPaso() {
     return Column(
-      key: const ValueKey('correo'),
+      key: const ValueKey('correo'), // Clave única para transiciones
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Logo - Delay 1 (90ms)
+        // ═══════════════════════════════════════════════════════════════════════
+        // ELEMENTO 1: Logo (Delay 90ms)
+        // ═══════════════════════════════════════════════════════════════════════
         _buildAnimatedWidget(
           index: 0,
           child: Center(
@@ -215,7 +361,9 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
         ),
         const SizedBox(height: 26),
         
-        // Título - Delay 2 (190ms)
+        // ═══════════════════════════════════════════════════════════════════════
+        // ELEMENTO 2: Título (Delay 190ms)
+        // ═══════════════════════════════════════════════════════════════════════
         _buildAnimatedWidget(
           index: 1,
           child: const Text(
@@ -226,7 +374,9 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
         ),
         const SizedBox(height: 14),
         
-        // Descripción - Delay 3 (290ms)
+        // ═══════════════════════════════════════════════════════════════════════
+        // ELEMENTO 3: Descripción (Delay 290ms)
+        // ═══════════════════════════════════════════════════════════════════════
         _buildAnimatedWidget(
           index: 2,
           child: const Text(
@@ -237,12 +387,17 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
         ),
         const SizedBox(height: 24),
 
+        // ═══════════════════════════════════════════════════════════════════════
+        // FORMULARIO DE CORREO
+        // ═══════════════════════════════════════════════════════════════════════
         Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Campo de correo - Delay 4 (390ms)
+              // ═══════════════════════════════════════════════════════════════════
+              // ELEMENTO 4: Campo de Correo (Delay 390ms)
+              // ═══════════════════════════════════════════════════════════════════
               _buildAnimatedWidget(
                 index: 3,
                 child: Column(
@@ -300,7 +455,11 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
                 ),
               ),
               
-              // Mensaje de error - Delay 5 (490ms)
+              // Mensaje de error general
+              // ═══════════════════════════════════════════════════════════════════
+              // ELEMENTO 5: Mensaje de Error (Delay 490ms)
+              // ═══════════════════════════════════════════════════════════════════
+              // Solo se muestra si hay un error de validación
               if (_resetError.isNotEmpty)
                 _buildAnimatedWidget(
                   index: 4,
@@ -316,7 +475,9 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
               
               const SizedBox(height: 18),
               
-              // Botón enviar - Delay 5 (490ms)
+              // ═══════════════════════════════════════════════════════════════════
+              // ELEMENTO 5: Botón Enviar (Delay 490ms)
+              // ═══════════════════════════════════════════════════════════════════
               _buildAnimatedWidget(
                 index: 4,
                 child: Container(
@@ -348,7 +509,9 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
         
         const SizedBox(height: 20),
         
-        // Enlace regresar - Delay 6 (590ms)
+        // ═══════════════════════════════════════════════════════════════════════
+        // ELEMENTO 6: Enlace Regresar a Login (Delay 590ms)
+        // ═══════════════════════════════════════════════════════════════════════
         _buildAnimatedWidget(
           index: 5,
           child: TextButton(
@@ -360,9 +523,18 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PASO 2: VERIFICACIÓN DE CÓDIGO
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Construye la interfaz del segundo paso (verificación de código)
+  /// 
+  /// Utiliza el componente CodigoVerificacion con:
+  /// - Correo verificado del paso anterior
+  /// - Callbacks para avanzar o retroceder
   Widget _buildCodigoPaso() {
     return CodigoVerificacion(
-      key: ValueKey('codigo_$_correoVerificado'),
+      key: ValueKey('codigo_$_correoVerificado'), // Clave única por correo
       correo: _correoVerificado,
       onCodigoVerificado: mostrarCambioPassword,
       onReenviarCodigo: reenviarCodigoVerificacion,
@@ -371,6 +543,15 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PASO 3: CAMBIO DE CONTRASEÑA
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Construye la interfaz del tercer paso (nueva contraseña)
+  /// 
+  /// Utiliza el componente CambiarPassword con:
+  /// - Callback para avanzar al paso final
+  /// - Callback opcional para regresar a login
   Widget _buildCambiarPasswordPaso() {
     return CambiarPassword(
       key: const ValueKey('password_change'),
@@ -379,6 +560,14 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PASO 4: CONFIRMACIÓN FINAL
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Construye la interfaz del cuarto paso (confirmación)
+  /// 
+  /// Utiliza el componente PasswordConfirmacion con:
+  /// - Callback para regresar a login
   Widget _buildFinalizadoPaso() {
     return PasswordConfirmacion(
       key: const ValueKey('confirmacion_final'),

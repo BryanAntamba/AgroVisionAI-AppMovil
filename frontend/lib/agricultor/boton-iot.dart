@@ -1,11 +1,23 @@
-import 'dart:async';
-import 'dart:math';
-import 'package:flutter/material.dart';
-import '../styles/agricultor-styles/boton-iot.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../navbars/barra-agricultor.dart';
-import '../styles/navbars-styles/barra-agricultor.dart';
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPORTACIONES
+// ═══════════════════════════════════════════════════════════════════════════
+import 'dart:async'; // Para Timer y operaciones asíncronas
+import 'dart:math'; // Para funciones matemáticas (sin para animación)
+import 'package:flutter/material.dart'; // Framework de Flutter
+import '../styles/agricultor-styles/boton-iot.dart'; // Estilos del botón IoT
+import 'package:shared_preferences/shared_preferences.dart'; // Almacenamiento local
+import '../navbars/barra-agricultor.dart'; // Barra de navegación
+import '../styles/navbars-styles/barra-agricultor.dart'; // Estilos de barra
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ENUM: ConexionState - Estados posibles del dispositivo IoT
+// ═══════════════════════════════════════════════════════════════════════════
+/// Define los 5 estados del proceso de conexión del dispositivo:
+/// - inicial: Estado por defecto, listo para conectar
+/// - conectando: Intentando establecer conexión (animación activa)
+/// - conectado: Conexión exitosa establecida
+/// - errorConexion: Fallo en la conexión (con opción de reintentar)
+/// - desconectado: Dispositivo desconectado intencionalmente
 enum ConexionState {
   inicial,
   conectando,
@@ -14,10 +26,24 @@ enum ConexionState {
   desconectado,
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// WIDGET: BotonIOT - Botón inteligente de conexión de dispositivo IoT
+// ═══════════════════════════════════════════════════════════════════════════
+/// Widget interactivo para conectar/desconectar el dispositivo IoT de monitoreo.
+/// 
+/// Características:
+/// - Animaciones según estado (pulsar, sacudir, parpadear)
+/// - Navegación automática al panel tras conectar
+/// - Persistencia de estado en SharedPreferences
+/// - Dos modos: fullScreen (con navbar) o embebido
+/// - Feedback visual con colores y mensajes dinámicos
 class BotonIOT extends StatefulWidget {
-  final ValueChanged<bool>? onConectado;
-  final bool isFullScreen;
+  final ValueChanged<bool>? onConectado; // Callback opcional al cambiar estado de conexión
+  final bool isFullScreen; // true = pantalla completa con navbar, false = embebido
 
+  /// Constructor del botón IoT
+  /// @param onConectado: Callback que recibe true/false al conectar/desconectar
+  /// @param isFullScreen: Si es true, muestra navbar y ocupa pantalla completa
   const BotonIOT({
     super.key,
     this.onConectado,
@@ -28,10 +54,16 @@ class BotonIOT extends StatefulWidget {
   State<BotonIOT> createState() => _BotonIOTState();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADO: _BotonIOTState - Gestiona estado, animaciones y lógica de conexión
+// ═══════════════════════════════════════════════════════════════════════════
 class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
-  ConexionState _estado = ConexionState.inicial;
-  String _descripcion = '';
+  // ─── ESTADO DE CONEXIÓN ───
+  ConexionState _estado = ConexionState.inicial; // Estado actual del dispositivo
+  String _descripcion = ''; // Mensaje descriptivo según el estado
 
+  // ─── MENSAJES POR ESTADO ───
+  /// Mapa que asocia cada estado con su mensaje correspondiente
   static const Map<ConexionState, String> _mensajes = {
     ConexionState.inicial:
         'Apriete el botón para conectar el dispositivo AgroVision AI',
@@ -43,66 +75,84 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
     ConexionState.desconectado: 'Dispositivo desconectado',
   };
 
-  // Constantes de simulación
-  static const int tiempoConexionMs = 2000;
+  // ─── CONSTANTES DE SIMULACIÓN ───
+  static const int tiempoConexionMs = 2000; // Tiempo simulado de conexión (2 segundos)
 
-  late AnimationController _pulsarController;
-  late AnimationController _shakeController;
-  late AnimationController _blinkController;
+  // ─── CONTROLADORES DE ANIMACIONES ───
+  late AnimationController _pulsarController; // Animación de pulsar durante "conectando" (1.5s loop)
+  late AnimationController _shakeController; // Animación de sacudida en error (500ms)
+  late AnimationController _blinkController; // Animación de parpadeo cuando conectado (1s loop)
 
   @override
   void initState() {
     super.initState();
-    _descripcion = _mensajes[ConexionState.inicial]!;
+    _descripcion = _mensajes[ConexionState.inicial]!; // Inicializa mensaje
 
+    // Configura controladores de animaciones
     _pulsarController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1500), // Pulsar: 1.5s por ciclo
     );
 
     _shakeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500), // Sacudir: 0.5s
     );
 
     _blinkController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1000), // Parpadear: 1s por ciclo
     );
   }
 
   @override
   void dispose() {
+    // Libera recursos de los controladores
     _pulsarController.dispose();
     _shakeController.dispose();
     _blinkController.dispose();
     super.dispose();
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MÉTODOS DE CONTROL DE CONEXIÓN
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Inicia el proceso de conexión del dispositivo IoT
+  /// Proceso:
+  /// 1. Valida que no esté ya conectando o conectado
+  /// 2. Cambia a estado "conectando" con animación de pulsar
+  /// 3. Simula conexión por 2 segundos
+  /// 4. Guarda estado en SharedPreferences
+  /// 5. Navega al panel o ejecuta callback según configuración
   void _onConectarDispositivo() {
+    // Evita múltiples clicks durante conexión
     if (_estado == ConexionState.conectando ||
         _estado == ConexionState.conectado) {
       return;
     }
 
+    // Cambia a estado "conectando"
     setState(() {
       _estado = ConexionState.conectando;
       _descripcion = _mensajes[ConexionState.conectando]!;
     });
 
-    _pulsarController.repeat(reverse: true);
+    _pulsarController.repeat(reverse: true); // Inicia animación de pulsar (loop)
 
-    // Navegar directamente después de un breve delay
+    // Simula tiempo de conexión (2 segundos)
     Timer(const Duration(milliseconds: tiempoConexionMs), () async {
-      if (!mounted) return;
+      if (!mounted) return; // Verifica que el widget siga montado
 
+      // Detiene animación
       _pulsarController.stop();
       _pulsarController.reset();
 
       if (widget.onConectado != null) {
+        // Modo embebido: ejecuta callback
         widget.onConectado!(true);
       } else if (widget.isFullScreen) {
-        // Guardar estado de conexión
+        // Modo fullScreen: guarda estado y navega
         try {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('dispositivoConectado', 'true');
@@ -111,7 +161,7 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
           debugPrint('Error guardando en SharedPreferences: $e');
         }
 
-        // Navegar inmediatamente al panel del agricultor
+        // Navega al panel del agricultor
         if (mounted) {
           Navigator.pushReplacementNamed(context, '/panel-agricultor');
         }
@@ -119,6 +169,7 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
     });
   }
 
+  /// Reinicia el estado a inicial tras un error de conexión
   void _reintentar() {
     setState(() {
       _estado = ConexionState.inicial;
@@ -126,14 +177,16 @@ class _BotonIOTState extends State<BotonIOT> with TickerProviderStateMixin {
     });
   }
 
+  /// Resetea la conexión al estado inicial (usado externamente)
+  /// Detiene animaciones y ejecuta callback si existe
   void resetConexion() {
-    _blinkController.stop();
+    _blinkController.stop(); // Detiene parpadeo si estaba activo
     setState(() {
       _estado = ConexionState.inicial;
       _descripcion = _mensajes[ConexionState.inicial]!;
     });
     if (widget.onConectado != null) {
-      widget.onConectado!(false);
+      widget.onConectado!(false); // Notifica desconexión
     }
   }
 

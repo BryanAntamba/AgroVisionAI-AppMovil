@@ -1,73 +1,108 @@
-import 'package:flutter/material.dart';
+// ═══════════════════════════════════════════════════════════════════════════
+// BARRA ADMIN - ESTILOS DEL NAVBAR PARA ADMINISTRADORES
+// ═══════════════════════════════════════════════════════════════════════════
+// Define todos los estilos visuales del navbar usado en el panel de administración
+// Incluye colores, dimensiones, tipografía y decoraciones
+// ═══════════════════════════════════════════════════════════════════════════
 
+import 'package:flutter/material.dart'; // Importa el paquete de Flutter Material Design
+
+/// Clase que contiene todos los estilos del navbar para administradores
+/// Proporciona constantes estáticas para mantener consistencia visual
 class BarraAdminStyles {
-  // Colores base
-  static const Color darkGreen = Color(0xFF073D2B);
-  static const Color primaryGreen = Color(0xFF55A820);
-  static const Color linkNormal = Color(0xFF456657);
-  static const Color borderColor = Color(0xFFD7E4DC);
+  // ═══════════════════════════════════════════════════════════════════════════
+  // COLORES BASE
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  static const Color darkGreen = Color(0xFF073D2B);    // Verde oscuro para elementos principales y brand
+  static const Color primaryGreen = Color(0xFF55A820); // Verde brillante para elementos activos y botones
+  static const Color linkNormal = Color(0xFF456657);   // Verde grisáceo para enlaces en estado normal
+  static const Color borderColor = Color(0xFFD7E4DC);  // Verde muy claro para bordes y separadores
 
-  // Dimensiones
-  static const double navbarHeight = 72.0; // Altura mínima del navbar
-  static const double navbarPaddingVertical = 6.0; // Padding vertical inferior reducida para bajar el contenido
-  static const double contentPaddingTop = 35.0; // Padding superior adicional para bajar el contenido
-  static const double elevation = 0.0; // Elevación para sombra (0 porque usamos boxShadow personalizada)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DIMENSIONES
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  static const double navbarHeight = 72.0;              // Altura mínima del navbar en píxeles
+  static const double navbarPaddingVertical = 6.0;      // Padding vertical inferior (reducido para bajar contenido)
+  static const double contentPaddingTop = 35.0;         // Padding superior adicional para separar contenido
+  static const double elevation = 0.0;                  // Sin elevación (se usa boxShadow personalizada en su lugar)
 
-  // Tipografía
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TIPOGRAFÍA
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Estilo para el texto del brand (nombre de la plataforma)
   static const TextStyle brandText = TextStyle(
-    color: darkGreen,
-    fontSize: 22,
-    fontWeight: FontWeight.w800,
-    letterSpacing: -0.2,
+    color: darkGreen,          // Color verde oscuro
+    fontSize: 22,              // Tamaño grande para destacar
+    fontWeight: FontWeight.w800, // Peso extra-bold para impacto visual
+    letterSpacing: -0.2,       // Espaciado negativo para texto más compacto
   );
 
+  /// Estilo para los enlaces de navegación
   static const TextStyle navLinkText = TextStyle(
-    color: linkNormal,
-    fontSize: 15,
-    fontWeight: FontWeight.w700,
+    color: linkNormal,         // Color verde grisáceo normal
+    fontSize: 15,              // Tamaño mediano legible
+    fontWeight: FontWeight.w700, // Peso bold para claridad
   );
 
-  // Navbar container (fondo blanco + sombra)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NAVBAR CONTAINER (fondo blanco + sombra)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Decoración principal del container del navbar
+  /// Incluye fondo blanco, borde inferior y sombra suave
   static const BoxDecoration navbarDecoration = BoxDecoration(
-    color: Colors.white,
+    color: Colors.white,       // Fondo blanco sólido
     border: Border(
-      bottom: BorderSide(color: borderColor, width: 1),
+      bottom: BorderSide(color: borderColor, width: 1), // Borde inferior de 1px verde claro
     ),
     boxShadow: [
       BoxShadow(
-        color: Color.fromRGBO(7, 61, 43, 0.12),
-        blurRadius: 24,
-        offset: Offset(0, 10),
+        color: Color.fromRGBO(7, 61, 43, 0.12),  // Sombra verde oscuro con 12% de opacidad
+        blurRadius: 24,                           // Difuminado suave de 24px
+        offset: Offset(0, 10),                    // Desplazamiento hacia abajo 10px
       )
     ],
   );
 
-  // Gradiente radial overlay top-right (verde suave 20%)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // GRADIENTE RADIAL OVERLAY (efecto decorativo top-right)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Decoración con gradiente radial en la esquina superior derecha
+  /// Crea un efecto de resplandor verde suave del 20% de opacidad
   static const BoxDecoration radialOverlay = BoxDecoration(
     gradient: RadialGradient(
-      center: Alignment(1.0, -1.0),
-      radius: 1.2,
+      center: Alignment(1.0, -1.0),  // Centro en esquina superior derecha
+      radius: 1.2,                   // Radio de 1.2 para extender el efecto
       colors: [
-        Color.fromRGBO(85, 168, 32, 0.20),
-        Colors.transparent,
+        Color.fromRGBO(85, 168, 32, 0.20), // Verde brillante con 20% de opacidad
+        Colors.transparent,                 // Transparente en los bordes
       ],
-      stops: [0.0, 0.34],
+      stops: [0.0, 0.34],            // Transición del 0% al 34% del radio
     ),
   );
 
-  // Botón cerrar sesión
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BOTÓN CERRAR SESIÓN
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Decoración del botón de cerrar sesión
+  /// Incluye gradiente verde, bordes redondeados y sombra prominente
   static BoxDecoration logoutButtonDecoration = BoxDecoration(
     gradient: const LinearGradient(
-      colors: [darkGreen, primaryGreen],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
+      colors: [darkGreen, primaryGreen],  // Gradiente de verde oscuro a brillante
+      begin: Alignment.topLeft,           // Inicio del gradiente en esquina superior izquierda
+      end: Alignment.bottomRight,         // Fin del gradiente en esquina inferior derecha
     ),
-    borderRadius: BorderRadius.circular(8),
+    borderRadius: BorderRadius.circular(8), // Bordes redondeados de 8px de radio
     boxShadow: const [
       BoxShadow(
-        color: Color.fromRGBO(7, 61, 43, 0.24),
-        blurRadius: 28,
-        offset: Offset(0, 16),
+        color: Color.fromRGBO(7, 61, 43, 0.24), // Sombra verde oscuro con 24% de opacidad
+        blurRadius: 28,                          // Difuminado amplio de 28px
+        offset: Offset(0, 16),                   // Desplazamiento hacia abajo 16px para profundidad
       )
     ],
   );

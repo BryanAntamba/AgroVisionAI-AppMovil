@@ -1,3 +1,24 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// LOGIN - PANTALLA PRINCIPAL DE AUTENTICACIÓN
+// ═══════════════════════════════════════════════════════════════════════════
+// Pantalla de inicio de sesión con diseño responsivo adaptable a diferentes
+// tamaños de pantalla (móvil, tablet portrait, tablet landscape, desktop).
+//
+// Características principales:
+// - Autenticación con correo y contraseña
+// - Navegación basada en roles (admin vs agricultor)
+// - Carrusel de imágenes (3 imágenes, 6 segundos por slide)
+// - Layout adaptativo con breakpoints responsivos
+// - Animaciones fade-up escalonadas (6 elementos)
+// - Integración con flujo de restablecimiento de contraseña
+// - Toggle para mostrar/ocultar contraseña
+// - Validación en tiempo real
+//
+// Credenciales de prueba:
+// - Admin: admin@agrovision.com / admin123
+// - Agricultor: agricultor@agrovision.com / agricultor123
+// ═══════════════════════════════════════════════════════════════════════════
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,36 +34,84 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONTROLADORES Y ESTADO DEL FORMULARIO
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Clave global para validación del formulario
   final _formKey = GlobalKey<FormState>();
+  
+  /// Controlador para el campo de correo electrónico
   final TextEditingController _emailController = TextEditingController();
+  
+  /// Controlador para el campo de contraseña
   final TextEditingController _passwordController = TextEditingController();
   
+  /// Controla si la contraseña es visible (true) u oculta (false)
   bool _showPassword = false;
+  
+  /// Mensaje de error general de autenticación
   String _loginError = '';
+  
+  /// Controla si se muestra el flujo de restablecimiento de contraseña
   bool _showResetPassword = false;
   
+  /// Mensaje de error para el campo de correo
   String? _emailError;
+  
+  /// Mensaje de error para el campo de contraseña
   String? _passwordError;
   
+  /// Clave global para el componente de restablecimiento de contraseña
   final GlobalKey<RestablecerPasswordState> _resetPasswordKey = GlobalKey();
   
+  /// Indica si el campo de correo tiene foco
   bool _emailFocus = false;
+  
+  /// Indica si el campo de contraseña tiene foco
   bool _passwordFocus = false;
   
-  // Lógica del Carrusel
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LÓGICA DEL CARRUSEL DE IMÁGENES
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Índice actual de la imagen mostrada en el carrusel (0-2)
   int _currentCarouselIndex = 0;
+  
+  /// Timer que controla el cambio automático de imágenes cada 6 segundos
   Timer? _carouselTimer;
+  
+  /// Lista de rutas de las 3 imágenes del carrusel
   final List<String> _carouselImages = [
     'assets/imagesLogin/sosteniendoTomate.jpg',
     'assets/imagesLogin/tomateHumedo.jpg',
     'assets/imagesLogin/tomateIluminado.jpg',
   ];
 
-  // Animaciones
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONTROLADORES Y ANIMACIONES
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Sistema de animaciones fade-up con delays escalonados para 6 elementos:
+  // 1. Logo (90ms)
+  // 2. Título (190ms)
+  // 3. Campo correo (290ms)
+  // 4. Campo contraseña (390ms)
+  // 5. Botón iniciar sesión (490ms)
+  // 6. Enlace olvidaste contraseña (590ms)
+  
+  /// Controlador principal de animaciones (duración total: 1310ms)
   late AnimationController _animationController;
+  
+  /// Lista de animaciones de opacidad (fade-in) para cada elemento
   late List<Animation<double>> _fadeAnimations;
+  
+  /// Lista de animaciones de desplazamiento (slide-up) para cada elemento
   late List<Animation<Offset>> _slideAnimations;
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CICLO DE VIDA DEL WIDGET
+  // ═══════════════════════════════════════════════════════════════════════════
+  
   @override
   void initState() {
     super.initState();
@@ -50,6 +119,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     _initializeAnimations();
   }
 
+  /// Inicializa el sistema de animaciones fade-up escalonadas
+  /// 
+  /// Proceso:
+  /// 1. Crea el AnimationController con duración total de 1310ms
+  /// 2. Genera 6 animaciones de fade (opacidad 0 → 1)
+  /// 3. Genera 6 animaciones de slide (offset 0.34 → 0)
+  /// 4. Cada animación tiene su propio delay y usa Interval para timing
+  /// 5. Inicia todas las animaciones automáticamente
   void _initializeAnimations() {
     // Duración total: 590ms (último delay) + 720ms (duración animación) = 1310ms
     _animationController = AnimationController(
@@ -57,6 +134,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       vsync: this,
     );
 
+    // Genera animaciones de fade-in para cada uno de los 6 elementos
     _fadeAnimations = List.generate(6, (index) {
       final delayMs = LoginStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
@@ -74,6 +152,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       );
     });
 
+    // Genera animaciones de slide-up para cada uno de los 6 elementos
     _slideAnimations = List.generate(6, (index) {
       final delayMs = LoginStyles.animationDelays[index];
       final startFraction = delayMs / 1310.0;
@@ -91,11 +170,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       );
     });
 
+    // Inicia las animaciones automáticamente
     _animationController.forward();
   }
   
   @override
   void dispose() {
+    // Libera recursos de animación, timer del carrusel y controladores
     _animationController.dispose();
     _carouselTimer?.cancel();
     _emailController.dispose();
@@ -103,6 +184,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     super.dispose();
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // GESTIÓN DEL CARRUSEL
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Inicia el carrusel automático de imágenes
+  /// 
+  /// Cambia a la siguiente imagen cada 6 segundos de forma cíclica
   void _startCarousel() {
     _carouselTimer = Timer.periodic(const Duration(seconds: 6), (timer) {
       setState(() {
@@ -111,6 +199,15 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     });
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BUILDER DE ANIMACIONES
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Construye un widget con animaciones de fade y slide aplicadas
+  /// 
+  /// Parámetros:
+  /// - [index]: Índice del elemento (0-5) que determina qué animación usar
+  /// - [child]: Widget hijo que se animará
   Widget _buildAnimatedWidget({
     required int index,
     required Widget child,
@@ -124,10 +221,22 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // VALIDACIÓN Y AUTENTICACIÓN
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Valida los campos del formulario de login
+  /// 
+  /// Validaciones:
+  /// 1. Correo: no vacío, contiene '@' y '.'
+  /// 2. Contraseña: no vacía
+  /// 
+  /// Retorna [true] si todos los campos son válidos, [false] en caso contrario
   bool _validateFields() {
     bool isValid = true;
     final email = _emailController.text.trim();
     
+    // Validación de correo
     if (email.isEmpty) {
       _emailError = 'El correo es requerido';
       isValid = false;
@@ -138,6 +247,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       _emailError = null;
     }
 
+    // Validación de contraseña
     if (_passwordController.text.isEmpty) {
       _passwordError = 'La contraseña es requerida';
       isValid = false;
@@ -149,6 +259,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return isValid;
   }
 
+  /// Maneja el envío del formulario y autenticación
+  /// 
+  /// Flujo:
+  /// 1. Limpia errores previos
+  /// 2. Valida los campos
+  /// 3. Verifica credenciales hardcodeadas
+  /// 4. Navega según el rol (admin o agricultor)
+  /// 5. Si las credenciales son incorrectas, muestra error
   void _onSubmit() {
     setState(() {
       _loginError = '';
@@ -161,22 +279,32 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    // Lógica de navegación simulada
+    // Autenticación simulada con credenciales hardcodeadas
+    // Admin: redirige a panel de administración
     if (email == 'admin@agrovision.com' && password == 'admin123') {
       Navigator.pushReplacementNamed(context, '/panel-admin');
       return;
     }
 
+    // Agricultor: redirige a botón IoT (pantalla de conexión)
     if (email == 'agricultor@agrovision.com' && password == 'agricultor123') {
       Navigator.pushReplacementNamed(context, '/boton-iot');
       return;
     }
 
+    // Credenciales incorrectas
     setState(() {
       _loginError = 'Credenciales incorrectas. Verifique el correo y la contraseña.';
     });
   }
   
+  /// Regresa del flujo de restablecimiento de contraseña al login
+  /// 
+  /// Resetea:
+  /// - La vista actual
+  /// - Mensajes de error
+  /// - Campos de texto
+  /// - Reinicia las animaciones
   void _backToLogin() {
     setState(() {
       _showResetPassword = false;
@@ -186,40 +314,58 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       _emailError = null;
       _passwordError = null;
     });
-    // Reinicia la animación al regresar al login
+    
+    // Reinicia las animaciones al regresar al login
     _animationController.reset();
     _animationController.forward();
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONSTRUCCIÓN DE LA INTERFAZ PRINCIPAL (LAYOUT RESPONSIVO)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final screenWidth = size.width;
     
-    // Breakpoints adaptativos
+    // ═══════════════════════════════════════════════════════════════════════
+    // BREAKPOINTS ADAPTATIVOS
+    // ═══════════════════════════════════════════════════════════════════════
+    // Define el comportamiento según el ancho de pantalla:
+    // - Móvil: < 600px
+    // - Tablet Portrait: 600px - 900px
+    // - Tablet Landscape: 900px - 1200px
+    // - Desktop: >= 1200px
+    
     final bool isMobile = screenWidth < 600;
     final bool isTabletPortrait = screenWidth >= 600 && screenWidth < 900;
     final bool isTabletLandscape = screenWidth >= 900 && screenWidth < 1200;
     final bool isDesktop = screenWidth >= 1200;
     
-    // Mostrar carrusel en tablets landscape y desktop
+    // Carrusel visible solo en tablets landscape y desktop
     final bool showCarousel = isTabletLandscape || isDesktop;
     
-    // Calcular ancho del panel de login según el tamaño de pantalla
+    // ═══════════════════════════════════════════════════════════════════════
+    // CÁLCULO DE ANCHO DEL PANEL DE LOGIN
+    // ═══════════════════════════════════════════════════════════════════════
+    
     double loginPanelWidth;
     if (isMobile) {
-      loginPanelWidth = screenWidth;
+      loginPanelWidth = screenWidth; // Ancho completo
     } else if (isTabletPortrait) {
-      loginPanelWidth = screenWidth;
+      loginPanelWidth = screenWidth; // Ancho completo
     } else if (isTabletLandscape) {
-      // Tablet landscape: panel más estrecho para mostrar el carrusel
-      loginPanelWidth = screenWidth * 0.45; // 45% del ancho
+      loginPanelWidth = screenWidth * 0.45; // 45% del ancho (para mostrar carrusel)
     } else {
-      // Desktop: anchos fijos según el tamaño total
+      // Desktop: anchos fijos según tamaño total
       loginPanelWidth = screenWidth > 1440 ? 540 : 440;
     }
     
-    // Padding adaptativo
+    // ═══════════════════════════════════════════════════════════════════════
+    // PADDING ADAPTATIVO
+    // ═══════════════════════════════════════════════════════════════════════
+    
     double horizontalPadding;
     double verticalPadding;
     
@@ -241,12 +387,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       backgroundColor: LoginStyles.backgroundLight,
       body: Row(
         children: [
-          // Panel del Carrusel (Visible en tablets landscape y desktop)
+          // ═══════════════════════════════════════════════════════════════════
+          // PANEL DEL CARRUSEL (Visible solo en tablet landscape y desktop)
+          // ═══════════════════════════════════════════════════════════════════
           if (showCarousel)
             Expanded(
               child: Stack(
                 fit: StackFit.expand,
                 children: [
+                  // ═══════════════════════════════════════════════════════════
+                  // Imagen del carrusel con transición fade
+                  // ═══════════════════════════════════════════════════════════
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 800),
                     transitionBuilder: (Widget child, Animation<double> animation) {
@@ -266,8 +417,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       ),
                     ),
                   ),
-                  // Botones de control del carrusel
-                  // Ajustar tamaño de botones según dispositivo
+                  
+                  // ═══════════════════════════════════════════════════════════
+                  // Botón de navegación izquierda (imagen anterior)
+                  // ═══════════════════════════════════════════════════════════
                   Positioned(
                     left: isTabletLandscape ? 12 : 20,
                     top: 0,
@@ -288,6 +441,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       ),
                     ),
                   ),
+                  
+                  // ═══════════════════════════════════════════════════════════
+                  // Botón de navegación derecha (siguiente imagen)
+                  // ═══════════════════════════════════════════════════════════
                   Positioned(
                     right: isTabletLandscape ? 12 : 20,
                     top: 0,
@@ -336,7 +493,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
             
-          // Panel de Login
+          // ═══════════════════════════════════════════════════════════════════
+          // PANEL DE LOGIN (derecha o completo si no hay carrusel)
+          // ═══════════════════════════════════════════════════════════════════
           Container(
             width: loginPanelWidth,
             decoration: LoginStyles.loginPanelDecoration,
@@ -350,6 +509,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   constraints: BoxConstraints(
                     maxWidth: isTabletLandscape ? 380 : 430,
                   ),
+                  // Alterna entre formulario de login y restablecimiento
                   child: _showResetPassword ? _buildResetPasswordView() : _buildLoginForm(),
                 ),
               ),
@@ -360,6 +520,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FORMULARIO DE LOGIN
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Construye el formulario principal de inicio de sesión
+  /// 
+  /// Elementos animados (6 total):
+  /// 1. Logo (90ms)
+  /// 2. Título (190ms)
+  /// 3. Campo de correo (290ms)
+  /// 4. Campo de contraseña (390ms)
+  /// 5. Botón de inicio de sesión (490ms)
+  /// 6. Enlace "¿Olvidaste tu contraseña?" (590ms)
   Widget _buildLoginForm() {
     return Form(
       key: _formKey,
@@ -367,7 +540,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Logo - Delay 1 (90ms)
+          // ═══════════════════════════════════════════════════════════════════
+          // ELEMENTO 1: Logo (Delay 90ms)
+          // ═══════════════════════════════════════════════════════════════════
           _buildAnimatedWidget(
             index: 0,
             child: Center(
@@ -384,7 +559,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           const SizedBox(height: 26),
           
-          // Título - Delay 2 (190ms)
+          // ═══════════════════════════════════════════════════════════════════
+          // ELEMENTO 2: Título (Delay 190ms)
+          // ═══════════════════════════════════════════════════════════════════
           _buildAnimatedWidget(
             index: 1,
             child: const Text(
@@ -395,7 +572,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           const SizedBox(height: 28),
           
-          // Campo Correo - Delay 3 (290ms)
+          // ═══════════════════════════════════════════════════════════════════
+          // ELEMENTO 3: Campo de Correo (Delay 290ms)
+          // ═══════════════════════════════════════════════════════════════════
           _buildAnimatedWidget(
             index: 2,
             child: Column(
@@ -449,7 +628,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           const SizedBox(height: 18),
           
-          // Campo Contraseña - Delay 4 (390ms)
+          // ═══════════════════════════════════════════════════════════════════
+          // ELEMENTO 4: Campo de Contraseña (Delay 390ms)
+          // ═══════════════════════════════════════════════════════════════════
           _buildAnimatedWidget(
             index: 3,
             child: Column(
@@ -514,7 +695,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
           ),
           
-          // Mensaje de Error General
+          // Mensaje de error general (si hay credenciales incorrectas)
           if (_loginError.isNotEmpty) ...[
             const SizedBox(height: 18),
             Text(
@@ -526,7 +707,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           
           const SizedBox(height: 28),
           
-          // Botón Iniciar Sesión - Delay 5 (490ms)
+          // ═══════════════════════════════════════════════════════════════════
+          // ELEMENTO 5: Botón Iniciar Sesión (Delay 490ms)
+          // ═══════════════════════════════════════════════════════════════════
           _buildAnimatedWidget(
             index: 4,
             child: Container(
@@ -554,7 +737,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           const SizedBox(height: 20),
           
-          // Enlace Olvidaste tu contraseña - Delay 6 (590ms)
+          // ═══════════════════════════════════════════════════════════════════
+          // ELEMENTO 6: Enlace "¿Olvidaste tu contraseña?" (Delay 590ms)
+          // ═══════════════════════════════════════════════════════════════════
           _buildAnimatedWidget(
             index: 5,
             child: TextButton(
@@ -582,6 +767,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // VISTA DE RESTABLECIMIENTO DE CONTRASEÑA
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Construye la vista del flujo de restablecimiento de contraseña
+  /// 
+  /// Integra el componente RestablecerPassword que maneja los 4 pasos
   Widget _buildResetPasswordView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -598,7 +790,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 }
 
-// Widget helper para animaciones con delay (fade-up)
+// ═══════════════════════════════════════════════════════════════════════════
+// WIDGET HELPER PARA ANIMACIONES CON DELAY (FADE-UP) - NO UTILIZADO
+// ═══════════════════════════════════════════════════════════════════════════
+// Este widget fue reemplazado por el sistema de animaciones centralizado
+// en _buildAnimatedWidget, pero se conserva por compatibilidad
+// ═══════════════════════════════════════════════════════════════════════════
+
 class _DelayedFadeUp extends StatefulWidget {
   final Widget child;
   final Duration delay;
