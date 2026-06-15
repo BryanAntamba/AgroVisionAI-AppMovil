@@ -176,20 +176,12 @@ class EliminarUsuarioStyles {
   /// Padding horizontal del botón eliminar (22px en cada lado - más padding que cancelar)
   static const EdgeInsets deleteButtonPadding = EdgeInsets.symmetric(horizontal: 22);
   
-  /// Decoración del botón eliminar (estilo destructivo con sombra dramática)
+  /// Decoración del botón eliminar (estilo destructivo)
   /// - Fondo: Rojo destructivo (deleteButtonColor)
   /// - Radio: 8px para consistencia
-  /// - Sombra: Roja con blur de 24px y offset vertical de 12px para efecto elevado
   static final BoxDecoration deleteButtonDecoration = BoxDecoration(
     color: deleteButtonColor,
     borderRadius: BorderRadius.circular(8),
-    boxShadow: const [
-      BoxShadow(
-        color: deleteButtonShadowColor,
-        blurRadius: 24,
-        offset: Offset(0, 12),
-      ),
-    ],
   );
   
   /// Estilo del texto del botón eliminar

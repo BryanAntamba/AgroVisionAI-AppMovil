@@ -95,17 +95,9 @@ class DesconectarDispositivoStyles {
   /// Decoración del botón destructivo "Desconectar" (acción peligrosa)
   /// - Fondo: rojo oscuro sólido
   /// - Border radius: 8px
-  /// - Sombra: roja 24% opacidad, desplazada 12px hacia abajo
   static BoxDecoration disconnectBtnDecoration = BoxDecoration(
     color: destructBtnBg,
     borderRadius: BorderRadius.circular(8),
-    boxShadow: const [
-      BoxShadow(
-        color: destructBtnShadow,
-        blurRadius: 24,
-        offset: Offset(0, 12),
-      ),
-    ],
   );
 
   // ══════════════════════════════════════════════════════════════════════════════

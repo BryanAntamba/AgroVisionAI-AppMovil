@@ -117,10 +117,9 @@ class BarraAgricultorStyles {
   // DECORACIÓN DEL BOTÓN CERRAR SESIÓN
   // ══════════════════════════════════════════════════════════════════════════════
   
-  /// Decoración del botón de cerrar sesión con gradiente y sombra elevada
+  /// Decoración del botón de cerrar sesión con gradiente
   /// - Gradiente: verde oscuro → verde primario (diagonal superior izquierda a inferior derecha)
   /// - Border radius: 8px (esquinas redondeadas)
-  /// - Sombra: desenfoque de 28px con 24% de opacidad, desplazada 16px hacia abajo
   static BoxDecoration logoutButtonDecoration = BoxDecoration(
     gradient: const LinearGradient(
       colors: [darkGreen, primaryGreen], // Gradiente de verde oscuro a verde brillante
@@ -128,12 +127,5 @@ class BarraAgricultorStyles {
       end: Alignment.bottomRight, // Termina en la esquina inferior derecha
     ),
     borderRadius: BorderRadius.circular(8), // Esquinas redondeadas de 8px
-    boxShadow: const [
-      BoxShadow(
-        color: Color.fromRGBO(7, 61, 43, 0.24), // Verde oscuro con 24% de opacidad
-        blurRadius: 28, // Desenfoque pronunciado de 28px
-        offset: Offset(0, 16), // Desplazamiento vertical de 16px (sombra elevada)
-      )
-    ],
   );
 }

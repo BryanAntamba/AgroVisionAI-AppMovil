@@ -90,7 +90,7 @@ class BarraAdminStyles {
   // ═══════════════════════════════════════════════════════════════════════════
   
   /// Decoración del botón de cerrar sesión
-  /// Incluye gradiente verde, bordes redondeados y sombra prominente
+  /// Incluye gradiente verde y bordes redondeados
   static BoxDecoration logoutButtonDecoration = BoxDecoration(
     gradient: const LinearGradient(
       colors: [darkGreen, primaryGreen],  // Gradiente de verde oscuro a brillante
@@ -98,12 +98,5 @@ class BarraAdminStyles {
       end: Alignment.bottomRight,         // Fin del gradiente en esquina inferior derecha
     ),
     borderRadius: BorderRadius.circular(8), // Bordes redondeados de 8px de radio
-    boxShadow: const [
-      BoxShadow(
-        color: Color.fromRGBO(7, 61, 43, 0.24), // Sombra verde oscuro con 24% de opacidad
-        blurRadius: 28,                          // Difuminado amplio de 28px
-        offset: Offset(0, 16),                   // Desplazamiento hacia abajo 16px para profundidad
-      )
-    ],
   );
 }

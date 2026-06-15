@@ -95,17 +95,10 @@ class EliminarRecomendacionStyles {
     fontWeight: FontWeight.w800,
   );
 
-  /// Decoración del botón eliminar - fondo rojo con sombra
+  /// Decoración del botón eliminar - fondo rojo sin sombra
   static final BoxDecoration deleteBtnDecoration = BoxDecoration(
     color: dangerText, // Fondo rojo peligro
     borderRadius: BorderRadius.circular(8), // Esquinas redondeadas
-    boxShadow: const [
-      BoxShadow(
-        color: Color.fromRGBO(163, 38, 38, 0.24), // Sombra roja
-        blurRadius: 24,
-        offset: Offset(0, 12),
-      ),
-    ],
   );
 
   /// Estilo para texto del botón eliminar - texto blanco negrita

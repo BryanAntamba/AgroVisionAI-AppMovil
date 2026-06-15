@@ -356,7 +356,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     } else if (isTabletPortrait) {
       loginPanelWidth = screenWidth; // Ancho completo
     } else if (isTabletLandscape) {
-      loginPanelWidth = screenWidth * 0.45; // 45% del ancho (para mostrar carrusel)
+      loginPanelWidth = screenWidth * 0.42; // 42% del ancho (carrusel más ancho)
     } else {
       // Desktop: anchos fijos según tamaño total
       loginPanelWidth = screenWidth > 1440 ? 540 : 440;
@@ -377,7 +377,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       verticalPadding = 48;
     } else if (isTabletLandscape) {
       horizontalPadding = 40;
-      verticalPadding = 48;
+      verticalPadding = 8;
     } else {
       horizontalPadding = 64;
       verticalPadding = 64;
@@ -386,6 +386,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Scaffold(
       backgroundColor: LoginStyles.backgroundLight,
       body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ═══════════════════════════════════════════════════════════════════
           // PANEL DEL CARRUSEL (Visible solo en tablet landscape y desktop)
@@ -422,16 +423,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   // Botón de navegación izquierda (imagen anterior)
                   // ═══════════════════════════════════════════════════════════
                   Positioned(
-                    left: isTabletLandscape ? 12 : 20,
+                    left: isTabletLandscape ? 16 : 20,
                     top: 0,
                     bottom: 0,
                     child: Center(
                       child: IconButton(
-                        iconSize: isTabletLandscape ? 20 : 24,
+                        iconSize: isTabletLandscape ? 24 : 24,
                         icon: Icon(
                           Icons.arrow_back_ios, 
                           color: Colors.white70,
-                          size: isTabletLandscape ? 20 : 24,
+                          size: isTabletLandscape ? 24 : 24,
                         ),
                         onPressed: () {
                           setState(() {
@@ -446,16 +447,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   // Botón de navegación derecha (siguiente imagen)
                   // ═══════════════════════════════════════════════════════════
                   Positioned(
-                    right: isTabletLandscape ? 12 : 20,
+                    right: isTabletLandscape ? 16 : 20,
                     top: 0,
                     bottom: 0,
                     child: Center(
                       child: IconButton(
-                        iconSize: isTabletLandscape ? 20 : 24,
+                        iconSize: isTabletLandscape ? 24 : 24,
                         icon: Icon(
                           Icons.arrow_forward_ios, 
                           color: Colors.white70,
-                          size: isTabletLandscape ? 20 : 24,
+                          size: isTabletLandscape ? 24 : 24,
                         ),
                         onPressed: () {
                           setState(() {
@@ -468,7 +469,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   // Indicadores de carrusel para tablets
                   if (isTabletLandscape)
                     Positioned(
-                      bottom: 20,
+                      bottom: 24,
                       left: 0,
                       right: 0,
                       child: Row(
@@ -476,9 +477,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         children: List.generate(
                           _carouselImages.length,
                           (index) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: 8,
-                            height: 8,
+                            margin: const EdgeInsets.symmetric(horizontal: 6),
+                            width: 10,
+                            height: 10,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: _currentCarouselIndex == index
@@ -507,7 +508,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               child: SingleChildScrollView(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: isTabletLandscape ? 380 : 430,
+                    maxWidth: isTabletLandscape ? 360 : 430,
                   ),
                   // Alterna entre formulario de login y restablecimiento
                   child: _showResetPassword ? _buildResetPasswordView() : _buildLoginForm(),
