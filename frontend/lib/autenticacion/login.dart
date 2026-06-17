@@ -72,23 +72,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   bool _passwordFocus = false;
   
   // ═══════════════════════════════════════════════════════════════════════════
-  // LÓGICA DEL CARRUSEL DE IMÁGENES
-  // ═══════════════════════════════════════════════════════════════════════════
-  
-  /// Índice actual de la imagen mostrada en el carrusel (0-2)
-  int _currentCarouselIndex = 0;
-  
-  /// Timer que controla el cambio automático de imágenes cada 6 segundos
-  Timer? _carouselTimer;
-  
-  /// Lista de rutas de las 3 imágenes del carrusel
-  final List<String> _carouselImages = [
-    'assets/imagesLogin/sosteniendoTomate.jpg',
-    'assets/imagesLogin/tomateHumedo.jpg',
-    'assets/imagesLogin/tomateIluminado.jpg',
-  ];
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // CONTROLADORES Y ANIMACIONES
   // ═══════════════════════════════════════════════════════════════════════════
   // Sistema de animaciones fade-up con delays escalonados para 6 elementos:
@@ -115,7 +99,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _startCarousel();
     _initializeAnimations();
   }
 
@@ -176,27 +159,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   
   @override
   void dispose() {
-    // Libera recursos de animación, timer del carrusel y controladores
+    // Libera recursos de animación y controladores
     _animationController.dispose();
-    _carouselTimer?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // GESTIÓN DEL CARRUSEL
-  // ═══════════════════════════════════════════════════════════════════════════
-  
-  /// Inicia el carrusel automático de imágenes
-  /// 
-  /// Cambia a la siguiente imagen cada 6 segundos de forma cíclica
-  void _startCarousel() {
-    _carouselTimer = Timer.periodic(const Duration(seconds: 6), (timer) {
-      setState(() {
-        _currentCarouselIndex = (_currentCarouselIndex + 1) % _carouselImages.length;
-      });
-    });
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -341,10 +308,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final bool isMobile = screenWidth < 600;
     final bool isTabletPortrait = screenWidth >= 600 && screenWidth < 900;
     final bool isTabletLandscape = screenWidth >= 900 && screenWidth < 1200;
-    final bool isDesktop = screenWidth >= 1200;
-    
-    // Carrusel visible solo en tablets landscape y desktop
-    final bool showCarousel = isTabletLandscape || isDesktop;
     
     // ═══════════════════════════════════════════════════════════════════════
     // CÁLCULO DE ANCHO DEL PANEL DE LOGIN
@@ -356,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     } else if (isTabletPortrait) {
       loginPanelWidth = screenWidth; // Ancho completo
     } else if (isTabletLandscape) {
-      loginPanelWidth = screenWidth * 0.42; // 42% del ancho (carrusel más ancho)
+      loginPanelWidth = 540; // Ancho fijo sin carrusel
     } else {
       // Desktop: anchos fijos según tamaño total
       loginPanelWidth = screenWidth > 1440 ? 540 : 440;
@@ -386,116 +349,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Scaffold(
       backgroundColor: LoginStyles.backgroundLight,
       body: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ═══════════════════════════════════════════════════════════════════
-          // PANEL DEL CARRUSEL (Visible solo en tablet landscape y desktop)
-          // ═══════════════════════════════════════════════════════════════════
-          if (showCarousel)
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // ═══════════════════════════════════════════════════════════
-                  // Imagen del carrusel con transición fade
-                  // ═══════════════════════════════════════════════════════════
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 800),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                    child: Image.asset(
-                      _carouselImages[_currentCarouselIndex],
-                      key: ValueKey<int>(_currentCarouselIndex),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: LoginStyles.darkGreen,
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Imagen no encontrada', 
-                          style: TextStyle(color: Colors.white)
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  // ═══════════════════════════════════════════════════════════
-                  // Botón de navegación izquierda (imagen anterior)
-                  // ═══════════════════════════════════════════════════════════
-                  Positioned(
-                    left: isTabletLandscape ? 16 : 20,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: IconButton(
-                        iconSize: isTabletLandscape ? 24 : 24,
-                        icon: Icon(
-                          Icons.arrow_back_ios, 
-                          color: Colors.white70,
-                          size: isTabletLandscape ? 24 : 24,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _currentCarouselIndex = (_currentCarouselIndex - 1 + _carouselImages.length) % _carouselImages.length;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  
-                  // ═══════════════════════════════════════════════════════════
-                  // Botón de navegación derecha (siguiente imagen)
-                  // ═══════════════════════════════════════════════════════════
-                  Positioned(
-                    right: isTabletLandscape ? 16 : 20,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: IconButton(
-                        iconSize: isTabletLandscape ? 24 : 24,
-                        icon: Icon(
-                          Icons.arrow_forward_ios, 
-                          color: Colors.white70,
-                          size: isTabletLandscape ? 24 : 24,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _currentCarouselIndex = (_currentCarouselIndex + 1) % _carouselImages.length;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  // Indicadores de carrusel para tablets
-                  if (isTabletLandscape)
-                    Positioned(
-                      bottom: 24,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          _carouselImages.length,
-                          (index) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 6),
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _currentCarouselIndex == index
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.4),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            
-          // ═══════════════════════════════════════════════════════════════════
-          // PANEL DE LOGIN (derecha o completo si no hay carrusel)
+          // PANEL DE LOGIN
           // ═══════════════════════════════════════════════════════════════════
           Container(
             width: loginPanelWidth,
