@@ -41,6 +41,10 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
   // ─── ESTADO DE SELECCIÓN (Dropdown) - Inicializados con valores de la recomendación existente ───
   late PrioridadRecomendacion _prioridad; // Prioridad seleccionada
   late ColorRecomendacion _color; // Color seleccionado
+  
+  // ─── ESTADO DE EXPANSIÓN DE DROPDOWNS ───
+  bool _prioridadExpanded = false; // Controla si dropdown de prioridad está expandido
+  bool _colorExpanded = false; // Controla si dropdown de color está expandido
 
   // ─── CONTROLADORES DE ANIMACIÓN ───
   late AnimationController _controller; // Controla el progreso de las animaciones (0.0 a 1.0)
@@ -250,6 +254,11 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
                                 _buildDropdown<PrioridadRecomendacion>(
                                   label: 'Prioridad de la recomendación',
                                   value: _prioridad,
+                                  isExpanded: _prioridadExpanded,
+                                  onToggle: () => setState(() {
+                                    _prioridadExpanded = !_prioridadExpanded;
+                                    _colorExpanded = false;
+                                  }),
                                   items: PrioridadRecomendacion.values.map((p) => DropdownMenuItem(value: p, child: Text(p.label))).toList(),
                                   onChanged: (v) => setState(() => _prioridad = v!),
                                 ),
@@ -257,6 +266,11 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
                                 _buildDropdown<ColorRecomendacion>(
                                   label: 'Color de la recomendación',
                                   value: _color,
+                                  isExpanded: _colorExpanded,
+                                  onToggle: () => setState(() {
+                                    _colorExpanded = !_colorExpanded;
+                                    _prioridadExpanded = false;
+                                  }),
                                   items: ColorRecomendacion.values.map((c) => DropdownMenuItem(value: c, child: Text(c.label))).toList(),
                                   onChanged: (v) => setState(() => _color = v!),
                                 ),
@@ -267,6 +281,11 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
                                       child: _buildDropdown<PrioridadRecomendacion>(
                                         label: 'Prioridad de la recomendación',
                                         value: _prioridad,
+                                        isExpanded: _prioridadExpanded,
+                                        onToggle: () => setState(() {
+                                          _prioridadExpanded = !_prioridadExpanded;
+                                          _colorExpanded = false;
+                                        }),
                                         items: PrioridadRecomendacion.values.map((p) => DropdownMenuItem(value: p, child: Text(p.label))).toList(),
                                         onChanged: (v) => setState(() => _prioridad = v!),
                                       ),
@@ -276,6 +295,11 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
                                       child: _buildDropdown<ColorRecomendacion>(
                                         label: 'Color de la recomendación',
                                         value: _color,
+                                        isExpanded: _colorExpanded,
+                                        onToggle: () => setState(() {
+                                          _colorExpanded = !_colorExpanded;
+                                          _prioridadExpanded = false;
+                                        }),
                                         items: ColorRecomendacion.values.map((c) => DropdownMenuItem(value: c, child: Text(c.label))).toList(),
                                         onChanged: (v) => setState(() => _color = v!),
                                       ),
@@ -413,32 +437,111 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
   // ═══════════════════════════════════════════════════════════════════════════
   // MÉTODO HELPER: _buildDropdown - Construye dropdown (select) sin validación (siempre tiene valor)
   // ═══════════════════════════════════════════════════════════════════════════
+  // MÉTODO HELPER: _buildDropdown - Construye dropdown (select) sin validación (siempre tiene valor)
+  // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildDropdown<T>({
     required String label, // Label del campo
     required T value, // Valor seleccionado (nunca null en edición)
     required List<DropdownMenuItem<T>> items, // Lista de opciones
     required ValueChanged<T?> onChanged, // Callback cuando cambia selección
+    required bool isExpanded, // Si el dropdown está expandido
+    required VoidCallback onToggle, // Callback para alternar expansión
   }) {
-    return Column( // Columna: label + Dropdown
+    // Obtiene el texto del item seleccionado
+    String getSelectedText() {
+      final selectedItem = items.firstWhere((item) => item.value == value);
+      final child = selectedItem.child;
+      if (child is Text) {
+        return child.data ?? '';
+      }
+      return '';
+    }
+
+    return Column( // Columna: label + Dropdown + opciones
       crossAxisAlignment: CrossAxisAlignment.start, // Alinea a la izquierda
       children: [
         Text(label, style: EditarRecomendacionStyles.labelStyle), // Label (ej: "Prioridad de la recomendación")
         const SizedBox(height: 8), // Espacio entre label y dropdown
-        Container( // Contenedor del dropdown
-          height: 54, // Altura fija
-          decoration: EditarRecomendacionStyles.inputShellDecoration(), // Estilo (borde, fondo)
-          padding: const EdgeInsets.symmetric(horizontal: 14), // Espaciado horizontal interno
-          child: DropdownButtonHideUnderline( // Oculta línea por defecto del dropdown
-            child: DropdownButton<T>( // Widget de dropdown
-              value: value, // Valor seleccionado
-              isExpanded: true, // Expande para ocupar ancho completo
-              icon: const FaIcon(FontAwesomeIcons.chevronDown, color: EditarRecomendacionStyles.darkGreen, size: 16), // Ícono de flecha
-              style: EditarRecomendacionStyles.inputTextStyle, // Estilo del texto seleccionado
-              dropdownColor: EditarRecomendacionStyles.backgroundModal, // Color de fondo del menú desplegable
-              items: items, // Lista de opciones
-              onChanged: onChanged, // Callback al cambiar
+        
+        // Campo del dropdown (siempre visible)
+        GestureDetector(
+          onTap: onToggle,
+          child: Container( // Contenedor del dropdown
+            height: 54, // Altura fija
+            decoration: EditarRecomendacionStyles.inputShellDecoration(), // Estilo (borde, fondo)
+            padding: const EdgeInsets.symmetric(horizontal: 14), // Espaciado horizontal interno
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    getSelectedText(),
+                    style: EditarRecomendacionStyles.inputTextStyle,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                FaIcon(
+                  isExpanded ? FontAwesomeIcons.chevronUp : FontAwesomeIcons.chevronDown,
+                  color: EditarRecomendacionStyles.darkGreen,
+                  size: 16,
+                ),
+              ],
             ),
           ),
+        ),
+        
+        // Lista de opciones expandible
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: isExpanded ? (items.length * 54.0).clamp(0, 270) : 0,
+          child: isExpanded
+              ? Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  decoration: BoxDecoration(
+                    color: EditarRecomendacionStyles.backgroundModal,
+                    border: Border.all(color: EditarRecomendacionStyles.borderInput),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          final isSelected = item.value == value;
+                          
+                          return InkWell(
+                            onTap: () {
+                              onChanged(item.value);
+                              onToggle();
+                            },
+                            hoverColor: EditarRecomendacionStyles.backgroundInput,
+                            splashColor: EditarRecomendacionStyles.primaryGreen.withValues(alpha: 0.1),
+                            highlightColor: EditarRecomendacionStyles.backgroundInput,
+                            child: Container(
+                              height: 54,
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              alignment: Alignment.centerLeft,
+                              decoration: BoxDecoration(
+                                color: isSelected 
+                                    ? const Color(0xFFE8EDE6)
+                                    : Colors.transparent,
+                              ),
+                              child: DefaultTextStyle(
+                                style: EditarRecomendacionStyles.inputTextStyle,
+                                child: item.child,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              : null,
         ),
       ],
     );

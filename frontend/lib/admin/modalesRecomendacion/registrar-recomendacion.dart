@@ -37,6 +37,10 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
   // ─── ESTADO DE SELECCIÓN (Dropdown) ───
   PrioridadRecomendacion? _prioridad; // Prioridad seleccionada (null al inicio)
   ColorRecomendacion? _color; // Color seleccionado (null al inicio)
+  
+  // ─── ESTADO DE EXPANSIÓN DE DROPDOWNS ───
+  bool _prioridadExpanded = false; // Controla si dropdown de prioridad está expandido
+  bool _colorExpanded = false; // Controla si dropdown de color está expandido
 
   // ─── ERRORES DE VALIDACIÓN (String? = null si no hay error) ───
   String? _errorTitulo; // Error del campo "Título"
@@ -226,6 +230,11 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
                                             hint: 'Seleccione prioridad',
                                             value: _prioridad,
                                             errorText: _errorPrioridad,
+                                            isExpanded: _prioridadExpanded,
+                                            onToggle: () => setState(() {
+                                              _prioridadExpanded = !_prioridadExpanded;
+                                              _colorExpanded = false;
+                                            }),
                                             items: PrioridadRecomendacion.values
                                                 .map((p) => DropdownMenuItem(
                                                       value: p,
@@ -243,6 +252,11 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
                                             hint: 'Seleccione color',
                                             value: _color,
                                             errorText: _errorColor,
+                                            isExpanded: _colorExpanded,
+                                            onToggle: () => setState(() {
+                                              _colorExpanded = !_colorExpanded;
+                                              _prioridadExpanded = false;
+                                            }),
                                             items: ColorRecomendacion.values
                                                 .map((c) => DropdownMenuItem(
                                                       value: c,
@@ -375,33 +389,116 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
     required ValueChanged<T?> onChanged, // Callback cuando cambia selección
     required String hint, // Texto placeholder
     String? errorText, // Mensaje de error (opcional)
+    required bool isExpanded, // Si el dropdown está expandido
+    required VoidCallback onToggle, // Callback para alternar expansión
   }) {
-    return Column( // Columna: label + Dropdown + mensaje de error
+    // Obtiene el texto del item seleccionado
+    String getSelectedText() {
+      if (value == null) return hint;
+      final selectedItem = items.firstWhere((item) => item.value == value);
+      final child = selectedItem.child;
+      if (child is Text) {
+        return child.data ?? hint;
+      }
+      return hint;
+    }
+
+    return Column( // Columna: label + Dropdown + opciones + mensaje de error
       crossAxisAlignment: CrossAxisAlignment.start, // Alinea a la izquierda
       children: [
         Text(label, style: RegistrarRecomendacionStyles.labelText), // Label (ej: "Prioridad")
         const SizedBox(height: 8), // Espacio entre label y dropdown
-        Container( // Contenedor del dropdown
-          height: 48, // Altura fija
-          decoration: RegistrarRecomendacionStyles.inputDecoration().copyWith( // Estilo base
-            border: Border.all(color: errorText != null ? Colors.red : RegistrarRecomendacionStyles.borderInput), // Borde rojo si hay error
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14), // Espaciado horizontal interno
-          child: DropdownButtonHideUnderline( // Oculta línea por defecto del dropdown
-            child: DropdownButton<T>( // Widget de dropdown
-              value: value, // Valor seleccionado
-              hint: Text(hint, style: const TextStyle(color: Color(0xFF6B8177), fontSize: 14)), // Placeholder
-              isExpanded: true, // Expande para ocupar ancho completo
-              icon: const Icon(Icons.keyboard_arrow_down, color: RegistrarRecomendacionStyles.primaryGreen), // Ícono de flecha
-              style: const TextStyle( // Estilo del texto seleccionado
-                  color: RegistrarRecomendacionStyles.darkGreen,
-                  fontSize: 14,
-                  fontFamily: 'Arial'),
-              items: items, // Lista de opciones
-              onChanged: onChanged, // Callback al cambiar
+        
+        // Campo del dropdown (siempre visible)
+        GestureDetector(
+          onTap: onToggle,
+          child: Container( // Contenedor del dropdown
+            height: 48, // Altura fija
+            decoration: RegistrarRecomendacionStyles.inputDecoration().copyWith( // Estilo base
+              border: Border.all(color: errorText != null ? Colors.red : RegistrarRecomendacionStyles.borderInput), // Borde rojo si hay error
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14), // Espaciado horizontal interno
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    getSelectedText(),
+                    style: TextStyle(
+                      color: value == null ? const Color(0xFF6B8177) : RegistrarRecomendacionStyles.darkGreen,
+                      fontSize: 14,
+                      fontFamily: 'Arial',
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(
+                  isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: RegistrarRecomendacionStyles.primaryGreen,
+                ),
+              ],
             ),
           ),
         ),
+        
+        // Lista de opciones expandible
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: isExpanded ? (items.length * 48.0).clamp(0, 240) : 0,
+          child: isExpanded
+              ? Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  decoration: BoxDecoration(
+                    color: RegistrarRecomendacionStyles.backgroundInput,
+                    border: Border.all(color: RegistrarRecomendacionStyles.borderInput),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          final isSelected = item.value == value;
+                          
+                          return InkWell(
+                            onTap: () {
+                              onChanged(item.value);
+                              onToggle();
+                            },
+                            hoverColor: RegistrarRecomendacionStyles.backgroundInput,
+                            splashColor: RegistrarRecomendacionStyles.primaryGreen.withValues(alpha: 0.1),
+                            highlightColor: RegistrarRecomendacionStyles.backgroundInput,
+                            child: Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              alignment: Alignment.centerLeft,
+                              decoration: BoxDecoration(
+                                color: isSelected 
+                                    ? const Color(0xFFE8EDE6)
+                                    : Colors.transparent,
+                              ),
+                              child: DefaultTextStyle(
+                                style: const TextStyle(
+                                  color: RegistrarRecomendacionStyles.darkGreen,
+                                  fontSize: 14,
+                                  fontFamily: 'Arial',
+                                ),
+                                child: item.child,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              : null,
+        ),
+        
         if (errorText != null) ...[ // Si hay error, muestra mensaje
           const SizedBox(height: 6), // Espacio antes del mensaje
           Text(errorText, style: const TextStyle(color: Colors.red, fontSize: 12)), // Mensaje de error (rojo)

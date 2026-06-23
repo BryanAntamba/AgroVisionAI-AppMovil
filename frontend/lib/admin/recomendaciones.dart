@@ -48,6 +48,7 @@ class _RecomendacionesState extends State<Recomendaciones> {
   // ─── ESTADO DE FILTROS ───
   String _busqueda = ''; // Término de búsqueda (título o descripción)
   FiltroPrioridad _filtroPrioridad = FiltroPrioridad.todas; // Filtro de prioridad seleccionado
+  bool _prioridadExpanded = false; // Controla si dropdown de prioridad está expandido
 
   // ─── DATOS ───
   List<RecomendacionRegistrada> _lista = []; // Lista completa de recomendaciones del store
@@ -316,32 +317,101 @@ class _RecomendacionesState extends State<Recomendaciones> {
   Widget _buildPrioridadDropdown(double width) {
     return _LabeledField( // Widget auxiliar que agrega label
       label: 'Prioridad', // Label del dropdown
-      child: Container( // Contenedor del dropdown
-        height: 48, // Altura fija del campo
-        decoration: RecomendacionesStyles.inputDecoration(), // Estilo del input (borde, fondo)
-        padding: const EdgeInsets.symmetric(horizontal: 14), // Padding horizontal interno
-        child: DropdownButtonHideUnderline( // Oculta línea inferior del dropdown
-          child: DropdownButton<FiltroPrioridad>( // Widget dropdown nativo
-            value: _filtroPrioridad, // Valor seleccionado
-            isExpanded: true, // Ocupa ancho completo del contenedor
-            icon: const FaIcon(FontAwesomeIcons.chevronDown, // Icono de flecha hacia abajo
-                color: RecomendacionesStyles.primaryGreen), // Color verde
-            style: const TextStyle( // Estilo del texto seleccionado
-                color: RecomendacionesStyles.darkGreen, // Color del texto
-                fontSize: 14, // Tamaño del texto
-                fontFamily: 'Arial'), // Fuente
-            items: FiltroPrioridad.values // Obtiene todos los valores del enum
-                .map((p) => DropdownMenuItem( // Mapea cada valor a un item del dropdown
-                      value: p, // Valor del item
-                      child: Text(p.label), // Texto mostrado (label del enum)
-                    ))
-                .toList(), // Convierte a lista
-            onChanged: (v) { // Al cambiar selección
-              _filtroPrioridad = v!; // Actualiza filtro de prioridad
-              _aplicarFiltros(); // Vuelve a aplicar filtros con nueva prioridad
-            },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Campo del dropdown (siempre visible)
+          GestureDetector(
+            onTap: () => setState(() => _prioridadExpanded = !_prioridadExpanded),
+            child: Container(
+              height: 48,
+              decoration: RecomendacionesStyles.inputDecoration(),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _filtroPrioridad.label,
+                      style: const TextStyle(
+                        color: RecomendacionesStyles.darkGreen,
+                        fontSize: 14,
+                        fontFamily: 'Arial',
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  FaIcon(
+                    _prioridadExpanded ? FontAwesomeIcons.chevronUp : FontAwesomeIcons.chevronDown,
+                    color: RecomendacionesStyles.primaryGreen,
+                    size: 14,
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
+          
+          // Lista de opciones expandible
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: _prioridadExpanded ? (FiltroPrioridad.values.length * 48.0).clamp(0, 240) : 0,
+            child: _prioridadExpanded
+                ? Container(
+                    margin: const EdgeInsets.only(top: 4),
+                    decoration: BoxDecoration(
+                      color: RecomendacionesStyles.backgroundWhite,
+                      border: Border.all(color: RecomendacionesStyles.borderInput),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: FiltroPrioridad.values.length,
+                          itemBuilder: (context, index) {
+                            final prioridad = FiltroPrioridad.values[index];
+                            final isSelected = prioridad == _filtroPrioridad;
+                            
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _filtroPrioridad = prioridad;
+                                  _prioridadExpanded = false;
+                                  _aplicarFiltros();
+                                });
+                              },
+                              hoverColor: RecomendacionesStyles.backgroundInput,
+                              splashColor: RecomendacionesStyles.primaryGreen.withValues(alpha: 0.1),
+                              highlightColor: RecomendacionesStyles.backgroundInput,
+                              child: Container(
+                                height: 48,
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                alignment: Alignment.centerLeft,
+                                decoration: BoxDecoration(
+                                  color: isSelected 
+                                      ? const Color(0xFFE8EDE6)
+                                      : Colors.transparent,
+                                ),
+                                child: Text(
+                                  prioridad.label,
+                                  style: const TextStyle(
+                                    color: RecomendacionesStyles.textGreen,
+                                    fontSize: 14,
+                                    fontFamily: 'Arial',
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+        ],
       ),
     );
   }
@@ -641,6 +711,8 @@ class _SearchBoxState extends State<_SearchBox> {
     super.initState(); // Llama al initState del padre
     // Escucha cambios de foco y actualiza estado cuando cambia
     _focus.addListener(() => setState(() => _focused = _focus.hasFocus)); // Cuando cambia foco, actualiza _focused
+    // Escucha cambios en el texto para reconstruir widget (necesario para botón de limpiar)
+    _ctrl.addListener(() => setState(() {})); // Reconstruye cuando cambia el texto
   }
 
   // ═══ LIMPIEZA ═══

@@ -44,6 +44,12 @@ class _PanelAdminState extends State<PanelAdmin> {
   DateTime? _fechaFin; // Fecha de fin del rango de filtro (null = sin filtro)
   OrdenAlfabetico _orden = OrdenAlfabetico.az; // Orden alfabético actual (A-Z por defecto)
 
+  // ─── VARIABLES DE ESTADO - EXPANSIÓN DE DROPDOWNS ───
+  bool _ordenExpanded = false; // Controla si dropdown de orden está expandido
+  bool _rolExpanded = false; // Controla si dropdown de rol está expandido
+  bool _estadoExpanded = false; // Controla si dropdown de estado está expandido
+  bool _dispositivoExpanded = false; // Controla si dropdown de dispositivo está expandido
+
   // ─── VARIABLES DE ESTADO - MODALES ───
   ModalModo? _modalModo; // Modo del modal activo (null = ningún modal abierto)
   UsuarioAdmin? _usuarioSeleccionado; // Usuario seleccionado para editar/ver perfil (null = ninguno)
@@ -231,7 +237,10 @@ class _PanelAdminState extends State<PanelAdmin> {
             rol: datos.rol, // Rol del formulario (admin/agricultor)
             cuenta: EstadoCuenta.activo, // Nueva cuenta siempre empieza activa
             sesion: EstadoSesion.sinSesion, // Nueva cuenta no tiene sesión aún
-            fechaRegistro: DateTime.now().toIso8601String(), // Fecha actual en formato ISO
+            dispositivo: datos.rol == RolUsuario.agricultor 
+                ? EstadoDispositivo.noVinculado // Agricultor empieza sin dispositivo vinculado
+                : null, // Admin no tiene campo de dispositivo
+            fechaRegistro: DateTime.now().toIso8601String().split('T')[0], // Fecha actual en formato YYYY-MM-DD
           ),
         );
       } 
@@ -250,6 +259,15 @@ class _PanelAdminState extends State<PanelAdmin> {
           _usuarios[index].correoElectronico = datos.correoElectronico; // Actualiza correo electrónico
           _usuarios[index].telefono = datos.telefono; // Actualiza teléfono
           _usuarios[index].rol = datos.rol; // Actualiza rol
+          
+          // Actualiza estado de dispositivo según el rol
+          if (datos.rol == RolUsuario.agricultor) {
+            // Si cambia a agricultor y no tiene dispositivo, asignar "no vinculado"
+            _usuarios[index].dispositivo ??= EstadoDispositivo.noVinculado;
+          } else {
+            // Si cambia a admin, eliminar estado de dispositivo
+            _usuarios[index].dispositivo = null;
+          }
         }
       }
       
@@ -490,6 +508,14 @@ class _PanelAdminState extends State<PanelAdmin> {
         label: 'Orden alfabético', // Label del dropdown
         value: _orden, // Valor actual seleccionado
         width: fieldWidth, // Ancho del campo
+        isExpanded: _ordenExpanded, // Estado de expansión
+        onToggle: () => setState(() {
+          _ordenExpanded = !_ordenExpanded;
+          // Cierra los demás dropdowns
+          _rolExpanded = false;
+          _estadoExpanded = false;
+          _dispositivoExpanded = false;
+        }),
         items: const [ // Opciones del dropdown
           DropdownMenuItem(value: OrdenAlfabetico.az, child: Text('A-Z')), // Opción A-Z
           DropdownMenuItem(value: OrdenAlfabetico.za, child: Text('Z-A')), // Opción Z-A
@@ -502,6 +528,14 @@ class _PanelAdminState extends State<PanelAdmin> {
         label: 'Rol', // Label del dropdown
         value: _filtroRol, // Valor actual seleccionado
         width: fieldWidth, // Ancho del campo
+        isExpanded: _rolExpanded, // Estado de expansión
+        onToggle: () => setState(() {
+          _rolExpanded = !_rolExpanded;
+          // Cierra los demás dropdowns
+          _ordenExpanded = false;
+          _estadoExpanded = false;
+          _dispositivoExpanded = false;
+        }),
         items: const [ // Opciones del dropdown
           DropdownMenuItem(value: FiltroRol.todos, child: Text('Todos')), // Todos los roles
           DropdownMenuItem(value: FiltroRol.admin, child: Text('Admin')), // Solo admins
@@ -515,6 +549,14 @@ class _PanelAdminState extends State<PanelAdmin> {
         label: 'Estado', // Label del dropdown
         value: _filtroEstado, // Valor actual seleccionado
         width: fieldWidth, // Ancho del campo
+        isExpanded: _estadoExpanded, // Estado de expansión
+        onToggle: () => setState(() {
+          _estadoExpanded = !_estadoExpanded;
+          // Cierra los demás dropdowns
+          _ordenExpanded = false;
+          _rolExpanded = false;
+          _dispositivoExpanded = false;
+        }),
         items: const [ // Opciones del dropdown
           DropdownMenuItem(value: FiltroEstado.todos, child: Text('Todos')), // Sin filtro
           DropdownMenuItem(value: FiltroEstado.activo, child: Text('Activo')), // Cuenta activa
@@ -530,6 +572,14 @@ class _PanelAdminState extends State<PanelAdmin> {
         label: 'Dispositivo', // Label del dropdown
         value: _filtroDispositivo, // Valor actual seleccionado
         width: fieldWidth, // Ancho del campo
+        isExpanded: _dispositivoExpanded, // Estado de expansión
+        onToggle: () => setState(() {
+          _dispositivoExpanded = !_dispositivoExpanded;
+          // Cierra los demás dropdowns
+          _ordenExpanded = false;
+          _rolExpanded = false;
+          _estadoExpanded = false;
+        }),
         items: const [ // Opciones del dropdown
           DropdownMenuItem(value: FiltroDispositivo.todos, child: Text('Todos')), // Sin filtro
           DropdownMenuItem(value: FiltroDispositivo.vinculado, child: Text('Dispositivo vinculado')), // Con dispositivo
@@ -551,7 +601,19 @@ class _PanelAdminState extends State<PanelAdmin> {
     required List<DropdownMenuItem<T>> items, // Lista de opciones
     required ValueChanged<T?> onChanged, // Callback al cambiar selección
     required double width, // Ancho del campo
+    required bool isExpanded, // Si el dropdown está expandido
+    required VoidCallback onToggle, // Callback para alternar expansión
   }) {
+    // Obtiene el texto del item seleccionado
+    String getSelectedText() {
+      final selectedItem = items.firstWhere((item) => item.value == value);
+      final child = selectedItem.child;
+      if (child is Text) {
+        return child.data ?? '';
+      }
+      return '';
+    }
+
     return SizedBox( // Contenedor con ancho fijo
       width: width, // Aplica ancho especificado
       child: Column( // Apila label y dropdown verticalmente
@@ -559,26 +621,93 @@ class _PanelAdminState extends State<PanelAdmin> {
         children: [
           Text(label, style: PanelAdminStyles.labelText), // Label del dropdown
           const SizedBox(height: 8), // Espaciado vertical
-          Container( // Contenedor del dropdown
-            height: 44, // Altura fija del campo
-            decoration: PanelAdminStyles.inputDecoration(), // Estilo del input (borde, fondo)
-            padding: const EdgeInsets.symmetric(horizontal: 12), // Padding horizontal interno
-            child: DropdownButtonHideUnderline( // Oculta línea inferior del dropdown
-              child: DropdownButton<T>( // Widget dropdown nativo
-                value: value, // Valor seleccionado
-                isExpanded: true, // Ocupa ancho completo del contenedor
-                icon: const Icon(Icons.keyboard_arrow_down, color: PanelAdminStyles.primaryGreen), // Icono de flecha
-                style: const TextStyle( // Estilo del texto seleccionado
-                  color: PanelAdminStyles.darkGreen, // Color del texto
-                  fontSize: 14, // Tamaño del texto
-                  fontFamily: 'Arial', // Fuente
-                ),
-                dropdownColor: PanelAdminStyles.backgroundWhite, // Color de fondo del menú desplegable
-                menuMaxHeight: 300, // Altura máxima del menú (scroll si hay muchas opciones)
-                items: items, // Opciones del dropdown
-                onChanged: onChanged, // Callback al cambiar selección
+          
+          // Campo del dropdown (siempre visible)
+          GestureDetector(
+            onTap: onToggle, // Al tocar, alterna expansión
+            child: Container( // Contenedor del dropdown
+              height: 44, // Altura fija del campo
+              decoration: PanelAdminStyles.inputDecoration(), // Estilo del input (borde, fondo)
+              padding: const EdgeInsets.symmetric(horizontal: 12), // Padding horizontal interno
+              child: Row( // Fila con texto seleccionado e icono
+                mainAxisAlignment: MainAxisAlignment.spaceBetween, // Espacia elementos
+                children: [
+                  Expanded(
+                    child: Text(
+                      getSelectedText(), // Texto del item seleccionado
+                      style: const TextStyle(
+                        color: PanelAdminStyles.darkGreen,
+                        fontSize: 14,
+                        fontFamily: 'Arial',
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Icon(
+                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: PanelAdminStyles.primaryGreen,
+                  ),
+                ],
               ),
             ),
+          ),
+          
+          // Lista de opciones expandible (solo visible cuando isExpanded es true)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200), // Duración de la animación
+            height: isExpanded ? (items.length * 48.0).clamp(0, 240) : 0, // Altura dinámica basada en cantidad de items
+            child: isExpanded
+                ? Container(
+                    margin: const EdgeInsets.only(top: 4), // Margen superior
+                    decoration: BoxDecoration(
+                      color: PanelAdminStyles.backgroundWhite, // Fondo blanco
+                      border: Border.all(color: PanelAdminStyles.borderInput), // Borde gris para visibilidad
+                      borderRadius: BorderRadius.circular(8), // Esquinas redondeadas
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final item = items[index];
+                            final isSelected = item.value == value; // Verifica si esta opción está seleccionada
+                            
+                            return InkWell(
+                              onTap: () {
+                                onChanged(item.value); // Llama al callback con el valor seleccionado
+                                onToggle(); // Cierra el dropdown
+                              },
+                              hoverColor: PanelAdminStyles.backgroundInput, // Fondo gris claro al hacer hover
+                              splashColor: PanelAdminStyles.primaryGreen.withValues(alpha: 0.1), // Color del efecto ripple
+                              highlightColor: PanelAdminStyles.backgroundInput, // Fondo gris claro al presionar
+                              child: Container(
+                                height: 48,
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                alignment: Alignment.centerLeft,
+                                decoration: BoxDecoration(
+                                  color: isSelected 
+                                      ? const Color(0xFFE8EDE6) // Gris oscuro para opción seleccionada
+                                      : Colors.transparent, // Transparente para opciones no seleccionadas
+                                ),
+                                child: DefaultTextStyle(
+                                  style: const TextStyle(
+                                    color: PanelAdminStyles.textGreen, // Texto verde medio
+                                    fontSize: 14,
+                                    fontFamily: 'Arial',
+                                  ),
+                                  child: item.child,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
           ),
         ],
       ),
@@ -1065,6 +1194,8 @@ class _SearchInputState extends State<_SearchInput> {
     super.initState(); // Llama al initState del padre
     // Escucha cambios de foco y actualiza estado cuando cambia
     _focus.addListener(() => setState(() => _focused = _focus.hasFocus)); // Cuando cambia foco, actualiza _focused
+    // Escucha cambios en el texto para reconstruir widget (necesario para botón de limpiar)
+    _controller.addListener(() => setState(() {})); // Reconstruye cuando cambia el texto
   }
 
   // ═══ LIMPIEZA ═══
