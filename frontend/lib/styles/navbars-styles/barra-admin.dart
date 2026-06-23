@@ -52,37 +52,22 @@ class BarraAdminStyles {
   // ═══════════════════════════════════════════════════════════════════════════
   
   /// Decoración principal del container del navbar
-  /// Incluye fondo blanco, borde inferior y sombra suave
+  /// Incluye fondo blanco y borde inferior
   static const BoxDecoration navbarDecoration = BoxDecoration(
     color: Colors.white,       // Fondo blanco sólido
     border: Border(
       bottom: BorderSide(color: borderColor, width: 1), // Borde inferior de 1px verde claro
     ),
-    boxShadow: [
-      BoxShadow(
-        color: Color.fromRGBO(7, 61, 43, 0.12),  // Sombra verde oscuro con 12% de opacidad
-        blurRadius: 24,                           // Difuminado suave de 24px
-        offset: Offset(0, 10),                    // Desplazamiento hacia abajo 10px
-      )
-    ],
   );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // GRADIENTE RADIAL OVERLAY (efecto decorativo top-right)
   // ═══════════════════════════════════════════════════════════════════════════
   
-  /// Decoración con gradiente radial en la esquina superior derecha
-  /// Crea un efecto de resplandor verde suave del 20% de opacidad
+  /// Decoración con gradiente radial en la esquina superior derecha (deshabilitado)
+  /// Sin efecto de resplandor
   static const BoxDecoration radialOverlay = BoxDecoration(
-    gradient: RadialGradient(
-      center: Alignment(1.0, -1.0),  // Centro en esquina superior derecha
-      radius: 1.2,                   // Radio de 1.2 para extender el efecto
-      colors: [
-        Color.fromRGBO(85, 168, 32, 0.20), // Verde brillante con 20% de opacidad
-        Colors.transparent,                 // Transparente en los bordes
-      ],
-      stops: [0.0, 0.34],            // Transición del 0% al 34% del radio
-    ),
+    gradient: null,
   );
 
   // ═══════════════════════════════════════════════════════════════════════════

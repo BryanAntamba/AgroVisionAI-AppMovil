@@ -73,44 +73,24 @@ class BarraAgricultorStyles {
   // DECORACIÓN DEL CONTENEDOR PRINCIPAL
   // ══════════════════════════════════════════════════════════════════════════════
   
-  /// Decoración del contenedor del navbar: fondo blanco + borde inferior + sombra
+  /// Decoración del contenedor del navbar: fondo blanco + borde inferior
   /// - Fondo: blanco puro
   /// - Borde: línea inferior de 1px en color borderColor
-  /// - Sombra: desenfoque de 24px con transparencia 12% en verde oscuro
   static const BoxDecoration navbarDecoration = BoxDecoration(
     color: Colors.white, // Fondo blanco limpio
     border: Border(
       bottom: BorderSide(color: borderColor, width: 1), // Línea divisoria inferior de 1px
     ),
-    boxShadow: [
-      BoxShadow(
-        color: Color.fromRGBO(7, 61, 43, 0.12), // Verde oscuro con 12% de opacidad
-        blurRadius: 24, // Desenfoque suave de 24px
-        offset: Offset(0, 10), // Desplazamiento vertical de 10px (sombra hacia abajo)
-      )
-    ],
   );
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // OVERLAY DECORATIVO CON GRADIENTE RADIAL
+  // OVERLAY DECORATIVO CON GRADIENTE RADIAL (DESHABILITADO)
   // ══════════════════════════════════════════════════════════════════════════════
   
-  /// Overlay decorativo con gradiente radial en la esquina superior derecha
-  /// Crea un efecto visual sutil con verde primario al 20% de opacidad
-  /// - Centro: esquina superior derecha (1.0, -1.0)
-  /// - Radio: 1.2 (cubre aproximadamente 1/4 del navbar)
-  /// - Colores: verde primario 20% → transparente
-  /// - Stops: 0% verde, 34% transparente (transición gradual)
+  /// Overlay decorativo con gradiente radial DESHABILITADO
+  /// El gradiente radial verde ha sido removido para eliminar el resplandor verde
   static const BoxDecoration radialOverlay = BoxDecoration(
-    gradient: RadialGradient(
-      center: Alignment(1.0, -1.0), // Posición: esquina superior derecha
-      radius: 1.2, // Radio del gradiente (1.2 unidades desde el centro)
-      colors: [
-        Color.fromRGBO(85, 168, 32, 0.20), // Verde primario con 20% de opacidad
-        Colors.transparent, // Transparente en el borde exterior
-      ],
-      stops: [0.0, 0.34], // 0% = verde, 34% = transparente (transición suave)
-    ),
+    gradient: null,
   );
 
   // ══════════════════════════════════════════════════════════════════════════════

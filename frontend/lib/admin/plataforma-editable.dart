@@ -1203,9 +1203,11 @@ class _PlataformaEditableState extends State<PlataformaEditable> {
       backgroundColor: PlataformaEditableStyles.bgPage,
       body: Stack(
         children: [
+          // ═══ CAPA 1: Contenido principal (debajo de la navbar) ═══
           Column(
             children: [
-              const BarraAdmin(),
+              // ─── Espacio vacío para evitar que navbar tape contenido ───
+              const SizedBox(height: 119), // Altura total del navbar (72 + 35 + 6*2 = 119)
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
@@ -1215,106 +1217,116 @@ class _PlataformaEditableState extends State<PlataformaEditable> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: PlataformaEditableStyles.bgHelp,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: PlataformaEditableStyles.primaryGreen.withOpacity(0.2),
+                        // Header
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: PlataformaEditableStyles.bgHelp,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: PlataformaEditableStyles.primaryGreen.withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: const FaIcon(
+                                    FontAwesomeIcons.paintbrush,
+                                    size: 24,
+                                    color: PlataformaEditableStyles.primaryGreen,
                                   ),
                                 ),
-                                child: const FaIcon(
-                                  FontAwesomeIcons.paintbrush,
-                                  size: 24,
-                                  color: PlataformaEditableStyles.primaryGreen,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Editar Configuración Visual',
-                                      style: PlataformaEditableStyles.h1.copyWith(fontSize: 28),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Personaliza colores, fondos, estilos de botones y otros elementos visuales de la plataforma',
-                                      style: PlataformaEditableStyles.pageDesc,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE8F5E9),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: PlataformaEditableStyles.primaryGreen.withOpacity(0.3),
-                              ),
-                            ),
-                            child: const Row(
-                              children: [
-                                FaIcon(
-                                  FontAwesomeIcons.lightbulb,
-                                  size: 18,
-                                  color: PlataformaEditableStyles.primaryGreen,
-                                ),
-                                SizedBox(width: 12),
+                                const SizedBox(width: 16),
                                 Expanded(
-                                  child: Text(
-                                    'Los cambios realizados aquí afectarán la apariencia de toda la plataforma. Puedes ver una vista previa de algunos elementos antes de guardar.',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: PlataformaEditableStyles.darkGreen,
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.4,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Editar Configuración Visual',
+                                        style: PlataformaEditableStyles.h1.copyWith(fontSize: 28),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      const Text(
+                                        'Personaliza colores, fondos, estilos de botones y otros elementos visuales de la plataforma',
+                                        style: PlataformaEditableStyles.pageDesc,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      
-                      // Secciones
-                      _buildIdentidadVisual(),
-                      const SizedBox(height: 24),
-                      _buildNavbar(),
-                      const SizedBox(height: 24),
-                      _buildColores(),
-                      const SizedBox(height: 24),
-                      _buildBotones(),
-                      const SizedBox(height: 24),
-                      _buildIconos(),
-                      const SizedBox(height: 24),
-                      _buildFondoModales(),
-                      const SizedBox(height: 24),
-                      _buildModalesAccion(),
-                      const SizedBox(height: 32),
-                      
-                      // Action buttons
-                      _buildActionButtons(),
-                    ],
+                            const SizedBox(height: 24),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F5E9),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: PlataformaEditableStyles.primaryGreen.withOpacity(0.3),
+                                ),
+                              ),
+                              child: const Row(
+                                children: [
+                                  FaIcon(
+                                    FontAwesomeIcons.lightbulb,
+                                    size: 18,
+                                    color: PlataformaEditableStyles.primaryGreen,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Los cambios realizados aquí afectarán la apariencia de toda la plataforma. Puedes ver una vista previa de algunos elementos antes de guardar.',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: PlataformaEditableStyles.darkGreen,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        
+                        // Secciones
+                        _buildIdentidadVisual(),
+                        const SizedBox(height: 24),
+                        _buildNavbar(),
+                        const SizedBox(height: 24),
+                        _buildColores(),
+                        const SizedBox(height: 24),
+                        _buildBotones(),
+                        const SizedBox(height: 24),
+                        _buildIconos(),
+                        const SizedBox(height: 24),
+                        _buildFondoModales(),
+                        const SizedBox(height: 24),
+                        _buildModalesAccion(),
+                        const SizedBox(height: 32),
+                        
+                        // Action buttons
+                        _buildActionButtons(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
+          
+          // ═══ CAPA 2: Barra de navegación fija en la parte superior ═══
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: const BarraAdmin(),
+          ),
+          
+          // ═══ CAPA 3: Modales con overlay de pantalla completa ═══
           _buildOverlay(),
         ],
       ),
