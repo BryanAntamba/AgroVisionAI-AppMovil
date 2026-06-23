@@ -7,7 +7,6 @@
 // Características principales:
 // - Autenticación con correo y contraseña
 // - Navegación basada en roles (admin vs agricultor)
-// - Carrusel de imágenes (3 imágenes, 6 segundos por slide)
 // - Layout adaptativo con breakpoints responsivos
 // - Animaciones fade-up escalonadas (6 elementos)
 // - Integración con flujo de restablecimiento de contraseña

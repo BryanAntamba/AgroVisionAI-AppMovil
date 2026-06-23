@@ -47,10 +47,14 @@ class RegistrarRecomendacionStyles {
   /// Estilos específicos para elementos visuales
   
   /// Decoración de inputs - borde gris y fondo claro
-  static BoxDecoration inputDecoration() => BoxDecoration(
-    color: backgroundInput, // Fondo claro
-    border: Border.all(color: borderInput), // Borde gris
+  /// Decoración de inputs - borde gris y fondo claro
+  static BoxDecoration inputDecoration({bool focused = false}) => BoxDecoration(
+    color: focused ? Colors.white : backgroundInput, // Fondo blanco si está enfocado
+    border: Border.all(color: focused ? primaryGreen : borderInput), // Borde verde si está enfocado
     borderRadius: BorderRadius.circular(8), // Esquinas redondeadas
+    boxShadow: focused
+        ? const [BoxShadow(color: Color.fromRGBO(85, 168, 32, 0.13), blurRadius: 0, spreadRadius: 4)] // Sombra glow verde
+        : null,
   );
 
   /// Decoración del botón crear - gradiente verde y sombra

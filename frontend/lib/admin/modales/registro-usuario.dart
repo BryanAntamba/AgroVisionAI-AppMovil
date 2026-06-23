@@ -68,6 +68,28 @@ class _RegistroUsuarioState extends State<RegistroUsuario> with SingleTickerProv
   late final TextEditingController _passwordCtrl; // Controla campo "Contraseña"
   late final TextEditingController _confirmPassCtrl; // Controla campo "Confirmar contraseña"
 
+  // ─── NODOS DE FOCO (FocusNode) - Detectan cuando un campo tiene foco ───
+  final _nombreFocus = FocusNode();
+  final _segundoNombreFocus = FocusNode();
+  final _apellidoFocus = FocusNode();
+  final _segundoApellidoFocus = FocusNode();
+  final _correoCorpFocus = FocusNode();
+  final _correoElecFocus = FocusNode();
+  final _telefonoFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPassFocus = FocusNode();
+
+  // ─── ESTADO DE FOCO (bool) - Indica si cada campo está enfocado ───
+  bool _nombreFocused = false;
+  bool _segundoNombreFocused = false;
+  bool _apellidoFocused = false;
+  bool _segundoApellidoFocused = false;
+  bool _correoCorpFocused = false;
+  bool _correoElecFocused = false;
+  bool _telefonoFocused = false;
+  bool _passwordFocused = false;
+  bool _confirmPassFocused = false;
+
   // ─── ESTADO DE VISIBILIDAD DE CONTRASEÑAS ───
   bool _showPassword = false; // Si true, muestra contraseña (ícono ojo)
   bool _showConfirmPassword = false; // Si true, muestra confirmación de contraseña
@@ -110,6 +132,17 @@ class _RegistroUsuarioState extends State<RegistroUsuario> with SingleTickerProv
     _passwordCtrl = TextEditingController();
     _confirmPassCtrl = TextEditingController();
 
+    // ─── Agrega listeners para detectar cambios de foco ───
+    _nombreFocus.addListener(() => setState(() => _nombreFocused = _nombreFocus.hasFocus));
+    _segundoNombreFocus.addListener(() => setState(() => _segundoNombreFocused = _segundoNombreFocus.hasFocus));
+    _apellidoFocus.addListener(() => setState(() => _apellidoFocused = _apellidoFocus.hasFocus));
+    _segundoApellidoFocus.addListener(() => setState(() => _segundoApellidoFocused = _segundoApellidoFocus.hasFocus));
+    _correoCorpFocus.addListener(() => setState(() => _correoCorpFocused = _correoCorpFocus.hasFocus));
+    _correoElecFocus.addListener(() => setState(() => _correoElecFocused = _correoElecFocus.hasFocus));
+    _telefonoFocus.addListener(() => setState(() => _telefonoFocused = _telefonoFocus.hasFocus));
+    _passwordFocus.addListener(() => setState(() => _passwordFocused = _passwordFocus.hasFocus));
+    _confirmPassFocus.addListener(() => setState(() => _confirmPassFocused = _confirmPassFocus.hasFocus));
+
     // ─── Configura el controlador de animación ───
     _controller = AnimationController(
       vsync: this, // Sincroniza con el tick del frame
@@ -150,6 +183,18 @@ class _RegistroUsuarioState extends State<RegistroUsuario> with SingleTickerProv
     _passwordCtrl.dispose();
     _confirmPassCtrl.dispose();
     _controller.dispose(); // Libera el controlador de animación
+    
+    // ─── Libera FocusNodes ───
+    _nombreFocus.dispose();
+    _segundoNombreFocus.dispose();
+    _apellidoFocus.dispose();
+    _segundoApellidoFocus.dispose();
+    _correoCorpFocus.dispose();
+    _correoElecFocus.dispose();
+    _telefonoFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPassFocus.dispose();
+    
     super.dispose(); // Llama al dispose del padre
   }
 
@@ -416,28 +461,28 @@ class _RegistroUsuarioState extends State<RegistroUsuario> with SingleTickerProv
                             isMobile: isMobile, // Pasa si es vista móvil
                             children: [ // Lista de campos editables con validación
                               _buildTextField('Nombre', Icons.person, _nombreCtrl, // Campo "Nombre" (opcional)
-                                error: _nombreError, onChanged: _validarNombre), // Validación en tiempo real
+                                error: _nombreError, onChanged: _validarNombre, focusNode: _nombreFocus, focused: _nombreFocused), // Validación en tiempo real
                               _buildTextField('Segundo nombre', Icons.person, _segundoNombreCtrl, // "Segundo nombre" (opcional)
-                                error: _segundoNombreError, onChanged: _validarSegundoNombre),
+                                error: _segundoNombreError, onChanged: _validarSegundoNombre, focusNode: _segundoNombreFocus, focused: _segundoNombreFocused),
                               _buildTextField('Apellido', Icons.person, _apellidoCtrl, // "Apellido" (opcional)
-                                error: _apellidoError, onChanged: _validarApellido),
+                                error: _apellidoError, onChanged: _validarApellido, focusNode: _apellidoFocus, focused: _apellidoFocused),
                               _buildTextField('Segundo apellido', Icons.person, _segundoApellidoCtrl, // "Segundo apellido" (opcional)
-                                error: _segundoApellidoError, onChanged: _validarSegundoApellido),
+                                error: _segundoApellidoError, onChanged: _validarSegundoApellido, focusNode: _segundoApellidoFocus, focused: _segundoApellidoFocused),
                               _buildTextField('Correo corporativo *', Icons.email, _correoCorpCtrl, // "Correo corporativo" (OBLIGATORIO)
                                   isFull: true, placeholder: 'usuario@agrovision.com', // Ocupa ancho completo con placeholder
-                                  error: _correoCorpError, onChanged: _validarCorreoCorporativo),
+                                  error: _correoCorpError, onChanged: _validarCorreoCorporativo, focusNode: _correoCorpFocus, focused: _correoCorpFocused),
                               _buildTextField('Correo electronico *', Icons.email, _correoElecCtrl, // "Correo electrónico" (OBLIGATORIO)
                                   isFull: true, placeholder: 'usuario@gmail.com',
-                                  error: _correoElecError, onChanged: _validarCorreoElectronico),
+                                  error: _correoElecError, onChanged: _validarCorreoElectronico, focusNode: _correoElecFocus, focused: _correoElecFocused),
                               _buildTextField('Numero de telefono *', Icons.phone, _telefonoCtrl, // "Teléfono" (OBLIGATORIO)
                                   isFull: true, placeholder: '10 digitos', keyboardType: TextInputType.phone, // Teclado numérico
-                                  error: _telefonoError, onChanged: _validarTelefono),
+                                  error: _telefonoError, onChanged: _validarTelefono, focusNode: _telefonoFocus, focused: _telefonoFocused),
                               _buildPasswordField('Contraseña *', _passwordCtrl, _showPassword, () { // Campo contraseña con toggle visibilidad
                                 setState(() => _showPassword = !_showPassword); // Alterna visibilidad
-                              }, error: _passwordError, onChanged: _validarPassword),
+                              }, error: _passwordError, onChanged: _validarPassword, focusNode: _passwordFocus, focused: _passwordFocused),
                               _buildPasswordField('Confirmar contraseña *', _confirmPassCtrl, _showConfirmPassword, () { // Confirmación contraseña
                                 setState(() => _showConfirmPassword = !_showConfirmPassword); // Alterna visibilidad
-                              }, error: _confirmPassError, onChanged: _validarConfirmPassword),
+                              }, error: _confirmPassError, onChanged: _validarConfirmPassword, focusNode: _confirmPassFocus, focused: _confirmPassFocused),
                               _buildRolField(), // Campo rol (radio buttons: Admin / Agricultor)
                             ],
                           ),
@@ -559,7 +604,7 @@ class _RegistroUsuarioState extends State<RegistroUsuario> with SingleTickerProv
   // MÉTODO HELPER: _buildTextField - Construye campo de texto editable con validación
   // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildTextField(String label, IconData icon, TextEditingController ctrl,
-      {bool isFull = false, String placeholder = '', TextInputType? keyboardType, String? error, VoidCallback? onChanged}) {
+      {bool isFull = false, String placeholder = '', TextInputType? keyboardType, String? error, VoidCallback? onChanged, FocusNode? focusNode, bool focused = false}) {
     return Container( // Contenedor principal del campo
       key: isFull ? const ValueKey('full') : null, // Key 'full' indica ancho completo en grid
       constraints: const BoxConstraints(minHeight: RegistroUsuarioStyles.minFieldHeight), // Altura mínima
@@ -568,34 +613,43 @@ class _RegistroUsuarioState extends State<RegistroUsuario> with SingleTickerProv
         children: [
           Text(label, style: RegistroUsuarioStyles.labelText), // Label del campo (ej: "Nombre *")
           const SizedBox(height: RegistroUsuarioStyles.labelSpacing), // Espacio entre label e input
-          Container( // Contenedor del input
-            height: RegistroUsuarioStyles.inputHeight, // Altura fija del input
-            decoration: error != null  // Cambia estilo si hay error
-                ? RegistroUsuarioStyles.inputErrorDecoration // Borde rojo si hay error
-                : RegistroUsuarioStyles.inputDecoration, // Borde normal
-            child: Row( // Fila: icono + TextField
-              children: [
-                SizedBox( // Contenedor del icono (ancho fijo)
-                  width: RegistroUsuarioStyles.iconContainerWidth, // Ancho para centrar icono
-                  child: Center(child: Icon(icon, // Icono del campo (person, email, phone)
-                      color: RegistroUsuarioStyles.iconColor, // Color del icono
-                      size: RegistroUsuarioStyles.iconSize)), // Tamaño del icono
-                ),
-                Expanded( // TextField ocupa espacio restante
-                  child: TextField( // Campo de texto editable
-                    controller: ctrl, // Controlador de texto
-                    keyboardType: keyboardType, // Tipo de teclado (text, phone, email)
-                    onChanged: onChanged != null ? (_) => onChanged() : null, // Valida en tiempo real al escribir
-                    decoration: InputDecoration( // Configuración del TextField
-                      hintText: placeholder.isEmpty ? label : placeholder, // Placeholder (ej: "usuario@gmail.com")
-                      hintStyle: RegistroUsuarioStyles.hintTextStyle, // Estilo del placeholder (gris)
-                      border: InputBorder.none, // Sin borde (el borde lo tiene el Container)
-                      contentPadding: RegistroUsuarioStyles.inputContentPadding, // Espaciado interno
-                    ),
-                    style: RegistroUsuarioStyles.inputTextStyle, // Estilo del texto escrito
+          Focus( // Envuelve en Focus para detectar cambios de foco
+            onFocusChange: (focus) { // Callback cuando cambia el foco
+              if (focusNode != null) {
+                // El estado ya se maneja con el listener del FocusNode
+              }
+            },
+            child: AnimatedContainer( // AnimatedContainer para transición suave
+              duration: const Duration(milliseconds: 200), // Duración de la animación
+              height: RegistroUsuarioStyles.inputHeight, // Altura fija del input
+              decoration: error != null  // Cambia estilo si hay error
+                  ? RegistroUsuarioStyles.inputErrorDecoration // Borde rojo si hay error
+                  : RegistroUsuarioStyles.inputDecoration(focused: focused), // Borde normal con glow si focused
+              child: Row( // Fila: icono + TextField
+                children: [
+                  SizedBox( // Contenedor del icono (ancho fijo)
+                    width: RegistroUsuarioStyles.iconContainerWidth, // Ancho para centrar icono
+                    child: Center(child: Icon(icon, // Icono del campo (person, email, phone)
+                        color: RegistroUsuarioStyles.iconColor, // Color del icono
+                        size: RegistroUsuarioStyles.iconSize)), // Tamaño del icono
                   ),
-                ),
-              ],
+                  Expanded( // TextField ocupa espacio restante
+                    child: TextField( // Campo de texto editable
+                      controller: ctrl, // Controlador de texto
+                      focusNode: focusNode, // Nodo de foco
+                      keyboardType: keyboardType, // Tipo de teclado (text, phone, email)
+                      onChanged: onChanged != null ? (_) => onChanged() : null, // Valida en tiempo real al escribir
+                      decoration: InputDecoration( // Configuración del TextField
+                        hintText: placeholder.isEmpty ? label : placeholder, // Placeholder (ej: "usuario@gmail.com")
+                        hintStyle: RegistroUsuarioStyles.hintTextStyle, // Estilo del placeholder (gris)
+                        border: InputBorder.none, // Sin borde (el borde lo tiene el Container)
+                        contentPadding: RegistroUsuarioStyles.inputContentPadding, // Espaciado interno
+                      ),
+                      style: RegistroUsuarioStyles.inputTextStyle, // Estilo del texto escrito
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           if (error != null) ...[ // Si hay error, muestra mensaje
@@ -610,7 +664,7 @@ class _RegistroUsuarioState extends State<RegistroUsuario> with SingleTickerProv
   // ═══════════════════════════════════════════════════════════════════════════
   // MÉTODO HELPER: _buildPasswordField - Construye campo de contraseña con toggle visibilidad
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildPasswordField(String label, TextEditingController ctrl, bool showPass, VoidCallback onToggle, {String? error, VoidCallback? onChanged}) {
+  Widget _buildPasswordField(String label, TextEditingController ctrl, bool showPass, VoidCallback onToggle, {String? error, VoidCallback? onChanged, FocusNode? focusNode, bool focused = false}) {
     return Container( // Contenedor principal del campo
       constraints: const BoxConstraints(minHeight: RegistroUsuarioStyles.minFieldHeight), // Altura mínima
       child: Column( // Columna: label + input + mensaje de error (si hay)
@@ -618,47 +672,56 @@ class _RegistroUsuarioState extends State<RegistroUsuario> with SingleTickerProv
         children: [
           Text(label, style: RegistroUsuarioStyles.labelText), // Label (ej: "Contraseña *")
           const SizedBox(height: RegistroUsuarioStyles.labelSpacing), // Espacio entre label e input
-          Container( // Contenedor del input
-            height: RegistroUsuarioStyles.inputHeight, // Altura fija
-            decoration: error != null  // Cambia estilo si hay error
-                ? RegistroUsuarioStyles.inputErrorDecoration // Borde rojo si hay error
-                : RegistroUsuarioStyles.inputDecoration, // Borde normal
-            child: Row( // Fila: icono candado + TextField + botón ojo
-              children: [
-                const SizedBox( // Contenedor del icono candado
-                  width: RegistroUsuarioStyles.iconContainerWidth, // Ancho fijo
-                  child: Center(child: Icon(Icons.lock, // Icono de candado
-                      color: RegistroUsuarioStyles.iconColor, // Color del icono
-                      size: RegistroUsuarioStyles.iconSize)), // Tamaño del icono
-                ),
-                Expanded( // TextField ocupa espacio central
-                  child: TextField( // Campo de texto para contraseña
-                    controller: ctrl, // Controlador de texto
-                    obscureText: !showPass, // Oculta texto si showPass = false (muestra ••••)
-                    onChanged: onChanged != null ? (_) => onChanged() : null, // Valida en tiempo real
-                    decoration: const InputDecoration( // Configuración del TextField
-                      hintText: 'Contraseña', // Placeholder
-                      hintStyle: RegistroUsuarioStyles.hintTextStyle, // Estilo del placeholder (gris)
-                      border: InputBorder.none, // Sin borde (el borde lo tiene el Container)
-                      contentPadding: RegistroUsuarioStyles.inputContentPadding, // Espaciado interno
-                    ),
-                    style: RegistroUsuarioStyles.inputTextStyle, // Estilo del texto escrito
+          Focus( // Envuelve en Focus para detectar cambios de foco
+            onFocusChange: (focus) { // Callback cuando cambia el foco
+              if (focusNode != null) {
+                // El estado ya se maneja con el listener del FocusNode
+              }
+            },
+            child: AnimatedContainer( // AnimatedContainer para transición suave
+              duration: const Duration(milliseconds: 200), // Duración de la animación
+              height: RegistroUsuarioStyles.inputHeight, // Altura fija
+              decoration: error != null  // Cambia estilo si hay error
+                  ? RegistroUsuarioStyles.inputErrorDecoration // Borde rojo si hay error
+                  : RegistroUsuarioStyles.inputDecoration(focused: focused), // Borde normal con glow si focused
+              child: Row( // Fila: icono candado + TextField + botón ojo
+                children: [
+                  const SizedBox( // Contenedor del icono candado
+                    width: RegistroUsuarioStyles.iconContainerWidth, // Ancho fijo
+                    child: Center(child: Icon(Icons.lock, // Icono de candado
+                        color: RegistroUsuarioStyles.iconColor, // Color del icono
+                        size: RegistroUsuarioStyles.iconSize)), // Tamaño del icono
                   ),
-                ),
-                GestureDetector( // Botón toggle visibilidad (ojo)
-                  onTap: onToggle, // Alterna entre mostrar/ocultar contraseña
-                  child: SizedBox( // Contenedor del ícono ojo
-                    width: RegistroUsuarioStyles.passwordToggleWidth, // Ancho del área tocable
-                    child: Center( // Centra ícono
-                      child: Icon( // Ícono de ojo
-                        showPass ? Icons.visibility_off : Icons.visibility, // Cambia según estado
-                        color: PanelAdminStyles.darkGreen, // Color verde
-                        size: RegistroUsuarioStyles.passwordIconSize, // Tamaño del ícono
+                  Expanded( // TextField ocupa espacio central
+                    child: TextField( // Campo de texto para contraseña
+                      controller: ctrl, // Controlador de texto
+                      focusNode: focusNode, // Nodo de foco
+                      obscureText: !showPass, // Oculta texto si showPass = false (muestra ••••)
+                      onChanged: onChanged != null ? (_) => onChanged() : null, // Valida en tiempo real
+                      decoration: const InputDecoration( // Configuración del TextField
+                        hintText: 'Contraseña', // Placeholder
+                        hintStyle: RegistroUsuarioStyles.hintTextStyle, // Estilo del placeholder (gris)
+                        border: InputBorder.none, // Sin borde (el borde lo tiene el Container)
+                        contentPadding: RegistroUsuarioStyles.inputContentPadding, // Espaciado interno
+                      ),
+                      style: RegistroUsuarioStyles.inputTextStyle, // Estilo del texto escrito
+                    ),
+                  ),
+                  GestureDetector( // Botón toggle visibilidad (ojo)
+                    onTap: onToggle, // Alterna entre mostrar/ocultar contraseña
+                    child: SizedBox( // Contenedor del ícono ojo
+                      width: RegistroUsuarioStyles.passwordToggleWidth, // Ancho del área tocable
+                      child: Center( // Centra ícono
+                        child: Icon( // Ícono de ojo
+                          showPass ? Icons.visibility_off : Icons.visibility, // Cambia según estado
+                          color: PanelAdminStyles.darkGreen, // Color verde
+                          size: RegistroUsuarioStyles.passwordIconSize, // Tamaño del ícono
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           if (error != null) ...[ // Si hay error, muestra mensaje

@@ -136,11 +136,23 @@ class RegistroUsuarioStyles {
   /// - Fondo: Color de input (backgroundInput)
   /// - Borde: Gris claro (borderGrey)
   /// - Radio: 8px para esquinas redondeadas
-  static final BoxDecoration inputDecoration = BoxDecoration(
-    color: PanelAdminStyles.backgroundInput,
-    border: Border.all(color: PanelAdminStyles.borderGrey),
-    borderRadius: BorderRadius.circular(8),
-  );
+  /// - focused: Si true, agrega resplandor verde y borde verde
+  static BoxDecoration inputDecoration({bool focused = false}) {
+    return BoxDecoration(
+      color: PanelAdminStyles.backgroundInput,
+      border: Border.all(color: focused ? PanelAdminStyles.primaryGreen : PanelAdminStyles.borderGrey), // Borde verde si está enfocado
+      borderRadius: BorderRadius.circular(8),
+      boxShadow: focused
+          ? [
+              const BoxShadow(
+                color: Color.fromRGBO(85, 168, 32, 0.13),
+                blurRadius: 0,
+                spreadRadius: 4,
+              ),
+            ]
+          : null,
+    );
+  }
   
   /// Decoración del contenedor del input en estado de error
   /// - Fondo: Igual que estado normal (backgroundInput)

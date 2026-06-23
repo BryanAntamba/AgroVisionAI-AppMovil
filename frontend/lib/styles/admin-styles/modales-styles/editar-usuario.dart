@@ -103,11 +103,23 @@ class EditarUsuarioStyles {
   static const double inputHeight = 54;
   
   /// Decoración para inputs - borde gris con fondo claro
-  static final BoxDecoration inputDecoration = BoxDecoration(
-    color: PanelAdminStyles.backgroundInput, // Fondo claro
-    border: Border.all(color: PanelAdminStyles.borderGrey), // Borde gris
-    borderRadius: BorderRadius.circular(8), // Esquinas redondeadas
-  );
+  /// - focused: Si true, agrega resplandor verde y borde verde
+  static BoxDecoration inputDecoration({bool focused = false}) {
+    return BoxDecoration(
+      color: PanelAdminStyles.backgroundInput, // Fondo claro
+      border: Border.all(color: focused ? PanelAdminStyles.primaryGreen : PanelAdminStyles.borderGrey), // Borde verde si está enfocado
+      borderRadius: BorderRadius.circular(8), // Esquinas redondeadas
+      boxShadow: focused
+          ? [
+              const BoxShadow(
+                color: Color.fromRGBO(85, 168, 32, 0.13),
+                blurRadius: 0,
+                spreadRadius: 4,
+              ),
+            ]
+          : null,
+    );
+  }
   
   /// Decoración para inputs con error - borde rojo
   static BoxDecoration inputErrorDecoration = BoxDecoration(

@@ -40,11 +40,37 @@ class _EditarUsuarioState extends State<EditarUsuario> with SingleTickerProvider
   late final TextEditingController _confirmPassCtrl; // Controlador para "Confirmar contraseña"
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // NODOS DE FOCO (FocusNode) - Detectan cuando un campo tiene foco
+  // ═══════════════════════════════════════════════════════════════════════════
+  final _nombreFocus = FocusNode();
+  final _segundoNombreFocus = FocusNode();
+  final _apellidoFocus = FocusNode();
+  final _segundoApellidoFocus = FocusNode();
+  final _correoCorpFocus = FocusNode();
+  final _correoElecFocus = FocusNode();
+  final _telefonoFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPassFocus = FocusNode();
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // VARIABLES DE ESTADO DEL FORMULARIO
   // ═══════════════════════════════════════════════════════════════════════════
   bool _showPassword = false; // Controla si se muestra la contraseña (false = oculta)
   bool _showConfirmPassword = false; // Controla si se muestra la confirmación de contraseña
   RolUsuario? _rol; // Rol seleccionado (admin o agricultor), nullable porque puede no estar seleccionado
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ESTADO DE FOCO (bool) - Indica si cada campo está enfocado
+  // ═══════════════════════════════════════════════════════════════════════════
+  bool _nombreFocused = false;
+  bool _segundoNombreFocused = false;
+  bool _apellidoFocused = false;
+  bool _segundoApellidoFocused = false;
+  bool _correoCorpFocused = false;
+  bool _correoElecFocused = false;
+  bool _telefonoFocused = false;
+  bool _passwordFocused = false;
+  bool _confirmPassFocused = false;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // CONTROLADORES DE ANIMACIÓN
@@ -86,6 +112,19 @@ class _EditarUsuarioState extends State<EditarUsuario> with SingleTickerProvider
     _passwordCtrl = TextEditingController(text: 'AgroVision2026!'); // Contraseña por defecto (placeholder)
     _confirmPassCtrl = TextEditingController(text: 'AgroVision2026!'); // Confirmación por defecto
     _rol = u.rol; // Establece el rol actual del usuario
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // LISTENERS PARA DETECTAR CAMBIOS DE FOCO
+    // ─────────────────────────────────────────────────────────────────────────
+    _nombreFocus.addListener(() => setState(() => _nombreFocused = _nombreFocus.hasFocus));
+    _segundoNombreFocus.addListener(() => setState(() => _segundoNombreFocused = _segundoNombreFocus.hasFocus));
+    _apellidoFocus.addListener(() => setState(() => _apellidoFocused = _apellidoFocus.hasFocus));
+    _segundoApellidoFocus.addListener(() => setState(() => _segundoApellidoFocused = _segundoApellidoFocus.hasFocus));
+    _correoCorpFocus.addListener(() => setState(() => _correoCorpFocused = _correoCorpFocus.hasFocus));
+    _correoElecFocus.addListener(() => setState(() => _correoElecFocused = _correoElecFocus.hasFocus));
+    _telefonoFocus.addListener(() => setState(() => _telefonoFocused = _telefonoFocus.hasFocus));
+    _passwordFocus.addListener(() => setState(() => _passwordFocused = _passwordFocus.hasFocus));
+    _confirmPassFocus.addListener(() => setState(() => _confirmPassFocused = _confirmPassFocus.hasFocus));
 
     // ─────────────────────────────────────────────────────────────────────────
     // CONFIGURACIÓN DE ANIMACIONES
@@ -131,6 +170,18 @@ class _EditarUsuarioState extends State<EditarUsuario> with SingleTickerProvider
     _passwordCtrl.dispose();
     _confirmPassCtrl.dispose();
     _controller.dispose(); // Libera el controlador de animación
+    
+    // Libera los FocusNodes
+    _nombreFocus.dispose();
+    _segundoNombreFocus.dispose();
+    _apellidoFocus.dispose();
+    _segundoApellidoFocus.dispose();
+    _correoCorpFocus.dispose();
+    _correoElecFocus.dispose();
+    _telefonoFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPassFocus.dispose();
+    
     super.dispose(); // Llama al dispose del padre
   }
 
@@ -385,26 +436,26 @@ class _EditarUsuarioState extends State<EditarUsuario> with SingleTickerProvider
                             isMobile: isMobile, // Pasa si es vista móvil
                             children: [ // Lista de campos del formulario
                               _buildTextField('Nombre', Icons.person, _nombreCtrl, // Campo nombre
-                                error: _nombreError, onChanged: _validarNombre), // Pasa error y validación
+                                error: _nombreError, onChanged: _validarNombre, focusNode: _nombreFocus, focused: _nombreFocused), // Pasa error y validación
                               _buildTextField('Segundo nombre', Icons.person, _segundoNombreCtrl, // Campo segundo nombre
-                                error: _segundoNombreError, onChanged: _validarSegundoNombre),
+                                error: _segundoNombreError, onChanged: _validarSegundoNombre, focusNode: _segundoNombreFocus, focused: _segundoNombreFocused),
                               _buildTextField('Apellido', Icons.person, _apellidoCtrl, // Campo apellido
-                                error: _apellidoError, onChanged: _validarApellido),
+                                error: _apellidoError, onChanged: _validarApellido, focusNode: _apellidoFocus, focused: _apellidoFocused),
                               _buildTextField('Segundo apellido', Icons.person, _segundoApellidoCtrl, // Campo segundo apellido
-                                error: _segundoApellidoError, onChanged: _validarSegundoApellido),
+                                error: _segundoApellidoError, onChanged: _validarSegundoApellido, focusNode: _segundoApellidoFocus, focused: _segundoApellidoFocused),
                               _buildTextField('Correo corporativo *', Icons.email, _correoCorpCtrl, // Campo correo corp
-                                  isFull: true, error: _correoCorpError, onChanged: _validarCorreoCorporativo), // isFull=true ocupa ancho completo
+                                  isFull: true, error: _correoCorpError, onChanged: _validarCorreoCorporativo, focusNode: _correoCorpFocus, focused: _correoCorpFocused), // isFull=true ocupa ancho completo
                               _buildTextField('Correo electronico *', Icons.email, _correoElecCtrl, // Campo correo personal
-                                  isFull: true, error: _correoElecError, onChanged: _validarCorreoElectronico),
+                                  isFull: true, error: _correoElecError, onChanged: _validarCorreoElectronico, focusNode: _correoElecFocus, focused: _correoElecFocused),
                               _buildTextField('Numero de telefono *', Icons.phone, _telefonoCtrl, // Campo teléfono
                                   isFull: true, keyboardType: TextInputType.phone, // Teclado numérico
-                                  error: _telefonoError, onChanged: _validarTelefono),
+                                  error: _telefonoError, onChanged: _validarTelefono, focusNode: _telefonoFocus, focused: _telefonoFocused),
                               _buildPasswordField('Contraseña *', _passwordCtrl, _showPassword, () { // Campo contraseña
                                 setState(() => _showPassword = !_showPassword); // Toggle mostrar/ocultar contraseña
-                              }, error: _passwordError, onChanged: _validarPassword),
+                              }, error: _passwordError, onChanged: _validarPassword, focusNode: _passwordFocus, focused: _passwordFocused),
                               _buildPasswordField('Confirmar contraseña *', _confirmPassCtrl, _showConfirmPassword, () { // Confirmar contraseña
                                 setState(() => _showConfirmPassword = !_showConfirmPassword); // Toggle visibilidad
-                              }, error: _confirmPassError, onChanged: _validarConfirmPassword),
+                              }, error: _confirmPassError, onChanged: _validarConfirmPassword, focusNode: _confirmPassFocus, focused: _confirmPassFocused),
                               _buildRolField(), // Campo de selección de rol (radio buttons)
                             ],
                           ),
@@ -524,7 +575,7 @@ class _EditarUsuarioState extends State<EditarUsuario> with SingleTickerProvider
   // Construye un campo de texto con validación (nombre, correo, teléfono, etc.)
   // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildTextField(String label, IconData icon, TextEditingController ctrl,
-      {bool isFull = false, TextInputType? keyboardType, String? error, VoidCallback? onChanged}) {
+      {bool isFull = false, TextInputType? keyboardType, String? error, VoidCallback? onChanged, FocusNode? focusNode, bool focused = false}) {
     return Container( // Contenedor principal del campo
       key: isFull ? const ValueKey('full') : null, // Key para identificar campos de ancho completo
       constraints: const BoxConstraints(minHeight: EditarUsuarioStyles.minFieldHeight), // Altura mínima
@@ -533,30 +584,39 @@ class _EditarUsuarioState extends State<EditarUsuario> with SingleTickerProvider
         children: [
           Text(label, style: EditarUsuarioStyles.labelText), // Etiqueta del campo
           const SizedBox(height: EditarUsuarioStyles.labelSpacing), // Espacio entre label e input
-          Container( // Contenedor del input con ícono
-            height: EditarUsuarioStyles.inputHeight, // Altura fija del input
-            decoration: error != null  // Cambia decoración si hay error
-                ? EditarUsuarioStyles.inputErrorDecoration  // Borde rojo si hay error
-                : EditarUsuarioStyles.inputDecoration, // Borde normal
-            child: Row( // Fila horizontal: ícono + campo de texto
-              children: [
-                SizedBox( // Contenedor del ícono (ancho fijo)
-                  width: EditarUsuarioStyles.iconContainerWidth,
-                  child: Center(child: Icon(icon, color: EditarUsuarioStyles.iconColor, size: EditarUsuarioStyles.iconSize)),
-                ),
-                Expanded( // TextField ocupa espacio restante
-                  child: TextField( // Campo de texto editable
-                    controller: ctrl, // Controlador que maneja el texto
-                    keyboardType: keyboardType, // Tipo de teclado (numérico para teléfono, etc.)
-                    onChanged: onChanged != null ? (_) => onChanged() : null, // Ejecuta validación al escribir
-                    decoration: const InputDecoration( // Configuración visual del input
-                      border: InputBorder.none, // Sin borde (ya está en el Container)
-                      contentPadding: EditarUsuarioStyles.inputContentPadding, // Padding interno del texto
-                    ),
-                    style: EditarUsuarioStyles.inputTextStyle, // Estilo del texto
+          Focus( // Envuelve en Focus para detectar cambios de foco
+            onFocusChange: (focus) { // Callback cuando cambia el foco
+              if (focusNode != null) {
+                // El estado ya se maneja con el listener del FocusNode
+              }
+            },
+            child: AnimatedContainer( // AnimatedContainer para transición suave
+              duration: const Duration(milliseconds: 200), // Duración de la animación
+              height: EditarUsuarioStyles.inputHeight, // Altura fija del input
+              decoration: error != null  // Cambia decoración si hay error
+                  ? EditarUsuarioStyles.inputErrorDecoration  // Borde rojo si hay error
+                  : EditarUsuarioStyles.inputDecoration(focused: focused), // Borde normal con glow si focused
+              child: Row( // Fila horizontal: ícono + campo de texto
+                children: [
+                  SizedBox( // Contenedor del ícono (ancho fijo)
+                    width: EditarUsuarioStyles.iconContainerWidth,
+                    child: Center(child: Icon(icon, color: EditarUsuarioStyles.iconColor, size: EditarUsuarioStyles.iconSize)),
                   ),
-                ),
-              ],
+                  Expanded( // TextField ocupa espacio restante
+                    child: TextField( // Campo de texto editable
+                      controller: ctrl, // Controlador que maneja el texto
+                      focusNode: focusNode, // Nodo de foco
+                      keyboardType: keyboardType, // Tipo de teclado (numérico para teléfono, etc.)
+                      onChanged: onChanged != null ? (_) => onChanged() : null, // Ejecuta validación al escribir
+                      decoration: const InputDecoration( // Configuración visual del input
+                        border: InputBorder.none, // Sin borde (ya está en el Container)
+                        contentPadding: EditarUsuarioStyles.inputContentPadding, // Padding interno del texto
+                      ),
+                      style: EditarUsuarioStyles.inputTextStyle, // Estilo del texto
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           if (error != null) ...[ // Si hay error, muestra mensaje (operador spread ...)
@@ -572,7 +632,7 @@ class _EditarUsuarioState extends State<EditarUsuario> with SingleTickerProvider
   // MÉTODO HELPER: _buildPasswordField
   // Construye un campo de contraseña con toggle para mostrar/ocultar
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildPasswordField(String label, TextEditingController ctrl, bool showPass, VoidCallback onToggle, {String? error, VoidCallback? onChanged}) {
+  Widget _buildPasswordField(String label, TextEditingController ctrl, bool showPass, VoidCallback onToggle, {String? error, VoidCallback? onChanged, FocusNode? focusNode, bool focused = false}) {
     return Container( // Contenedor del campo
       constraints: const BoxConstraints(minHeight: EditarUsuarioStyles.minFieldHeight), // Altura mínima
       child: Column( // Organiza verticalmente: label + input + error
@@ -580,43 +640,52 @@ class _EditarUsuarioState extends State<EditarUsuario> with SingleTickerProvider
         children: [
           Text(label, style: EditarUsuarioStyles.labelText), // Etiqueta del campo
           const SizedBox(height: EditarUsuarioStyles.labelSpacing), // Espacio
-          Container( // Contenedor del input
-            height: EditarUsuarioStyles.inputHeight, // Altura fija
-            decoration: error != null // Cambia estilo si hay error
-                ? EditarUsuarioStyles.inputErrorDecoration // Borde rojo
-                : EditarUsuarioStyles.inputDecoration, // Borde normal
-            child: Row( // Fila: ícono candado + input + botón ojo
-              children: [
-                const SizedBox( // Contenedor del ícono candado
-                  width: EditarUsuarioStyles.iconContainerWidth,
-                  child: Center(child: Icon(Icons.lock, color: EditarUsuarioStyles.iconColor, size: EditarUsuarioStyles.iconSize)),
-                ),
-                Expanded( // Campo de texto (ocupa espacio disponible)
-                  child: TextField(
-                    controller: ctrl, // Controlador del campo
-                    obscureText: !showPass, // Si showPass=false, oculta texto con •••
-                    onChanged: onChanged != null ? (_) => onChanged() : null, // Valida al escribir
-                    decoration: const InputDecoration( // Configuración del input
-                      border: InputBorder.none, // Sin borde adicional
-                      contentPadding: EditarUsuarioStyles.inputContentPadding, // Padding interno
-                    ),
-                    style: EditarUsuarioStyles.inputTextStyle, // Estilo del texto
+          Focus( // Envuelve en Focus para detectar cambios de foco
+            onFocusChange: (focus) { // Callback cuando cambia el foco
+              if (focusNode != null) {
+                // El estado ya se maneja con el listener del FocusNode
+              }
+            },
+            child: AnimatedContainer( // AnimatedContainer para transición suave
+              duration: const Duration(milliseconds: 200), // Duración de la animación
+              height: EditarUsuarioStyles.inputHeight, // Altura fija
+              decoration: error != null // Cambia estilo si hay error
+                  ? EditarUsuarioStyles.inputErrorDecoration // Borde rojo
+                  : EditarUsuarioStyles.inputDecoration(focused: focused), // Borde normal con glow si focused
+              child: Row( // Fila: ícono candado + input + botón ojo
+                children: [
+                  const SizedBox( // Contenedor del ícono candado
+                    width: EditarUsuarioStyles.iconContainerWidth,
+                    child: Center(child: Icon(Icons.lock, color: EditarUsuarioStyles.iconColor, size: EditarUsuarioStyles.iconSize)),
                   ),
-                ),
-                GestureDetector( // Botón para mostrar/ocultar contraseña
-                  onTap: onToggle, // Al tocar, cambia estado showPass
-                  child: SizedBox( // Contenedor del ícono ojo
-                    width: EditarUsuarioStyles.passwordToggleWidth, // Ancho fijo
-                    child: Center(
-                      child: Icon( // Ícono que cambia según estado
-                        showPass ? Icons.visibility_off : Icons.visibility, // Ojo tachado o normal
-                        color: PanelAdminStyles.darkGreen, // Color verde
-                        size: EditarUsuarioStyles.passwordIconSize, // Tamaño del ícono
+                  Expanded( // Campo de texto (ocupa espacio disponible)
+                    child: TextField(
+                      controller: ctrl, // Controlador del campo
+                      focusNode: focusNode, // Nodo de foco
+                      obscureText: !showPass, // Si showPass=false, oculta texto con •••
+                      onChanged: onChanged != null ? (_) => onChanged() : null, // Valida al escribir
+                      decoration: const InputDecoration( // Configuración del input
+                        border: InputBorder.none, // Sin borde adicional
+                        contentPadding: EditarUsuarioStyles.inputContentPadding, // Padding interno
+                      ),
+                      style: EditarUsuarioStyles.inputTextStyle, // Estilo del texto
+                    ),
+                  ),
+                  GestureDetector( // Botón para mostrar/ocultar contraseña
+                    onTap: onToggle, // Al tocar, cambia estado showPass
+                    child: SizedBox( // Contenedor del ícono ojo
+                      width: EditarUsuarioStyles.passwordToggleWidth, // Ancho fijo
+                      child: Center(
+                        child: Icon( // Ícono que cambia según estado
+                          showPass ? Icons.visibility_off : Icons.visibility, // Ojo tachado o normal
+                          color: PanelAdminStyles.darkGreen, // Color verde
+                          size: EditarUsuarioStyles.passwordIconSize, // Tamaño del ícono
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           if (error != null) ...[ // Muestra error si existe

@@ -323,9 +323,10 @@ class _RecomendacionesState extends State<Recomendaciones> {
           // Campo del dropdown (siempre visible)
           GestureDetector(
             onTap: () => setState(() => _prioridadExpanded = !_prioridadExpanded),
-            child: Container(
+            child: AnimatedContainer( // AnimatedContainer para transición suave
+              duration: const Duration(milliseconds: 200), // Duración de la animación
               height: 48,
-              decoration: RecomendacionesStyles.inputDecoration(),
+              decoration: RecomendacionesStyles.inputDecoration(focused: _prioridadExpanded), // Glow si está expandido
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -726,50 +727,54 @@ class _SearchBoxState extends State<_SearchBox> {
   // ═══ BUILD ═══
   @override
   Widget build(BuildContext context) {
-    return Container( // Contenedor principal del input
-      height: 48, // Altura fija del campo
-      decoration: RecomendacionesStyles.inputDecoration(focused: _focused), // Estilo del input (cambia si está enfocado)
-      child: Row( // Fila con icono, campo de texto y botón de limpiar
-        children: [
-          const SizedBox(width: 14), // Espaciado izquierdo
-          const FaIcon(FontAwesomeIcons.magnifyingGlass, // Icono de lupa (búsqueda)
-              color: RecomendacionesStyles.primaryGreen, size: 20), // Color verde, tamaño 20px
-          const SizedBox(width: 10), // Espaciado entre icono y campo
-          
-          // ── Campo de texto ──
-          Expanded( // Toma espacio disponible
-            child: TextField( // Widget de campo de texto
-              controller: _ctrl, // Controlador de texto
-              focusNode: _focus, // Nodo de foco
-              decoration: InputDecoration( // Decoración del TextField
-                hintText: widget.placeholder, // Texto placeholder
-                hintStyle: const TextStyle( // Estilo del placeholder
-                    color: Color(0xFF6B8177), fontSize: 14), // Color gris, tamaño 14px
-                border: InputBorder.none, // Sin borde (contenedor ya tiene borde)
-                isDense: true, // Reduce espaciado vertical interno
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 12), // Padding vertical interno
-              ),
-              style: const TextStyle( // Estilo del texto ingresado
-                  color: RecomendacionesStyles.darkGreen, fontSize: 14), // Color verde oscuro, tamaño 14px
-              onChanged: widget.onChanged, // Callback cuando cambia el texto
-            ),
-          ),
-          
-          // ── Botón de limpiar (solo visible si hay texto) ──
-          if (_ctrl.text.isNotEmpty) // Solo muestra si hay texto en el campo
-            GestureDetector( // Detector de gestos
-              onTap: () { // Al tocar
-                _ctrl.clear(); // Limpia el texto del controlador
-                widget.onChanged(''); // Notifica cambio a vacío al callback
-              },
-              child: const Padding( // Padding del icono
-                padding: EdgeInsets.symmetric(horizontal: 10), // Padding horizontal
-                child: FaIcon(FontAwesomeIcons.xmark, // Icono X
-                    color: Color(0xFF6B8177), size: 18), // Color gris, tamaño 18px
+    return Focus( // Envuelve en Focus para detectar cambios de foco
+      onFocusChange: (focus) => setState(() => _focused = focus), // Actualiza estado cuando cambia foco
+      child: AnimatedContainer( // AnimatedContainer para transición suave
+        duration: const Duration(milliseconds: 200), // Duración de la animación
+        height: 48, // Altura fija del campo
+        decoration: RecomendacionesStyles.inputDecoration(focused: _focused), // Estilo del input (cambia si está enfocado)
+        child: Row( // Fila con icono, campo de texto y botón de limpiar
+          children: [
+            const SizedBox(width: 14), // Espaciado izquierdo
+            const FaIcon(FontAwesomeIcons.magnifyingGlass, // Icono de lupa (búsqueda)
+                color: RecomendacionesStyles.primaryGreen, size: 20), // Color verde, tamaño 20px
+            const SizedBox(width: 10), // Espaciado entre icono y campo
+            
+            // ── Campo de texto ──
+            Expanded( // Toma espacio disponible
+              child: TextField( // Widget de campo de texto
+                controller: _ctrl, // Controlador de texto
+                focusNode: _focus, // Nodo de foco
+                decoration: InputDecoration( // Decoración del TextField
+                  hintText: widget.placeholder, // Texto placeholder
+                  hintStyle: const TextStyle( // Estilo del placeholder
+                      color: Color(0xFF6B8177), fontSize: 14), // Color gris, tamaño 14px
+                  border: InputBorder.none, // Sin borde (contenedor ya tiene borde)
+                  isDense: true, // Reduce espaciado vertical interno
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 12), // Padding vertical interno
+                ),
+                style: const TextStyle( // Estilo del texto ingresado
+                    color: RecomendacionesStyles.darkGreen, fontSize: 14), // Color verde oscuro, tamaño 14px
+                onChanged: widget.onChanged, // Callback cuando cambia el texto
               ),
             ),
-        ],
+            
+            // ── Botón de limpiar (solo visible si hay texto) ──
+            if (_ctrl.text.isNotEmpty) // Solo muestra si hay texto en el campo
+              GestureDetector( // Detector de gestos
+                onTap: () { // Al tocar
+                  _ctrl.clear(); // Limpia el texto del controlador
+                  widget.onChanged(''); // Notifica cambio a vacío al callback
+                },
+                child: const Padding( // Padding del icono
+                  padding: EdgeInsets.symmetric(horizontal: 10), // Padding horizontal
+                  child: FaIcon(FontAwesomeIcons.xmark, // Icono X
+                      color: Color(0xFF6B8177), size: 18), // Color gris, tamaño 18px
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

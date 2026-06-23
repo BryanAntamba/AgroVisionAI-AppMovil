@@ -625,9 +625,10 @@ class _PanelAdminState extends State<PanelAdmin> {
           // Campo del dropdown (siempre visible)
           GestureDetector(
             onTap: onToggle, // Al tocar, alterna expansión
-            child: Container( // Contenedor del dropdown
+            child: AnimatedContainer( // AnimatedContainer para transición suave
+              duration: const Duration(milliseconds: 200), // Duración de la animación
               height: 44, // Altura fija del campo
-              decoration: PanelAdminStyles.inputDecoration(), // Estilo del input (borde, fondo)
+              decoration: PanelAdminStyles.inputDecoration(focused: isExpanded), // Estilo con glow si está expandido
               padding: const EdgeInsets.symmetric(horizontal: 12), // Padding horizontal interno
               child: Row( // Fila con texto seleccionado e icono
                 mainAxisAlignment: MainAxisAlignment.spaceBetween, // Espacia elementos
@@ -1209,45 +1210,50 @@ class _SearchInputState extends State<_SearchInput> {
   // ═══ BUILD ═══
   @override
   Widget build(BuildContext context) {
-    return Container( // Contenedor principal del input
-      decoration: PanelAdminStyles.inputDecoration(focused: _focused), // Estilo del input (cambia si está enfocado)
-      child: Row( // Fila con icono, campo de texto y botón de limpiar
-        children: [
-          const SizedBox(width: 14), // Espaciado izquierdo
-          const Icon(Icons.search, color: PanelAdminStyles.primaryGreen, size: 20), // Icono de búsqueda
-          const SizedBox(width: 10), // Espaciado entre icono y campo
-          
-          // ── Campo de texto ──
-          Expanded( // Toma espacio disponible
-            child: TextField( // Widget de campo de texto
-              controller: _controller, // Controlador de texto
-              focusNode: _focus, // Nodo de foco
-              decoration: InputDecoration( // Decoración del TextField
-                hintText: widget.placeholder, // Texto placeholder
-                hintStyle: const TextStyle(color: PanelAdminStyles.dtColor, fontSize: 14), // Estilo del placeholder
-                border: InputBorder.none, // Sin borde (contenedor ya tiene borde)
-                isDense: true, // Reduce espaciado vertical interno
-                contentPadding: const EdgeInsets.symmetric(vertical: 12), // Padding vertical interno
-              ),
-              style: const TextStyle( // Estilo del texto ingresado
-                  color: PanelAdminStyles.darkGreen, fontSize: 14), // Color verde oscuro, tamaño 14px
-              onChanged: widget.onChanged, // Callback cuando cambia el texto
-            ),
-          ),
-          
-          // ── Botón de limpiar (solo visible si hay texto) ──
-          if (_controller.text.isNotEmpty) // Solo muestra si hay texto en el campo
-            GestureDetector( // Detector de gestos
-              onTap: () { // Al tocar
-                _controller.clear(); // Limpia el texto del controlador
-                widget.onChanged(''); // Notifica cambio a vacío al callback
-              },
-              child: const Padding( // Padding del icono
-                padding: EdgeInsets.symmetric(horizontal: 10), // Padding horizontal
-                child: Icon(Icons.close, color: PanelAdminStyles.dtColor, size: 18), // Icono X
+    return Focus( // Envuelve en Focus para detectar cambios de foco
+      onFocusChange: (focus) => setState(() => _focused = focus), // Actualiza estado cuando cambia foco
+      child: AnimatedContainer( // AnimatedContainer para transición suave
+        duration: const Duration(milliseconds: 200), // Duración de la animación
+        constraints: const BoxConstraints(minHeight: 44), // Altura mínima
+        decoration: PanelAdminStyles.inputDecoration(focused: _focused), // Estilo del input (cambia si está enfocado)
+        child: Row( // Fila con icono, campo de texto y botón de limpiar
+          children: [
+            const SizedBox(width: 14), // Espaciado izquierdo
+            const Icon(Icons.search, color: PanelAdminStyles.primaryGreen, size: 20), // Icono de búsqueda
+            const SizedBox(width: 10), // Espaciado entre icono y campo
+            
+            // ── Campo de texto ──
+            Expanded( // Toma espacio disponible
+              child: TextField( // Widget de campo de texto
+                controller: _controller, // Controlador de texto
+                focusNode: _focus, // Nodo de foco
+                decoration: InputDecoration( // Decoración del TextField
+                  hintText: widget.placeholder, // Texto placeholder
+                  hintStyle: const TextStyle(color: PanelAdminStyles.dtColor, fontSize: 14), // Estilo del placeholder
+                  border: InputBorder.none, // Sin borde (contenedor ya tiene borde)
+                  isDense: true, // Reduce espaciado vertical interno
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12), // Padding vertical interno
+                ),
+                style: const TextStyle( // Estilo del texto ingresado
+                    color: PanelAdminStyles.darkGreen, fontSize: 14), // Color verde oscuro, tamaño 14px
+                onChanged: widget.onChanged, // Callback cuando cambia el texto
               ),
             ),
-        ],
+            
+            // ── Botón de limpiar (solo visible si hay texto) ──
+            if (_controller.text.isNotEmpty) // Solo muestra si hay texto en el campo
+              GestureDetector( // Detector de gestos
+                onTap: () { // Al tocar
+                  _controller.clear(); // Limpia el texto del controlador
+                  widget.onChanged(''); // Notifica cambio a vacío al callback
+                },
+                child: const Padding( // Padding del icono
+                  padding: EdgeInsets.symmetric(horizontal: 10), // Padding horizontal
+                  child: Icon(Icons.close, color: PanelAdminStyles.dtColor, size: 18), // Icono X
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

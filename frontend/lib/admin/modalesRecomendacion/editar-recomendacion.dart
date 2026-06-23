@@ -200,8 +200,8 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
                                     ),
                                   ),
                                   Positioned(
-                                    top: -10,
-                                    right: -10,
+                                    top: 0,
+                                    right: 0,
                                     child: GestureDetector(
                                       onTap: widget.onCerrar,
                                       child: Container(
@@ -209,8 +209,8 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
                                         height: 40,
                                         decoration: EditarRecomendacionStyles.closeBtnDecoration,
                                         child: const Center(
-                                          child: FaIcon(
-                                            FontAwesomeIcons.xmark,
+                                          child: Icon(
+                                            Icons.close,
                                             color: EditarRecomendacionStyles.darkGreen,
                                             size: 18,
                                           ),
@@ -466,9 +466,10 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
         // Campo del dropdown (siempre visible)
         GestureDetector(
           onTap: onToggle,
-          child: Container( // Contenedor del dropdown
+          child: AnimatedContainer( // AnimatedContainer para transición suave
+            duration: const Duration(milliseconds: 200), // Duración de la animación
             height: 54, // Altura fija
-            decoration: EditarRecomendacionStyles.inputShellDecoration(), // Estilo (borde, fondo)
+            decoration: EditarRecomendacionStyles.inputShellDecoration(focused: isExpanded), // Glow si está expandido
             padding: const EdgeInsets.symmetric(horizontal: 14), // Espaciado horizontal interno
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

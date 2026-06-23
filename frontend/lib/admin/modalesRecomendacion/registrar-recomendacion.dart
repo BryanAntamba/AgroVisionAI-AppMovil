@@ -34,6 +34,16 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
   late final TextEditingController _descCtrl; // Controla campo "Descripción"
   late final TextEditingController _accionCtrl; // Controla campo "Acción recomendada"
   
+  // ─── NODOS DE FOCO (FocusNode) - Detectan cuando un campo tiene foco ───
+  final _tituloFocus = FocusNode();
+  final _descFocus = FocusNode();
+  final _accionFocus = FocusNode();
+  
+  // ─── ESTADO DE FOCO (bool) - Indica si cada campo está enfocado ───
+  bool _tituloFocused = false;
+  bool _descFocused = false;
+  bool _accionFocused = false;
+  
   // ─── ESTADO DE SELECCIÓN (Dropdown) ───
   PrioridadRecomendacion? _prioridad; // Prioridad seleccionada (null al inicio)
   ColorRecomendacion? _color; // Color seleccionado (null al inicio)
@@ -65,6 +75,11 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
     _tituloCtrl = TextEditingController();
     _descCtrl   = TextEditingController();
     _accionCtrl = TextEditingController();
+    
+    // ─── Agrega listeners para detectar cambios de foco ───
+    _tituloFocus.addListener(() => setState(() => _tituloFocused = _tituloFocus.hasFocus));
+    _descFocus.addListener(() => setState(() => _descFocused = _descFocus.hasFocus));
+    _accionFocus.addListener(() => setState(() => _accionFocused = _accionFocus.hasFocus));
     
     // ─── Configura el controlador de animación ───
     _controller = AnimationController(
@@ -100,6 +115,12 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
     _descCtrl.dispose();
     _accionCtrl.dispose();
     _controller.dispose(); // Libera el controlador de animación
+    
+    // Libera los FocusNodes
+    _tituloFocus.dispose();
+    _descFocus.dispose();
+    _accionFocus.dispose();
+    
     super.dispose(); // Llama al dispose del padre
   }
 
@@ -169,19 +190,24 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
                             ),
                           ],
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Header fijo
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(28, 28, 28, 0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text('Registrar recomendación',
-                                        style: RegistrarRecomendacionStyles.h1Text.copyWith(fontSize: 22)),
-                                  ),
-                                  GestureDetector(
+                        padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                            // Header
+                            Stack(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 44, bottom: 22),
+                                  child: Text('Registrar recomendación',
+                                      style: RegistrarRecomendacionStyles.h1Text.copyWith(fontSize: 28)),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
                                     onTap: widget.onCerrar,
                                     child: Container(
                                       width: 40,
@@ -194,186 +220,193 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
                                           color: RegistrarRecomendacionStyles.darkGreen, size: 18),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            // Cuerpo con scroll
-                            Flexible(
-                              child: SingleChildScrollView(
-                                padding: const EdgeInsets.fromLTRB(28, 20, 28, 0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
                                     _buildTextField('Título', _tituloCtrl,
                                         hint: 'Ej: Humedad foliar por debajo del óptimo',
                                         errorText: _errorTitulo,
-                                        onChanged: (v) => setState(() => _errorTitulo = RecomendacionesValidaciones.mensajeTitulo(v))),
+                                        onChanged: (v) => setState(() => _errorTitulo = RecomendacionesValidaciones.mensajeTitulo(v)),
+                                        focusNode: _tituloFocus,
+                                        focused: _tituloFocused),
                                     const SizedBox(height: 14),
                                     _buildTextField('Descripción', _descCtrl,
                                         hint: 'Descripción del hallazgo',
                                         maxLines: 3,
                                         errorText: _errorDesc,
-                                        onChanged: (v) => setState(() => _errorDesc = RecomendacionesValidaciones.mensajeDescripcion(v))),
+                                        onChanged: (v) => setState(() => _errorDesc = RecomendacionesValidaciones.mensajeDescripcion(v)),
+                                        focusNode: _descFocus,
+                                        focused: _descFocused),
                                     const SizedBox(height: 14),
                                     _buildTextField('Acción recomendada', _accionCtrl,
                                         hint: 'Qué debe hacer el agricultor',
                                         maxLines: 2,
                                         errorText: _errorAccion,
-                                        onChanged: (v) => setState(() => _errorAccion = RecomendacionesValidaciones.mensajeAccion(v))),
+                                        onChanged: (v) => setState(() => _errorAccion = RecomendacionesValidaciones.mensajeAccion(v)),
+                                        focusNode: _accionFocus,
+                                        focused: _accionFocused),
                                     const SizedBox(height: 14),
+                                    _buildDropdown<PrioridadRecomendacion>(
+                                      label: 'Prioridad',
+                                      hint: 'Seleccione prioridad',
+                                      value: _prioridad,
+                                      errorText: _errorPrioridad,
+                                      isExpanded: _prioridadExpanded,
+                                      onToggle: () => setState(() {
+                                        _prioridadExpanded = !_prioridadExpanded;
+                                        _colorExpanded = false;
+                                      }),
+                                      items: PrioridadRecomendacion.values
+                                          .map((p) => DropdownMenuItem(
+                                                value: p,
+                                                child: Text(p.label),
+                                              ))
+                                          .toList(),
+                                      onChanged: (v) =>
+                                          setState(() { _prioridad = v; _errorPrioridad = RecomendacionesValidaciones.mensajeSelect(v?.toString(), 'La prioridad'); }),
+                                    ),
+                                    const SizedBox(height: 14),
+                                    _buildDropdown<ColorRecomendacion>(
+                                      label: 'Color',
+                                      hint: 'Seleccione color',
+                                      value: _color,
+                                      errorText: _errorColor,
+                                      isExpanded: _colorExpanded,
+                                      onToggle: () => setState(() {
+                                        _colorExpanded = !_colorExpanded;
+                                        _prioridadExpanded = false;
+                                      }),
+                                      items: ColorRecomendacion.values
+                                          .map((c) => DropdownMenuItem(
+                                                value: c,
+                                                child: Text(c.label),
+                                              ))
+                                          .toList(),
+                                      onChanged: (v) =>
+                                          setState(() { _color = v; _errorColor = RecomendacionesValidaciones.mensajeSelect(v?.toString(), 'El color'); }),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    // Footer con botones
                                     Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Expanded(
-                                          child: _buildDropdown<PrioridadRecomendacion>(
-                                            label: 'Prioridad',
-                                            hint: 'Seleccione prioridad',
-                                            value: _prioridad,
-                                            errorText: _errorPrioridad,
-                                            isExpanded: _prioridadExpanded,
-                                            onToggle: () => setState(() {
-                                              _prioridadExpanded = !_prioridadExpanded;
-                                              _colorExpanded = false;
-                                            }),
-                                            items: PrioridadRecomendacion.values
-                                                .map((p) => DropdownMenuItem(
-                                                      value: p,
-                                                      child: Text(p.label),
-                                                    ))
-                                                .toList(),
-                                            onChanged: (v) =>
-                                                setState(() { _prioridad = v; _errorPrioridad = RecomendacionesValidaciones.mensajeSelect(v?.toString(), 'La prioridad'); }),
+                                          child: GestureDetector(
+                                            onTap: widget.onCerrar,
+                                            child: Container(
+                                              constraints: const BoxConstraints(minHeight: 50),
+                                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                                              decoration: BoxDecoration(
+                                                color: RegistrarRecomendacionStyles.backgroundInput,
+                                                border: Border.all(color: RegistrarRecomendacionStyles.borderGrey),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: const Center(
+                                                child: Text('Cancelar', style: RegistrarRecomendacionStyles.labelText, textAlign: TextAlign.center),
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                        const SizedBox(width: 14),
+                                        const SizedBox(width: 10),
                                         Expanded(
-                                          child: _buildDropdown<ColorRecomendacion>(
-                                            label: 'Color',
-                                            hint: 'Seleccione color',
-                                            value: _color,
-                                            errorText: _errorColor,
-                                            isExpanded: _colorExpanded,
-                                            onToggle: () => setState(() {
-                                              _colorExpanded = !_colorExpanded;
-                                              _prioridadExpanded = false;
-                                            }),
-                                            items: ColorRecomendacion.values
-                                                .map((c) => DropdownMenuItem(
-                                                      value: c,
-                                                      child: Text(c.label),
-                                                    ))
-                                                .toList(),
-                                            onChanged: (v) =>
-                                                setState(() { _color = v; _errorColor = RecomendacionesValidaciones.mensajeSelect(v?.toString(), 'El color'); }),
+                                          child: GestureDetector(
+                                            onTap: _submit,
+                                            child: Container(
+                                              constraints: const BoxConstraints(minHeight: 50),
+                                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                                              decoration: RegistrarRecomendacionStyles.createBtnDecoration,
+                                              child: const Center(
+                                                child: Text(
+                                                  'Registrar recomendación',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w800),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 24),
                                   ],
                                 ),
                               ),
                             ),
-                            // Footer fijo
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(28, 16, 28, 24),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: widget.onCerrar,
-                                      child: Container(
-                                        constraints: const BoxConstraints(minHeight: 50),
-                                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                                        decoration: BoxDecoration(
-                                          color: RegistrarRecomendacionStyles.backgroundInput,
-                                          border: Border.all(color: RegistrarRecomendacionStyles.borderGrey),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: const Center(
-                                          child: Text('Cancelar', style: RegistrarRecomendacionStyles.labelText, textAlign: TextAlign.center),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: _submit,
-                                      child: Container(
-                                        constraints: const BoxConstraints(minHeight: 50),
-                                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                                        decoration: RegistrarRecomendacionStyles.createBtnDecoration,
-                                        child: const Center(
-                                          child: Text(
-                                            'Registrar recomendación',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w800),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+              );
+            },
+          ),
+        );
+      }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // MÉTODO HELPER: _buildTextField - Construye campo de texto editable con validación
   // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildTextField(String label, TextEditingController ctrl,
-      {String hint = '', int maxLines = 1, String? errorText, void Function(String)? onChanged}) {
+      {String hint = '', int maxLines = 1, String? errorText, void Function(String)? onChanged, FocusNode? focusNode, bool focused = false}) {
     return Column( // Columna: label + TextField
       crossAxisAlignment: CrossAxisAlignment.start, // Alinea a la izquierda
       children: [
         Text(label, style: RegistrarRecomendacionStyles.labelText), // Label del campo (ej: "Título")
         const SizedBox(height: 8), // Espacio entre label y TextField
-        TextField( // Campo de texto editable
-          controller: ctrl, // Controlador de texto
-          maxLines: maxLines, // Número de líneas (1 para texto simple, 2-3 para textarea)
-          onChanged: onChanged, // Valida en tiempo real al escribir
-          decoration: InputDecoration( // Configuración del TextField
-            hintText: hint, // Placeholder (ej: "Ej: Humedad foliar por debajo del óptimo")
-            errorText: errorText, // Mensaje de error (aparece debajo del campo)
-            hintStyle: const TextStyle(color: Color(0xFF6B8177), fontSize: 14), // Estilo del placeholder (gris)
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), // Espaciado interno
-            filled: true, // Rellena el fondo
-            fillColor: RegistrarRecomendacionStyles.backgroundInput, // Color de fondo claro
-            enabledBorder: OutlineInputBorder( // Borde cuando NO está enfocado
-              borderRadius: BorderRadius.circular(8), // Bordes redondeados
-              borderSide: BorderSide(color: errorText != null ? Colors.red : RegistrarRecomendacionStyles.borderInput), // Rojo si hay error
-            ),
-            focusedBorder: OutlineInputBorder( // Borde cuando ESTÁ enfocado
+        Focus( // Envuelve en Focus para detectar cambios de foco
+          onFocusChange: (focus) { // Callback cuando cambia el foco
+            if (focusNode != null) {
+              // El estado ya se maneja con el listener del FocusNode
+            }
+          },
+          child: AnimatedContainer( // AnimatedContainer para el resplandor
+            duration: const Duration(milliseconds: 200), // Duración de la animación
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: errorText != null ? Colors.red : RegistrarRecomendacionStyles.primaryGreen, width: 1.5), // Verde o rojo
+              boxShadow: focused && errorText == null
+                  ? [
+                      const BoxShadow(
+                        color: Color.fromRGBO(85, 168, 32, 0.13),
+                        blurRadius: 0,
+                        spreadRadius: 4,
+                      ),
+                    ]
+                  : null,
             ),
-            errorBorder: OutlineInputBorder( // Borde cuando hay error (no enfocado)
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.red, width: 1.5), // Rojo
-            ),
-            focusedErrorBorder: OutlineInputBorder( // Borde cuando hay error (enfocado)
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.red, width: 1.5), // Rojo
+            child: TextField( // Campo de texto editable
+              controller: ctrl, // Controlador de texto
+              focusNode: focusNode, // Nodo de foco
+              maxLines: maxLines, // Número de líneas (1 para texto simple, 2-3 para textarea)
+              onChanged: onChanged, // Valida en tiempo real al escribir
+              decoration: InputDecoration( // Configuración del TextField
+                hintText: hint, // Placeholder (ej: "Ej: Humedad foliar por debajo del óptimo")
+                errorText: errorText, // Mensaje de error (aparece debajo del campo)
+                hintStyle: const TextStyle(color: Color(0xFF6B8177), fontSize: 14), // Estilo del placeholder (gris)
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), // Espaciado interno
+                filled: true, // Rellena el fondo
+                fillColor: RegistrarRecomendacionStyles.backgroundInput, // Color de fondo claro
+                enabledBorder: OutlineInputBorder( // Borde cuando NO está enfocado
+                  borderRadius: BorderRadius.circular(8), // Bordes redondeados
+                  borderSide: BorderSide(color: errorText != null ? Colors.red : RegistrarRecomendacionStyles.borderInput), // Rojo si hay error
+                ),
+                focusedBorder: OutlineInputBorder( // Borde cuando ESTÁ enfocado
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: errorText != null ? Colors.red : RegistrarRecomendacionStyles.primaryGreen, width: 1.5), // Verde o rojo
+                ),
+                errorBorder: OutlineInputBorder( // Borde cuando hay error (no enfocado)
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.red, width: 1.5), // Rojo
+                ),
+                focusedErrorBorder: OutlineInputBorder( // Borde cuando hay error (enfocado)
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.red, width: 1.5), // Rojo
+                ),
+              ),
+              style: const TextStyle(color: RegistrarRecomendacionStyles.darkGreen, fontSize: 14), // Estilo del texto escrito
             ),
           ),
-          style: const TextStyle(color: RegistrarRecomendacionStyles.darkGreen, fontSize: 14), // Estilo del texto escrito
         ),
       ],
     );
@@ -412,10 +445,11 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
         // Campo del dropdown (siempre visible)
         GestureDetector(
           onTap: onToggle,
-          child: Container( // Contenedor del dropdown
+          child: AnimatedContainer( // AnimatedContainer para transición suave
+            duration: const Duration(milliseconds: 200), // Duración de la animación
             height: 48, // Altura fija
-            decoration: RegistrarRecomendacionStyles.inputDecoration().copyWith( // Estilo base
-              border: Border.all(color: errorText != null ? Colors.red : RegistrarRecomendacionStyles.borderInput), // Borde rojo si hay error
+            decoration: RegistrarRecomendacionStyles.inputDecoration(focused: isExpanded).copyWith( // Glow si está expandido
+              border: Border.all(color: errorText != null ? Colors.red : (isExpanded ? RegistrarRecomendacionStyles.primaryGreen : RegistrarRecomendacionStyles.borderInput)), // Borde rojo si hay error, verde si expandido
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14), // Espaciado horizontal interno
             child: Row(
