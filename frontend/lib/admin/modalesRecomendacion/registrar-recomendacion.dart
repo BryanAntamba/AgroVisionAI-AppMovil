@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import 'package:flutter/material.dart'; // Framework de Flutter para widgets
 import '../../environments/modales-recomendacion.dart'; // Tipos de datos (DatosRecomendacionForm, PrioridadRecomendacion, ColorRecomendacion)
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Iconos de FontAwesome
 import '../../styles/admin-styles/modalesRecomendacion-styles/registrar-recomendacion.dart'; // Estilos específicos
 import '../../shared/validators/panel-admin/recomendaciones-validaciones.dart'; // Validadores y mensajes de error
 
@@ -225,6 +226,7 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
                             ),
                                     _buildTextField('Título', _tituloCtrl,
                                         hint: 'Ej: Humedad foliar por debajo del óptimo',
+                                        icon: FontAwesomeIcons.heading,
                                         errorText: _errorTitulo,
                                         onChanged: (v) => setState(() => _errorTitulo = RecomendacionesValidaciones.mensajeTitulo(v)),
                                         focusNode: _tituloFocus,
@@ -232,6 +234,7 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
                                     const SizedBox(height: 14),
                                     _buildTextField('Descripción', _descCtrl,
                                         hint: 'Descripción del hallazgo',
+                                        icon: FontAwesomeIcons.alignLeft,
                                         maxLines: 3,
                                         errorText: _errorDesc,
                                         onChanged: (v) => setState(() => _errorDesc = RecomendacionesValidaciones.mensajeDescripcion(v)),
@@ -240,6 +243,7 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
                                     const SizedBox(height: 14),
                                     _buildTextField('Acción recomendada', _accionCtrl,
                                         hint: 'Qué debe hacer el agricultor',
+                                        icon: FontAwesomeIcons.clipboardCheck,
                                         maxLines: 2,
                                         errorText: _errorAccion,
                                         onChanged: (v) => setState(() => _errorAccion = RecomendacionesValidaciones.mensajeAccion(v)),
@@ -349,7 +353,7 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
   // MÉTODO HELPER: _buildTextField - Construye campo de texto editable con validación
   // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildTextField(String label, TextEditingController ctrl,
-      {String hint = '', int maxLines = 1, String? errorText, void Function(String)? onChanged, FocusNode? focusNode, bool focused = false}) {
+      {String hint = '', int maxLines = 1, String? errorText, void Function(String)? onChanged, FocusNode? focusNode, bool focused = false, FaIconData? icon}) {
     return Column( // Columna: label + TextField
       crossAxisAlignment: CrossAxisAlignment.start, // Alinea a la izquierda
       children: [
@@ -383,6 +387,18 @@ class _RegistrarRecomendacionState extends State<RegistrarRecomendacion> with Si
               decoration: InputDecoration( // Configuración del TextField
                 hintText: hint, // Placeholder (ej: "Ej: Humedad foliar por debajo del óptimo")
                 errorText: errorText, // Mensaje de error (aparece debajo del campo)
+                prefixIcon: icon != null
+                    ? SizedBox(
+                        width: 48,
+                        child: Center(
+                          child: FaIcon(
+                            icon,
+                            size: 18,
+                            color: errorText != null ? Colors.red : RegistrarRecomendacionStyles.primaryGreen,
+                          ),
+                        ),
+                      )
+                    : null,
                 hintStyle: const TextStyle(color: Color(0xFF6B8177), fontSize: 14), // Estilo del placeholder (gris)
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), // Espaciado interno
                 filled: true, // Rellena el fondo

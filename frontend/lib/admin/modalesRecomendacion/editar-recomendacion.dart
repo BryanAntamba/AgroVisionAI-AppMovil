@@ -233,6 +233,7 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
                               _buildTextField(
                                 label: 'Descripción',
                                 ctrl: _descCtrl,
+                                icon: FontAwesomeIcons.alignLeft,
                                 focusNode: _descFocus,
                                 isFocused: _descFocused,
                                 maxLines: 3,
@@ -243,6 +244,7 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
                               _buildTextField(
                                 label: 'Acción recomendada',
                                 ctrl: _accionCtrl,
+                                icon: FontAwesomeIcons.clipboardCheck,
                                 focusNode: _accionFocus,
                                 isFocused: _accionFocused,
                                 maxLines: 2,
@@ -383,47 +385,33 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
         const SizedBox(height: 8), // Espacio entre label e input
         Container( // Contenedor del input con borde personalizado
           constraints: BoxConstraints(minHeight: maxLines == 1 ? 54 : 72), // Altura mínima según líneas
+          alignment: Alignment.center, // Centra verticalmente el TextField
           decoration: errorText != null  // Cambia decoración si hay error
               ? EditarRecomendacionStyles.inputShellDecoration(focused: isFocused).copyWith(
                   border: Border.all(color: Colors.red, width: 1.5)) // Borde rojo si hay error
               : EditarRecomendacionStyles.inputShellDecoration(focused: isFocused), // Borde normal o enfocado
-          child: Row( // Fila: ícono (opcional) + TextField
-            crossAxisAlignment: maxLines == 1 ? CrossAxisAlignment.center : CrossAxisAlignment.start, // Alineación según líneas
-            children: [
-              if (icon != null) // Si hay ícono, lo muestra
-                Container( // Contenedor del ícono
-                  width: 48, // Ancho fijo
-                  height: 54, // Alto fijo
-                  alignment: Alignment.center, // Centra ícono
-                  child: FaIcon( // Ícono de FontAwesome
-                    icon,
-                    color: errorText != null ? Colors.red : EditarRecomendacionStyles.primaryGreen, // Rojo si error, verde si no
-                    size: 18, // Tamaño del ícono
-                  ),
-                ),
-              Expanded( // TextField ocupa espacio restante
-                child: Padding( // Espaciado alrededor del TextField
-                  padding: EdgeInsets.only(
-                    left: icon == null ? 14 : 0, // Espaciado izquierdo si no hay ícono
-                    right: 14, // Espaciado derecho
-                    top: maxLines == 1 ? 0 : 12, // Espaciado superior si es textarea
-                    bottom: maxLines == 1 ? 0 : 12, // Espaciado inferior si es textarea
-                  ),
-                  child: TextField( // Campo de texto editable
-                    controller: ctrl, // Controlador de texto
-                    focusNode: focusNode, // FocusNode para detectar foco
-                    maxLines: maxLines, // Número de líneas
-                    onChanged: onChanged, // Valida en tiempo real al escribir
-                    decoration: const InputDecoration( // Configuración del TextField
-                      border: InputBorder.none, // Sin borde (el borde lo tiene el Container)
-                      isDense: true, // Reduce espaciado interno
-                      contentPadding: EdgeInsets.zero, // Sin padding interno
-                    ),
-                    style: EditarRecomendacionStyles.inputTextStyle, // Estilo del texto escrito
-                  ),
-                ),
-              ),
-            ],
+          child: TextField( // Campo de texto editable
+            controller: ctrl, // Controlador de texto
+            focusNode: focusNode, // FocusNode para detectar foco
+            maxLines: maxLines, // Número de líneas
+            onChanged: onChanged, // Valida en tiempo real al escribir
+            decoration: InputDecoration( // Configuración del TextField
+              border: InputBorder.none, // Sin borde (el borde lo tiene el Container padre)
+              prefixIcon: icon != null
+                  ? SizedBox(
+                      width: 48,
+                      child: Center(
+                        child: FaIcon(
+                          icon,
+                          color: errorText != null ? Colors.red : EditarRecomendacionStyles.primaryGreen,
+                          size: 18,
+                        ),
+                      ),
+                    )
+                  : null,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), // Espaciado interno
+            ),
+            style: EditarRecomendacionStyles.inputTextStyle, // Estilo del texto escrito
           ),
         ),
         if (errorText != null) ...[ // Si hay error, muestra mensaje
@@ -434,7 +422,6 @@ class _EditarRecomendacionState extends State<EditarRecomendacion> with SingleTi
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // MÉTODO HELPER: _buildDropdown - Construye dropdown (select) sin validación (siempre tiene valor)
   // ═══════════════════════════════════════════════════════════════════════════
   // MÉTODO HELPER: _buildDropdown - Construye dropdown (select) sin validación (siempre tiene valor)
