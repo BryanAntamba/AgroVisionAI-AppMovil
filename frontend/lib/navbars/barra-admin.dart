@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../app.dart';
 import '../styles/navbars-styles/barra-admin.dart';
 
 class BarraAdmin extends StatefulWidget {
@@ -240,7 +241,7 @@ class _BarraAdminState extends State<BarraAdmin>
       decoration: BarraAdminStyles.logoutButtonDecoration,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushReplacementNamed(context, '/login');
+          AppRoutes.irAlLogin(context);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,

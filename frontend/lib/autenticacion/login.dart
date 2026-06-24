@@ -444,16 +444,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
           ),
           
-          // Mensaje de error general (si hay credenciales incorrectas)
-          if (_loginError.isNotEmpty) ...[
-            const SizedBox(height: 18),
-            Text(
-              _loginError,
-              textAlign: TextAlign.center,
-              style: LoginStyles.errorText,
-            ),
-          ],
-          
           const SizedBox(height: 28),
           
           // ═══════════════════════════════════════════════════════════════════
@@ -484,6 +474,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
           ),
+          if (_loginError.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            Text(
+              _loginError,
+              textAlign: TextAlign.center,
+              style: LoginStyles.errorText,
+            ),
+          ],
           const SizedBox(height: 20),
           
           // ═══════════════════════════════════════════════════════════════════
@@ -493,7 +491,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             index: 5,
             child: TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.restablecerPassword);
+                Navigator.pushReplacementNamed(
+                  context,
+                  AppRoutes.restablecerPassword,
+                  arguments: DateTime.now().millisecondsSinceEpoch,
+                );
               },
               style: TextButton.styleFrom(
                 foregroundColor: LoginStyles.primaryGreen,

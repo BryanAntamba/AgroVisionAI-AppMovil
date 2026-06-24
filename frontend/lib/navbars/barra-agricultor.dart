@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../app.dart';
 import '../styles/navbars-styles/barra-agricultor.dart';
 
 class BarraAgricultor extends StatefulWidget {
@@ -71,7 +72,7 @@ class _BarraAgricultorState extends State<BarraAgricultor>
       debugPrint('Error guardando en SharedPreferences: $e');
     }
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
+      AppRoutes.irAlLogin(context);
     }
   }
 

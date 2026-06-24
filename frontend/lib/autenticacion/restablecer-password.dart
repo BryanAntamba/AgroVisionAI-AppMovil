@@ -234,10 +234,13 @@ class _RestablecerPasswordState extends State<RestablecerPassword> with TickerPr
       return;
     }
 
-    Navigator.pushNamed(
+    Navigator.pushReplacementNamed(
       context,
       AppRoutes.codigoVerificacion,
-      arguments: correo,
+      arguments: {
+        'correo': correo,
+        'instancia': DateTime.now().millisecondsSinceEpoch,
+      },
     );
   }
 
