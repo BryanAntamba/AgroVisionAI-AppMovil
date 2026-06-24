@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
 import 'app.dart';
-import 'shared/services/tema.service.dart';
 
 /// Punto de entrada principal de la aplicación AgroVision AI
-/// Inicializa los servicios necesarios y lanza la aplicación
-Future<void> main() async {
-  /// Asegura que el binding de Flutter esté inicializado
-  /// Necesario para usar servicios nativos de la plataforma
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  /// Carga la configuración de tema de la aplicación
-  /// (colores, estilos, preferencias de visual)
-  await TemaService.instance.cargar();
-  
-  /// Inicia la aplicación con el widget raíz
+void main() {
   runApp(const MyApp());
 }
 

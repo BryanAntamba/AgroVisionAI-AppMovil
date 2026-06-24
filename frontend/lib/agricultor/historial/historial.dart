@@ -39,6 +39,9 @@ class _HistorialState extends State<Historial> {
   String _filtroEstado = 'Todos'; // Filtro de estado: Todos, Sano, Alerta, Crítico
   DateTime? _fechaInicio; // Fecha de inicio del rango (null = sin filtro)
   DateTime? _fechaFin; // Fecha de fin del rango (null = sin filtro)
+  bool _estadoExpanded = false; // Controla si el dropdown de estado está expandido
+
+  static const List<String> _opcionesEstado = ['Todos', 'Sano', 'Alerta', 'Crítico'];
 
   // ─── DATOS ───
   List<RegistroHistorial> _registros = []; // Lista de todos los registros del historial
@@ -46,9 +49,7 @@ class _HistorialState extends State<Historial> {
 
   // ─── CONTROL DE FOCUS (para estilos de campos enfocados) ───
   final FocusNode _searchFocusNode = FocusNode(); // Focus del campo de búsqueda
-  final FocusNode _statusFocusNode = FocusNode(); // Focus del dropdown de estado
   bool _searchFocused = false; // true = campo de búsqueda tiene focus
-  bool _statusFocused = false; // true = dropdown de estado tiene focus
 
   // ─── CONTROL DE MODAL ───
   RegistroHistorial? _registroSeleccionado; // Registro actual para mostrar en modal (null = modal cerrado)
@@ -64,11 +65,6 @@ class _HistorialState extends State<Historial> {
         _searchFocused = _searchFocusNode.hasFocus;
       });
     });
-    _statusFocusNode.addListener(() {
-      setState(() {
-        _statusFocused = _statusFocusNode.hasFocus;
-      });
-    });
   }
 
   @override
@@ -76,7 +72,6 @@ class _HistorialState extends State<Historial> {
     // Libera recursos de controladores y focus nodes
     _searchController.dispose();
     _searchFocusNode.dispose();
-    _statusFocusNode.dispose();
     super.dispose();
   }
 
@@ -494,32 +489,94 @@ class _HistorialState extends State<Historial> {
       children: [
         const Text('Estado', style: HistorialStyles.labelText),
         const SizedBox(height: 8),
-        Container(
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: HistorialStyles.inputDecoration(_statusFocused),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _filtroEstado,
-              focusNode: _statusFocusNode,
-              icon: const FaIcon(FontAwesomeIcons.chevronDown, color: HistorialStyles.primaryGreen, size: 14),
-              isExpanded: true,
-              style: const TextStyle(color: HistorialStyles.darkGreen, fontSize: 14, fontWeight: FontWeight.w700),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    _filtroEstado = newValue;
-                  });
-                }
-              },
-              items: <String>['Todos', 'Sano', 'Alerta', 'Crítico'].map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+        GestureDetector(
+          onTap: () => setState(() => _estadoExpanded = !_estadoExpanded),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 44,
+            decoration: HistorialStyles.inputDecoration(_estadoExpanded),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    _filtroEstado,
+                    style: const TextStyle(
+                      color: HistorialStyles.darkGreen,
+                      fontSize: 14,
+                      fontFamily: 'Arial',
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(
+                  _estadoExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: HistorialStyles.primaryGreen,
+                ),
+              ],
             ),
           ),
+        ),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: _estadoExpanded
+              ? (_opcionesEstado.length * 48.0).clamp(0, 240)
+              : 0,
+          child: _estadoExpanded
+              ? Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  decoration: BoxDecoration(
+                    color: HistorialStyles.cardBackground,
+                    border: Border.all(color: const Color(0xFFC8D8CE)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: _opcionesEstado.length,
+                        itemBuilder: (context, index) {
+                          final opcion = _opcionesEstado[index];
+                          final isSelected = opcion == _filtroEstado;
+
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                _filtroEstado = opcion;
+                                _estadoExpanded = false;
+                              });
+                            },
+                            hoverColor: HistorialStyles.inputBackground,
+                            splashColor: HistorialStyles.primaryGreen.withValues(alpha: 0.1),
+                            highlightColor: HistorialStyles.inputBackground,
+                            child: Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              alignment: Alignment.centerLeft,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFFE8EDE6)
+                                    : Colors.transparent,
+                              ),
+                              child: Text(
+                                opcion,
+                                style: const TextStyle(
+                                  color: HistorialStyles.textGreen,
+                                  fontSize: 14,
+                                  fontFamily: 'Arial',
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              : null,
         ),
       ],
     );

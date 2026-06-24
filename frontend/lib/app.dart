@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'autenticacion/login.dart';
 import 'admin/panel-admin.dart';
 import 'admin/recomendaciones.dart';
-import 'admin/plataforma-editable.dart';
 import 'agricultor/panel-agricultor.dart';
 import 'agricultor/boton-iot.dart';
 import 'agricultor/historial/historial.dart';
@@ -23,9 +22,6 @@ class AppRoutes {
   /// Ruta para vista de recomendaciones en el panel admin
   static const String panelAdminRecomendaciones = '/panel-admin/recomendaciones';
   
-  /// Ruta para editar plataforma (configuración de sistema)
-  static const String panelAdminEditarPlataforma = '/panel-admin/editar-plataforma';
-  
   /// Ruta para botón de IoT en pantalla completa
   static const String botonIOT = '/boton-iot';
   
@@ -42,7 +38,6 @@ class AppRoutes {
         login: (context) => const LoginScreen(), // Pantalla de autenticación
         panelAdmin: (context) => const PanelAdmin(), // Panel principal admin
         panelAdminRecomendaciones: (context) => const Recomendaciones(), // Recomendaciones
-        panelAdminEditarPlataforma: (context) => const PlataformaEditable(), // Configuración
         botonIOT: (context) => const BotonIOT(isFullScreen: true), // Botón IoT
         panelAgricultor: (context) => const PanelAgricultor(), // Panel agricultor
         historial: (context) => const Historial(), // Historial de datos

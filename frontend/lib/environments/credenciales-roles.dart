@@ -45,5 +45,5 @@ const Map<String, List<String>> rolesAcceso = {
   // Permisos del rol AGRICULTOR: acceso a funciones operativas
   'AGRICULTOR': ['panel-agricultor', 'historial', 'alertas', 'boton-iot'],
   // Permisos del rol ADMIN: acceso a gestión y configuración
-  'ADMIN': ['panel-admin', 'usuarios', 'reportes', 'configuracion'],
+  'ADMIN': ['panel-admin', 'usuarios', 'reportes'],
 };
