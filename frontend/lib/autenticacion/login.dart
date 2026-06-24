@@ -21,9 +21,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../app.dart';
 import '../styles/autenticacion-styles/login.dart';
-
-import 'restablecer-password.dart';
+import 'auth_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -52,17 +52,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   /// Mensaje de error general de autenticación
   String _loginError = '';
   
-  /// Controla si se muestra el flujo de restablecimiento de contraseña
-  bool _showResetPassword = false;
-  
   /// Mensaje de error para el campo de correo
   String? _emailError;
   
   /// Mensaje de error para el campo de contraseña
   String? _passwordError;
-  
-  /// Clave global para el componente de restablecimiento de contraseña
-  final GlobalKey<RestablecerPasswordState> _resetPasswordKey = GlobalKey();
   
   /// Indica si el campo de correo tiene foco
   bool _emailFocus = false;
@@ -248,13 +242,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     // Autenticación simulada con credenciales hardcodeadas
     // Admin: redirige a panel de administración
     if (email == 'admin@agrovision.com' && password == 'admin123') {
-      Navigator.pushReplacementNamed(context, '/panel-admin');
+      Navigator.pushReplacementNamed(context, AppRoutes.panelAdmin);
       return;
     }
 
     // Agricultor: redirige a botón IoT (pantalla de conexión)
     if (email == 'agricultor@agrovision.com' && password == 'agricultor123') {
-      Navigator.pushReplacementNamed(context, '/boton-iot');
+      Navigator.pushReplacementNamed(context, AppRoutes.botonIOT);
       return;
     }
 
@@ -264,117 +258,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     });
   }
   
-  /// Regresa del flujo de restablecimiento de contraseña al login
-  /// 
-  /// Resetea:
-  /// - La vista actual
-  /// - Mensajes de error
-  /// - Campos de texto
-  /// - Reinicia las animaciones
-  void _backToLogin() {
-    setState(() {
-      _showResetPassword = false;
-      _loginError = '';
-      _emailController.clear();
-      _passwordController.clear();
-      _emailError = null;
-      _passwordError = null;
-    });
-    
-    // Reinicia las animaciones al regresar al login
-    _animationController.reset();
-    _animationController.forward();
-  }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // CONSTRUCCIÓN DE LA INTERFAZ PRINCIPAL (LAYOUT RESPONSIVO)
   // ═══════════════════════════════════════════════════════════════════════════
   
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final screenWidth = size.width;
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // BREAKPOINTS ADAPTATIVOS
-    // ═══════════════════════════════════════════════════════════════════════
-    // Define el comportamiento según el ancho de pantalla:
-    // - Móvil: < 600px
-    // - Tablet Portrait: 600px - 900px
-    // - Tablet Landscape: 900px - 1200px
-    // - Desktop: >= 1200px
-    
-    final bool isMobile = screenWidth < 600;
-    final bool isTabletPortrait = screenWidth >= 600 && screenWidth < 900;
-    final bool isTabletLandscape = screenWidth >= 900 && screenWidth < 1200;
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // CÁLCULO DE ANCHO DEL PANEL DE LOGIN
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    double loginPanelWidth;
-    if (isMobile) {
-      loginPanelWidth = screenWidth; // Ancho completo
-    } else if (isTabletPortrait) {
-      loginPanelWidth = screenWidth; // Ancho completo
-    } else if (isTabletLandscape) {
-      loginPanelWidth = 540; // Ancho fijo sin carrusel
-    } else {
-      // Desktop: anchos fijos según tamaño total
-      loginPanelWidth = screenWidth > 1440 ? 540 : 440;
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // PADDING ADAPTATIVO
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    double horizontalPadding;
-    double verticalPadding;
-    
-    if (isMobile) {
-      horizontalPadding = 24;
-      verticalPadding = 32;
-    } else if (isTabletPortrait) {
-      horizontalPadding = 48;
-      verticalPadding = 48;
-    } else if (isTabletLandscape) {
-      horizontalPadding = 40;
-      verticalPadding = 8;
-    } else {
-      horizontalPadding = 64;
-      verticalPadding = 64;
-    }
-
-    return Scaffold(
-      backgroundColor: LoginStyles.backgroundLight,
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ═══════════════════════════════════════════════════════════════════
-          // PANEL DE LOGIN
-          // ═══════════════════════════════════════════════════════════════════
-          Container(
-            width: loginPanelWidth,
-            decoration: LoginStyles.loginPanelDecoration,
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: verticalPadding,
-            ),
-            child: Center(
-              child: SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: isTabletLandscape ? 360 : 430,
-                  ),
-                  // Alterna entre formulario de login y restablecimiento
-                  child: _showResetPassword ? _buildResetPasswordView() : _buildLoginForm(),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return AuthLayout(
+      child: _buildLoginForm(),
     );
   }
 
@@ -602,14 +493,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             index: 5,
             child: TextButton(
               onPressed: () {
-                setState(() {
-                  _showResetPassword = true;
-                  _loginError = '';
-                  _emailController.clear();
-                  _passwordController.clear();
-                  _emailError = null;
-                  _passwordError = null;
-                });
+                Navigator.pushNamed(context, AppRoutes.restablecerPassword);
               },
               style: TextButton.styleFrom(
                 foregroundColor: LoginStyles.primaryGreen,
@@ -622,28 +506,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
         ],
       ),
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // VISTA DE RESTABLECIMIENTO DE CONTRASEÑA
-  // ═══════════════════════════════════════════════════════════════════════════
-  
-  /// Construye la vista del flujo de restablecimiento de contraseña
-  /// 
-  /// Integra el componente RestablecerPassword que maneja los 4 pasos
-  Widget _buildResetPasswordView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        RestablecerPassword(
-          key: _resetPasswordKey,
-          volverLogin: _backToLogin,
-          onPasoChanged: (paso) {
-            // El paso se maneja internamente en RestablecerPassword
-          },
-        ),
-      ],
     );
   }
 }

@@ -20,33 +20,26 @@
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../app.dart';
 import '../styles/autenticacion-styles/restablecer-password.dart';
-import 'password-confirmacion.dart';
-import 'codigo-verificacion.dart';
-import 'cambiar-password.dart';
 
 /// Widget Stateful que maneja el flujo completo de restablecimiento
 /// 
 /// Parámetros requeridos:
 /// - [volverLogin]: Callback para regresar a la pantalla de login
-/// 
-/// Parámetros opcionales:
-/// - [onPasoChanged]: Callback ejecutado cuando cambia el paso actual
 class RestablecerPassword extends StatefulWidget {
   final VoidCallback volverLogin;
-  final Function(String)? onPasoChanged;
 
   const RestablecerPassword({
     super.key,
     required this.volverLogin,
-    this.onPasoChanged,
   });
 
   @override
-  State<RestablecerPassword> createState() => RestablecerPasswordState();
+  State<RestablecerPassword> createState() => _RestablecerPasswordState();
 }
 
-class RestablecerPasswordState extends State<RestablecerPassword> with TickerProviderStateMixin {
+class _RestablecerPasswordState extends State<RestablecerPassword> with TickerProviderStateMixin {
   // ═══════════════════════════════════════════════════════════════════════════
   // CONTROLADORES Y ESTADO DEL FORMULARIO (PASO 1: CORREO)
   // ═══════════════════════════════════════════════════════════════════════════
@@ -62,12 +55,6 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
   
   /// Mensaje de error específico del campo de correo
   String? _emailErrorMsg;
-  
-  /// Almacena el correo verificado para usarlo en pasos posteriores
-  String _correoVerificado = '';
-  
-  /// Paso actual del wizard: 'correo', 'codigo', 'password', 'finalizado'
-  String paso = 'correo';
   
   /// Indica si el campo de correo tiene foco
   bool _emailFocus = false;
@@ -228,13 +215,7 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
   // NAVEGACIÓN ENTRE PASOS
   // ═══════════════════════════════════════════════════════════════════════════
   
-  /// PASO 1 → PASO 2: Envía código de verificación y avanza
-  /// 
-  /// Flujo:
-  /// 1. Limpia errores previos
-  /// 2. Valida el formato del correo
-  /// 3. Verifica que coincida con el correo simulado
-  /// 4. Si todo es correcto, avanza al paso 'codigo'
+  /// PASO 1 → PASO 2: Envía código de verificación y navega a la pantalla de código
   void _enviarCodigo() {
     setState(() {
       _resetError = '';
@@ -244,85 +225,25 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
       return;
     }
 
-    // Validación contra el correo simulado
-    if (_emailController.text.trim() != _correoSimulado) {
+    final correo = _emailController.text.trim();
+
+    if (correo != _correoSimulado) {
       setState(() {
         _resetError = 'El correo no coincide con el usuario simulado.';
       });
       return;
     }
 
-    // Avanza al paso de verificación de código
-    setState(() {
-      _correoVerificado = _emailController.text.trim();
-      paso = 'codigo';
-    });
-    widget.onPasoChanged?.call(paso);
+    Navigator.pushNamed(
+      context,
+      AppRoutes.codigoVerificacion,
+      arguments: correo,
+    );
   }
 
-  /// PASO 2 → PASO 3: Código verificado, muestra formulario de nueva contraseña
-  void mostrarCambioPassword() {
-    setState(() {
-      paso = 'password';
-    });
-    widget.onPasoChanged?.call(paso);
-  }
-
-  /// PASO 3 → PASO 4: Contraseña cambiada, muestra confirmación final
-  void finalizarCambio() {
-    setState(() {
-      paso = 'finalizado';
-    });
-    widget.onPasoChanged?.call(paso);
-  }
-
-  /// PASO 2 → PASO 1: Regresa al paso de correo para cambiar el email
-  /// 
-  /// Resetea:
-  /// - El paso actual a 'correo'
-  /// - El correo verificado
-  /// - Errores
-  /// - El campo de texto
-  /// - Reinicia las animaciones
-  void volverACorreo() {
-    setState(() {
-      paso = 'correo';
-      _correoVerificado = '';
-      _resetError = '';
-      _emailController.clear();
-    });
-    widget.onPasoChanged?.call(paso);
-    
-    // Reinicia las animaciones para el paso de correo
-    _animationController.reset();
-    _animationController.forward();
-  }
-
-  /// Callback para reenviar el código de verificación (usado en paso 2)
-  void reenviarCodigoVerificacion() {
-    debugPrint('Reenviando código de verificación a: $_correoVerificado');
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CONSTRUCCIÓN DE LA INTERFAZ (ROUTER DE PASOS)
-  // ═══════════════════════════════════════════════════════════════════════════
-  
   @override
   Widget build(BuildContext context) {
-    // Switch simple: cada paso renderiza su propio componente
-    // Cada componente maneja sus propias animaciones internas
-    switch (paso) {
-      case 'correo':
-        return _buildCorreoPaso();
-      case 'codigo':
-        return _buildCodigoPaso();
-      case 'password':
-        return _buildCambiarPasswordPaso();
-      case 'finalizado':
-        return _buildFinalizadoPaso();
-      default:
-        return _buildCorreoPaso();
-    }
+    return _buildCorreoPaso();
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -520,58 +441,6 @@ class RestablecerPasswordState extends State<RestablecerPassword> with TickerPro
           ),
         ),
       ],
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PASO 2: VERIFICACIÓN DE CÓDIGO
-  // ═══════════════════════════════════════════════════════════════════════════
-  
-  /// Construye la interfaz del segundo paso (verificación de código)
-  /// 
-  /// Utiliza el componente CodigoVerificacion con:
-  /// - Correo verificado del paso anterior
-  /// - Callbacks para avanzar o retroceder
-  Widget _buildCodigoPaso() {
-    return CodigoVerificacion(
-      key: ValueKey('codigo_$_correoVerificado'), // Clave única por correo
-      correo: _correoVerificado,
-      onCodigoVerificado: mostrarCambioPassword,
-      onReenviarCodigo: reenviarCodigoVerificacion,
-      onCambiarCorreo: volverACorreo,
-      onVolverLogin: widget.volverLogin,
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PASO 3: CAMBIO DE CONTRASEÑA
-  // ═══════════════════════════════════════════════════════════════════════════
-  
-  /// Construye la interfaz del tercer paso (nueva contraseña)
-  /// 
-  /// Utiliza el componente CambiarPassword con:
-  /// - Callback para avanzar al paso final
-  /// - Callback opcional para regresar a login
-  Widget _buildCambiarPasswordPaso() {
-    return CambiarPassword(
-      key: const ValueKey('password_change'),
-      onPasswordCambiado: finalizarCambio,
-      onVolverLogin: widget.volverLogin,
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PASO 4: CONFIRMACIÓN FINAL
-  // ═══════════════════════════════════════════════════════════════════════════
-  
-  /// Construye la interfaz del cuarto paso (confirmación)
-  /// 
-  /// Utiliza el componente PasswordConfirmacion con:
-  /// - Callback para regresar a login
-  Widget _buildFinalizadoPaso() {
-    return PasswordConfirmacion(
-      key: const ValueKey('confirmacion_final'),
-      onVolverLogin: widget.volverLogin,
     );
   }
 }
